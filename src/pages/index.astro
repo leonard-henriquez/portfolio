@@ -1,0 +1,575 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import wanderer from "../assets/wanderer.png";
+
+const email = "lhenriquez@proton.me";
+
+const links = [
+  { label: "GitHub", href: "https://github.com/leonard-henriquez" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/leonard-henriquez/" },
+  { label: "Email", href: `mailto:${email}` },
+];
+
+const nav = [
+  { label: "Work", href: "#work", hint: "What I built at Topo." },
+  { label: "Principles", href: "#principles", hint: "What production agents taught me." },
+  { label: "Talks", href: "#talks", hint: "Talks, juries and recognition." },
+];
+
+const numbers = [
+  { value: "$1M ARR", label: "three months after launching our AI SDR" },
+  { value: "10M+", label: "agent actions executed per month" },
+  { value: "1B", label: "documents in our search index" },
+  { value: "×4", label: "merged PRs per month after moving to coding agents" },
+];
+
+const work = [
+  {
+    title: "Agent platform",
+    body: "Durable agent workflows on Temporal executing tens of millions of actions per month, with human review before every send and realtime streaming to the product.",
+    stack: "Temporal · event-driven · streaming",
+  },
+  {
+    title: "Agentic engineering",
+    body: "Redesigned how we ship around coding agents (Claude Code, Codex, Cursor): strict CI gates, shift-left feedback, auto-fix loops, background agents and automated incident triage.",
+    result: "Merged PRs/month 80 → 318 · bugs per 100 PRs −63% · CI failures 15.7% → 2.4%",
+  },
+  {
+    title: "LLM systems",
+    body: "Agents for account discovery, enrichment, personalized outreach, reply handling and in-product chat. Context engineering over CRM data and call transcripts, with LLM evals to measure and improve quality.",
+    stack: "context engineering · RAG · tool use · evals",
+  },
+  {
+    title: "Playbooks & MCP",
+    body: "A composable, trigger-driven workflow engine (signals → agent steps → sequences) with versioning, test runs and rollback. An MCP server with 170+ tools lets customers run Topo from their own agents.",
+    stack: "workflow engine · MCP",
+  },
+  {
+    title: "Search at scale",
+    body: "The data layer: a 1B-document Elasticsearch index with hybrid search and ranking, migrated from Quickwit and fed by durable enrichment pipelines.",
+    stack: "Elasticsearch · hybrid ranking · PostgreSQL",
+  },
+  {
+    title: "Enterprise readiness",
+    body: "Made Topo ready for customers like Air France: CRM integrations, SAML SSO, security reviews, and SOC 2 Type 2, which I led.",
+    stack: "SOC 2 Type 2 · SSO · CRM integrations",
+  },
+];
+
+// DRAFT: written from the CV for Léonard to rewrite in his own words before launch.
+const principles = [
+  {
+    title: "Agents are distributed systems",
+    body: "An agent run is a long-lived workflow that calls slow models and flaky APIs. It needs what any distributed system needs: durable execution, retries, idempotent steps, replay. That is what lets Topo run tens of millions of actions a month.",
+  },
+  {
+    title: "Context beats prompts",
+    body: "Most of our quality gains came from what the model sees, not from how we ask: CRM history, call transcripts, the right tools at the right step. Evals tell us whether a change actually helped.",
+  },
+  {
+    title: "Keep humans where mistakes are expensive",
+    body: "Every email Topo sends is reviewed by a person first. Autonomy should be earned one action at a time, as the evals show the agent is ready.",
+  },
+  {
+    title: "Coding agents need feedback, not freedom",
+    body: "Strict CI gates and fast feedback let agents catch and fix their own mistakes. That took us from 80 to 318 merged PRs a month with 63% fewer bugs per PR.",
+  },
+];
+
+const talks = [
+  { year: "2024", text: "Talk: LangGraph in production" },
+  { year: "2024", text: "Judge, Mistral AI hackathon, San Francisco" },
+  { year: "", text: "Judge at AI hackathons in Paris" },
+  { year: "", text: "Invited to the Élysée by President Macron to help prepare the AI Action Summit" },
+];
+
+const earlier = [
+  {
+    years: "2019–22",
+    text: "Head of Engineering at Flatlooker (now Manda). Started as product manager, then ran engineering: ~10 developers, recruiting and training.",
+  },
+  {
+    years: "2015–19",
+    text: "MSc Data Analytics & AI at EDHEC. Product manager at BTU Protocol; data science intern at Jalgos, where I wrote a neural network from scratch in C++.",
+  },
+];
+---
+
+<Base
+  title="Léonard Henriquez — AI agent platforms"
+  description="Co-founder & CTO of Topo (YC W24). I build AI agents that run in production, and the platforms underneath them."
+>
+  <main>
+    <header class="hero">
+      <div class="swap pixel name">
+        <h1>LÉONARD HENRIQUEZ</h1>
+        <div class="muted" aria-hidden="true">HQZ</div>
+      </div>
+      <div class="hero-bar">
+        <div class="swap pixel tagline">
+          <p>I build AI agent platforms.</p>
+          <p class="muted" aria-hidden="true">Co-founder &amp; CTO, Topo (YC W24).</p>
+        </div>
+        <button id="theme-toggle" class="pixel theme-toggle" type="button" aria-label="Toggle dark mode">
+          <span class="when-light">DARK</span><span class="when-dark">LIGHT</span>
+        </button>
+      </div>
+      <div class="rule"></div>
+    </header>
+
+    <section class="intro">
+      <div class="intro-text">
+        <p>
+          I build AI agents that run in production, and the platforms underneath them.<br />
+          I'm co-founder &amp; CTO of <a href="https://www.topo.io">Topo</a> (YC W24), where our AI SDR went from $0 to $1M
+          ARR in three months.<br />
+          Coding since I was 12. Based in Paris.
+        </p>
+
+        <nav aria-label="Sections" class="nav">
+          {
+            nav.map((item) => (
+              <a href={item.href} class="nav-link">
+                <span class="nav-label">{item.label}</span>
+                <span aria-hidden="true">→</span>
+                <span class="nav-hint muted">{item.hint}</span>
+              </a>
+            ))
+          }
+        </nav>
+
+        <ul class="links">
+          {
+            links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <figure class="art">
+        <Image
+          src={wanderer}
+          widths={[560, 840, 1108]}
+          sizes="(min-width: 1024px) 560px, 100vw"
+          alt="Caspar David Friedrich's Wanderer above the Sea of Fog, rendered as a dithered pixel image"
+          loading="eager"
+          fetchpriority="high"
+          quality={85}
+        />
+      </figure>
+    </section>
+
+    <div class="rule-thick"></div>
+
+    <dl class="numbers">
+      {
+        numbers.map((n) => (
+          <div class="number">
+            <dt class="pixel">{n.value}</dt>
+            <dd class="muted">{n.label}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <div class="rule-thick"></div>
+
+    <section id="work" class="section">
+      <div class="section-head">
+        <h2 class="pixel">WORK</h2>
+        <p>
+          Since 2022 I've been building Topo: AI agents for B2B outbound sales, used by 150+ customers including Air France
+          and Aircall. As CTO I designed the platform, hired and led the team, and stayed its top committer with 1,205
+          merged PRs.
+        </p>
+      </div>
+      <div class="cards">
+        {
+          work.map((item) => (
+            <article class="card">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              {item.result && <p class="result">{item.result}</p>}
+              {item.stack && <p class="stack muted">{item.stack}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="rule-thick"></div>
+
+    <section id="principles" class="section">
+      <div class="section-head">
+        <h2 class="pixel">PRINCIPLES</h2>
+        <p>
+          Business school and product taught me to tie every architecture decision to a business outcome. These are the
+          lessons from shipping agents to real customers that held up.
+        </p>
+      </div>
+      <ol class="cards">
+        {
+          principles.map((p, i) => (
+            <li class="card principle">
+              <span class="pixel index">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{p.title}</h3>
+                <p>{p.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <div class="rule-thick"></div>
+
+    <section id="talks" class="section">
+      <div class="section-head">
+        <h2 class="pixel">TALKS</h2>
+        <p>Talks, juries and recognition.</p>
+      </div>
+      <ul class="rows">
+        {
+          talks.map((t) => (
+            <li class="row">
+              <span class="muted">{t.year}</span>
+              <span>{t.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <div class="rule-thick"></div>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="pixel">EARLIER</h2>
+        <p>From product management to running engineering.</p>
+      </div>
+      <ul class="rows">
+        {
+          earlier.map((e) => (
+            <li class="row">
+              <span class="muted">{e.years}</span>
+              <span>{e.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <footer>
+      <div class="rule"></div>
+      <div class="footer-inner">
+        <p>
+          Write to me at <a href={`mailto:${email}`}>{email}</a>
+        </p>
+        <p class="muted colophon">
+          Set in Tiny5 and iA Writer Mono. Image after Caspar David Friedrich, <i>Wanderer above the Sea of Fog</i> (1818).
+        </p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    document.getElementById("theme-toggle")?.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("theme", next);
+      } catch {}
+    });
+  </script>
+</Base>
+
+<style>
+  main {
+    padding: 48px var(--gutter) 64px;
+  }
+
+  /* Sized so the 17-character name fills the line without wrapping. */
+  .name {
+    font-size: clamp(2rem, 9.4vw, 11rem);
+    /* Leaves room above the cap height for the accent on É. */
+    line-height: 1.2;
+  }
+
+  .name h1 {
+    font-size: inherit;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .hero-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .tagline {
+    font-size: clamp(1.125rem, 2.6vw, 2.25rem);
+    line-height: 1.2;
+  }
+
+  .theme-toggle {
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.875rem;
+    padding: 4px 0;
+  }
+
+  .theme-toggle:hover {
+    color: var(--fg);
+  }
+
+  :root[data-theme="dark"] .when-light,
+  :root:not([data-theme="dark"]) .when-dark {
+    display: none;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 0;
+  }
+
+  .intro-text {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 8px;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .nav-link:hover .nav-label {
+    text-decoration: underline;
+  }
+
+  .nav-hint {
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+
+  .nav-link:hover .nav-hint,
+  .nav-link:focus-visible .nav-hint {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .name h1 {
+      font-size: clamp(2rem, 17vw, 5rem);
+      white-space: normal;
+      line-height: 1.1;
+    }
+
+    .nav-hint {
+      display: none;
+    }
+  }
+
+  .links {
+    display: flex;
+    gap: 24px;
+    font-size: 0.875rem;
+  }
+
+  .links a {
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    text-decoration: underline;
+  }
+
+  .art {
+    border: 4px solid var(--fg);
+    border-radius: 4px;
+    overflow: hidden;
+    align-self: flex-start;
+    max-width: 560px;
+    background: var(--fog);
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+    padding: 32px 8px;
+  }
+
+  .number dt {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .number dd {
+    font-size: 0.8125rem;
+    margin-top: 8px;
+    max-width: 24ch;
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 0 64px;
+  }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 0 8px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    line-height: 1;
+  }
+
+  .section-head p {
+    font-size: 0.875rem;
+    max-width: 480px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    border: 2px solid var(--fg);
+    background: var(--card);
+    padding: 16px;
+    font-size: 0.875rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card .result {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--fg);
+    font-weight: 700;
+  }
+
+  .card .stack {
+    margin-top: 12px;
+    font-size: 0.8125rem;
+  }
+
+  .principle {
+    display: flex;
+    gap: 16px;
+  }
+
+  .index {
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .rows {
+    font-size: 0.875rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 9ch 1fr;
+    gap: 16px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--fg);
+  }
+
+  .row:first-child {
+    border-top: 2px solid var(--fg);
+  }
+
+  .row:last-child {
+    border-bottom-width: 2px;
+  }
+
+  footer {
+    padding-top: 32px;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 8px 0;
+    font-size: 0.875rem;
+  }
+
+  .colophon {
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .numbers {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .intro,
+    .section {
+      flex-direction: row;
+    }
+
+    .intro-text,
+    .section-head,
+    .cards,
+    .rows {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .intro-text {
+      padding-top: 48px;
+    }
+
+    .section-head p {
+      padding: 48px 0 0 48px;
+    }
+
+    .art {
+      margin-left: auto;
+    }
+
+    .footer-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+  }
+</style>

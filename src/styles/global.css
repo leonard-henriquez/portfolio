@@ -1,0 +1,136 @@
+@import "@fontsource/tiny5/latin-400.css";
+@import "@fontsource/tiny5/latin-ext-400.css";
+@import "@fontsource/ia-writer-mono/latin-400.css";
+@import "@fontsource/ia-writer-mono/latin-400-italic.css";
+@import "@fontsource/ia-writer-mono/latin-700.css";
+
+/* Ink and fog are sampled from the hero image so the page and the picture share one palette. */
+:root {
+  --bg: #eef1f3;
+  --card: #f7f9fa;
+  --fg: #232729;
+  --muted: #646b71;
+  --fog: #ccd3d9;
+  --gutter: 16px;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #16191b;
+  --card: #1c2023;
+  --fg: #dde3e8;
+  --muted: #8b939a;
+  --fog: #2a3035;
+  color-scheme: dark;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 64px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: "iA Writer Mono", ui-monospace, monospace;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+.pixel {
+  font-family: "Tiny5", ui-monospace, monospace;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.rule {
+  height: 4px;
+  background: var(--fg);
+}
+
+.rule-thick {
+  height: 8px;
+  background: var(--fg);
+}
+
+/* Two lines stacked in a one-line window; hovering slides the second into view. */
+.swap {
+  height: 1lh;
+  overflow: hidden;
+}
+
+.swap > * {
+  transition: transform 300ms ease;
+}
+
+@media (hover: hover) {
+  .swap:hover > * {
+    transform: translateY(-100%);
+  }
+}
+
+/* Touch screens can't reveal the second line, so drop it and let the first one wrap. */
+@media (hover: none) {
+  .swap {
+    height: auto;
+  }
+
+  .swap > [aria-hidden="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .swap > * {
+    transition: none;
+  }
+}
