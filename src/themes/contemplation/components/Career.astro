@@ -1,0 +1,176 @@
+---
+/**
+ * Experience and education, as rows like the explorations': name, then every role (title, type, dates, text,
+ * highlights) or the program, then the period.
+ */
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { experience, education } = Astro.props.profile;
+---
+
+{
+  experience.length > 0 && (
+    <section id="experience" class="ct-section ct-wrap" aria-labelledby="experience-title">
+      <div class="ct-head">
+        <h2 id="experience-title" class="ct-mono">Experience</h2>
+      </div>
+      <ul class="ct-list" role="list">
+        {experience.map((org) => (
+          <li id={org.anchor} class="row ct-reveal">
+            <div class="name">
+              <h3 class="ct-title">
+                {org.href ? (
+                  <a href={org.href} rel="noopener">
+                    {org.org}
+                  </a>
+                ) : (
+                  org.org
+                )}
+              </h3>
+              {org.details.length > 0 && <p class="ct-mono ct-aside">{org.details.join(" · ")}</p>}
+            </div>
+            <div class="text">
+              {org.summary && <p class="ct-body">{org.summary}</p>}
+              <ul class="roles" role="list">
+                {org.roles.map((role) => (
+                  <li>
+                    <p class="role-title">{role.title}</p>
+                    <p class="ct-mono ct-aside">
+                      {role.typeLabel} · <time datetime={role.start.iso}>{role.start.label}</time> –{" "}
+                      {role.end ? <time datetime={role.end.iso}>{role.end.label}</time> : "present"}
+                      {!role.current && ` · ${role.duration}`}
+                    </p>
+                    {role.text && <p class="ct-body">{role.text}</p>}
+                    {role.highlights.map((h) => (
+                      <p class="ct-body">{h}</p>
+                    ))}
+                    {role.skills.length > 0 && <p class="skills ct-mono">{role.skills.join(" · ")}</p>}
+                  </li>
+                ))}
+              </ul>
+              {org.project && (
+                <p class="ct-mono">
+                  <a href={`#${org.project.anchor}`}>
+                    {org.project.title} in selected work <span aria-hidden="true">↑</span>
+                  </a>
+                </p>
+              )}
+            </div>
+            <span class="when ct-mono ct-aside">{org.years}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  education.length > 0 && (
+    <section id="education" class="ct-section ct-wrap" aria-labelledby="education-title">
+      <div class="ct-head">
+        <h2 id="education-title" class="ct-mono">Education</h2>
+      </div>
+      <ul class="ct-list" role="list">
+        {education.map((e) => (
+          <li id={e.anchor} class="row ct-reveal">
+            <div class="name">
+              <h3 class="ct-title">
+                {e.href ? (
+                  <a href={e.href} rel="noopener">
+                    {e.school}
+                  </a>
+                ) : (
+                  e.school
+                )}
+              </h3>
+            </div>
+            <div class="text">
+              <p class="ct-body">{e.program}</p>
+            </div>
+            <span class="when ct-mono ct-aside">{e.years}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 40px;
+    padding: 22px 0;
+  }
+
+  .name {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .name > p {
+    margin: 0;
+  }
+
+  .text {
+    flex: 1 1 360px;
+    min-width: 0;
+    max-width: 68ch;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .text > p {
+    margin: 0;
+  }
+
+  .roles {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .roles > li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .roles p {
+    margin: 0;
+  }
+
+  .role-title {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .skills {
+    font-size: 11px;
+  }
+
+  .when {
+    flex: 0 0 150px;
+    text-align: right;
+  }
+
+  @media (max-width: 760px) {
+    .name,
+    .when {
+      flex-basis: 100%;
+      text-align: left;
+    }
+  }
+</style>

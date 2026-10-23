@@ -1,0 +1,91 @@
+---
+/** The name, who I am in one sentence, and the key figures. */
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+---
+
+<section class="intro ct-wrap" aria-labelledby="intro-title">
+  <div class="lead">
+    <h1 id="intro-title" class="name">{profile.name}</h1>
+    <p class="text">{profile.current.label}. {profile.intro}</p>
+  </div>
+
+  {
+    profile.numbers.length > 0 && (
+      <dl class="numbers">
+        {profile.numbers.map((n) => (
+          <div class="figure">
+            <dt class="value">{n.value}</dt>
+            <dd class="label">{n.label}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+</section>
+
+<style>
+  .intro {
+    padding-top: clamp(28px, 3vw, 44px);
+  }
+
+  .lead {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+  }
+
+  .name {
+    margin: 0;
+    font-size: clamp(48px, 7.6vw, 120px);
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.055em;
+    color: var(--ink-deep);
+  }
+
+  .text {
+    margin: 0;
+    max-width: 36ch;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: clamp(72px, 8vw, 112px) 0 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .figure {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 24px 0 0;
+  }
+
+  .value {
+    font-size: clamp(36px, 3.6vw, 52px);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .label {
+    margin: 0;
+    max-width: 26ch;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+</style>

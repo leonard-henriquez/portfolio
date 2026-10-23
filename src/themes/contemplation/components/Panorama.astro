@@ -1,0 +1,318 @@
+---
+/**
+ * The hero: one frame, one landscape per project. Every image fills the whole frame at the same size, stacked;
+ * each panel is a moving mask (clip-path) over its own image, with the project's name in the band below.
+ * On hover or focus a panel widens to 40% and the others share the rest; on phones the panels stack.
+ * The header (name and navigation) sits over the sky.
+ */
+import { Image } from "astro:assets";
+import type { Portfolio } from "../../../lib/portfolio";
+import { panoramaImage, panoramaProjects } from "../vista";
+
+interface Props {
+  portfolio: Portfolio;
+}
+
+const { profile, projects } = Astro.props.portfolio;
+const panels = panoramaProjects(projects);
+
+const nav = [
+  { label: "Work", href: "#work" },
+  { label: "Explorations", href: "#explorations" },
+  { label: "About", href: "#about" },
+  ...(profile.experience.length ? [{ label: "Experience", href: "#experience" }] : []),
+  { label: "Contact", href: "#contact" },
+];
+---
+
+<section id="top" class="panorama" aria-label="Projects">
+  <div class="frame" style={`--n: ${panels.length}`}>
+    {
+      panels.map(({ project: p, vista }, i) => (
+        <a class="panel" href={`#${p.anchor}`} style={`--i: ${i}; --x: ${vista.x}; --sky: ${vista.sky}`}>
+          <Image
+            {...panoramaImage(vista.src)}
+            alt={vista.alt}
+            class="img"
+            loading="eager"
+            fetchpriority={i === 0 ? "high" : "auto"}
+          />
+          <span class="reticle" aria-hidden="true" />
+          <span class="cap">
+            <span class="name">{p.shortTitle}</span>
+            <span class="kicker ct-mono">
+              {p.role} · {p.period}
+            </span>
+          </span>
+        </a>
+      ))
+    }
+    <div class="over">
+      <header class="header ct-wrap">
+        <a class="ct-mono home" href="#top">{profile.name}</a>
+        <nav aria-label="Sections">
+          {
+            nav.map((item) => (
+              <a class="ct-mono" href={item.href}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </header>
+    </div>
+  </div>
+</section>
+
+<style>
+  .frame {
+    /* Image height, then the caption band. */
+    --H: clamp(520px, 56.25vw, 880px);
+    --C: 88px;
+    /* E: width of the panel in front; s: width of every other one. k: index of the panel in front. */
+    --E: calc(100% / var(--n));
+    --s: calc((100% - var(--E)) / max(1, var(--n) - 1));
+    --k: 0;
+    position: relative;
+    height: calc(var(--H) + var(--C));
+  }
+
+  .panel {
+    /*
+     * Edges of this panel, as a fraction of the frame: panels before the one in front keep `s`, the one in front
+     * gets `E`, the ones after it shift right by E - s. A 2px gap between neighbours.
+     */
+    --L: calc(var(--i) * var(--s) + clamp(0, var(--i) - var(--k), 1) * (var(--E) - var(--s)));
+    --R: calc((var(--i) + 1) * var(--s) + clamp(0, var(--i) + 1 - var(--k), 1) * (var(--E) - var(--s)));
+    --gl: calc(clamp(0, var(--i), 1) * 2px);
+    --gr: calc(clamp(0, var(--n) - 1 - var(--i), 1) * 2px);
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    color: var(--ink);
+    text-decoration: none;
+    clip-path: inset(0 calc(100% - var(--R) + var(--gr)) 0 calc(var(--L) + var(--gl)));
+    transition: clip-path 0.8s var(--ease);
+  }
+
+  .panel:hover {
+    color: var(--ink);
+  }
+
+  .img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: var(--H);
+    object-fit: cover;
+    object-position: 50% 72%;
+    background: var(--sky);
+  }
+
+  /* Corner marks of a viewfinder, framing the panel in front. */
+  .reticle {
+    --c: var(--light);
+    position: absolute;
+    top: 18px;
+    left: calc(var(--L) + var(--gl) + 18px);
+    width: calc(var(--R) - var(--L) - var(--gl) - var(--gr) - 36px);
+    height: calc(var(--H) - 36px);
+    opacity: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--c), var(--c)) left top / 24px 2px no-repeat,
+      linear-gradient(var(--c), var(--c)) left top / 2px 24px no-repeat,
+      linear-gradient(var(--c), var(--c)) right top / 24px 2px no-repeat,
+      linear-gradient(var(--c), var(--c)) right top / 2px 24px no-repeat,
+      linear-gradient(var(--c), var(--c)) left bottom / 24px 2px no-repeat,
+      linear-gradient(var(--c), var(--c)) left bottom / 2px 24px no-repeat,
+      linear-gradient(var(--c), var(--c)) right bottom / 24px 2px no-repeat,
+      linear-gradient(var(--c), var(--c)) right bottom / 2px 24px no-repeat;
+    transition:
+      opacity 0.45s,
+      left 0.8s var(--ease),
+      width 0.8s var(--ease);
+  }
+
+  .cap {
+    position: absolute;
+    top: var(--H);
+    left: calc(var(--L) + var(--gl));
+    width: calc(var(--R) - var(--L) - var(--gl) - var(--gr));
+    height: var(--C);
+    padding: 16px 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    transition:
+      left 0.8s var(--ease),
+      width 0.8s var(--ease);
+  }
+
+  .name {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    transition: color 0.3s;
+  }
+
+  .kicker {
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.4s 0.15s,
+      transform 0.4s 0.15s;
+  }
+
+  .over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .over a {
+    pointer-events: auto;
+  }
+
+  .header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-block: 22px;
+    color: var(--ink);
+  }
+
+  .header a {
+    text-decoration: none;
+  }
+
+  .header nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+
+  @media (min-width: 761px) {
+    .panel:focus-visible {
+      outline: none;
+    }
+
+    .panel:hover .reticle,
+    .panel:focus-visible .reticle {
+      opacity: 1;
+    }
+
+    .panel:hover .kicker,
+    .panel:focus-visible .kicker {
+      opacity: 1;
+      transform: none;
+    }
+
+    .panel:hover .name,
+    .panel:focus-visible .name {
+      color: var(--hover);
+    }
+
+    .frame:has(.panel:hover),
+    .frame:has(.panel:focus-visible) {
+      --E: 40%;
+    }
+
+    .frame:has(.panel:nth-child(2):hover),
+    .frame:has(.panel:nth-child(2):focus-visible) {
+      --k: 1;
+    }
+
+    .frame:has(.panel:nth-child(3):hover),
+    .frame:has(.panel:nth-child(3):focus-visible) {
+      --k: 2;
+    }
+
+    .frame:has(.panel:nth-child(4):hover),
+    .frame:has(.panel:nth-child(4):focus-visible) {
+      --k: 3;
+    }
+
+    .frame:has(.panel:nth-child(5):hover),
+    .frame:has(.panel:nth-child(5):focus-visible) {
+      --k: 4;
+    }
+
+    .frame:has(.panel:nth-child(6):hover),
+    .frame:has(.panel:nth-child(6):focus-visible) {
+      --k: 5;
+    }
+  }
+
+  /* Phones: the header, then one cropped strip per project with its caption. */
+  @media (max-width: 760px) {
+    .frame {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .over {
+      position: static;
+      order: -1;
+      pointer-events: auto;
+    }
+
+    .panel {
+      position: relative;
+      inset: auto;
+      clip-path: none;
+      padding-inline: var(--gutter);
+    }
+
+    .img {
+      position: relative;
+      height: 168px;
+      object-position: var(--x) 64%;
+      border-radius: 3px;
+    }
+
+    .reticle {
+      display: none;
+    }
+
+    .cap {
+      position: static;
+      width: auto;
+      height: auto;
+      padding: 10px 0 18px;
+    }
+
+    .kicker {
+      opacity: 1;
+      transform: none;
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel,
+    .reticle,
+    .cap,
+    .kicker,
+    .name {
+      transition: none;
+    }
+  }
+</style>

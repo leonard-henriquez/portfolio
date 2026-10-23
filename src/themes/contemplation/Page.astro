@@ -1,0 +1,234 @@
+---
+/**
+ * Contemplation: a panorama of six pixel-art landscapes, one per project, then quiet sections on a warm paper ground.
+ * Space Grotesk for text, Space Mono in capitals for labels and metadata, one ink blue.
+ * Hovering a panel of the panorama widens it and frames it; every other interaction is a link.
+ * Document-level settings (theme colour, font preloads, the hero preload) live in `meta.ts`; behaviour in `client.ts`.
+ *
+ * Type scale, the same in every section:
+ * - Display (500): the name, the contact link.
+ * - Title (500, ink): item names in every list (project, exploration, principle, organization, school), figures.
+ * - Body (400, ink-2): descriptions and prose.
+ * - Label (.ct-mono): section labels, navigation, kickers, statuses, periods.
+ * Importance shows through order and amount of content, never through per-item styling.
+ */
+import "@fontsource-variable/space-grotesk/wght.css";
+import "@fontsource/space-mono/400.css";
+import type { ThemePageProps } from "../types";
+import About from "./components/About.astro";
+import Career from "./components/Career.astro";
+import Explorations from "./components/Explorations.astro";
+import Footer from "./components/Footer.astro";
+import Intro from "./components/Intro.astro";
+import Panorama from "./components/Panorama.astro";
+import Principles from "./components/Principles.astro";
+import Work from "./components/Work.astro";
+
+type Props = ThemePageProps;
+
+const { portfolio } = Astro.props;
+const { profile, projects } = portfolio;
+// Shipped and in progress here; research and studies under Explorations.
+const work = projects.filter((p) => p.status === "shipped" || p.status === "building");
+const explorations = projects.filter((p) => p.status === "exploring" || p.status === "study");
+---
+
+<a class="ct-skip" href="#work">Skip to the work</a>
+<Panorama portfolio={portfolio} />
+<main>
+  <Intro profile={profile} />
+  <About profile={profile} />
+  <Work projects={work} span={portfolio.span.label} />
+  <Explorations projects={explorations} />
+  <Principles profile={profile} />
+  <Career profile={profile} />
+</main>
+<Footer profile={profile} />
+
+<style is:global>
+  /* Every theme's CSS ships on the one page: everything global is scoped to html[data-theme="contemplation"]. */
+  html[data-theme="contemplation"] {
+    --paper: #eae8e3;
+    --ink: #1e3044;
+    --ink-deep: #16263a;
+    --ink-2: #344556; /* 8.6:1 on paper */
+    --accent: #3e617b; /* 5.4:1 on paper: labels and metadata */
+    --hover: #2f5576;
+    --rule: #cdced2;
+    --light: #f6f3ec;
+    --gutter: clamp(16px, 3vw, 40px);
+    --max: 1360px;
+    --section: clamp(96px, 11vw, 160px);
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --mono: "Space Mono", ui-monospace, monospace;
+
+    --switcher-font: var(--mono);
+    --switcher-fg: var(--ink);
+    --switcher-muted: var(--accent);
+    --switcher-bg: var(--paper);
+    --switcher-border: 1px solid var(--rule);
+    --switcher-radius: 4px;
+    --switcher-shadow: 0 12px 32px -18px rgb(22 38 58 / 0.45);
+    --switcher-accent: var(--ink);
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-theme="contemplation"] {
+      scroll-behavior: smooth;
+    }
+  }
+
+  [data-theme="contemplation"] body {
+    margin: 0;
+    background: var(--paper);
+    overflow-x: clip;
+  }
+
+  [data-theme="contemplation"] *,
+  [data-theme="contemplation"] *::before,
+  [data-theme="contemplation"] *::after {
+    box-sizing: border-box;
+  }
+
+  [data-theme="contemplation"] a {
+    color: inherit;
+  }
+
+  [data-theme="contemplation"] a:hover {
+    color: var(--hover);
+  }
+
+  [data-theme="contemplation"] ::selection {
+    background: var(--ink);
+    color: var(--light);
+  }
+
+  [data-theme="contemplation"] :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  [data-theme="contemplation"] .ct-skip {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 50;
+    padding: 8px 12px;
+    background: var(--ink);
+    color: var(--light);
+    font-family: var(--mono);
+    font-size: 12px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transform: translateY(-160%);
+  }
+
+  [data-theme="contemplation"] .ct-skip:focus-visible {
+    transform: none;
+  }
+
+  /* Labels and metadata. */
+  :where([data-theme="contemplation"]) .ct-mono {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  :where([data-theme="contemplation"]) .ct-wrap {
+    width: 100%;
+    max-width: calc(var(--max) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  :where([data-theme="contemplation"]) .ct-section {
+    padding-top: var(--section);
+  }
+
+  /* Section head: the label, an aside on the right, an ink rule under both. */
+  :where([data-theme="contemplation"]) .ct-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  :where([data-theme="contemplation"]) .ct-head > * {
+    margin: 0;
+  }
+
+  :where([data-theme="contemplation"]) .ct-aside {
+    color: var(--accent);
+  }
+
+  /* Lists: hairlines between rows and under the last one. */
+  :where([data-theme="contemplation"]) .ct-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  :where([data-theme="contemplation"]) .ct-list > li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  :where([data-theme="contemplation"]) .ct-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  :where([data-theme="contemplation"]) .ct-body {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  :where([data-theme="contemplation"]) .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Rows rise in once, where scroll-driven animations exist; elsewhere they are simply there. */
+  @keyframes ct-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      :where([data-theme="contemplation"]) .ct-reveal {
+        animation: ct-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 25%;
+      }
+    }
+  }
+</style>

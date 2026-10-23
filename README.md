@@ -33,14 +33,14 @@ Everything the themes show is there too, principles included. A new content fiel
 
 ## Themes
 
-The site is one static page, `/`, that can be shown in several themes: **Minimal** (the default), **Raw** (the original site) and **Terminal**. A switcher in the bottom-right corner lets visitors pick one; the choice is remembered in `localStorage` (`site-theme`).
+The site is one static page, `/`, that can be shown in several themes: **Contemplation** (the default), **Raw** (the original site), **Minimal** and **Terminal**. A switcher in the bottom-right corner lets visitors pick one; the choice is remembered in `localStorage` (`site-theme`).
 
 - `/?theme=<slug>` opens the site in that theme and remembers it, e.g. [`/?theme=raw`](https://hqz.me/?theme=raw) or [`/?theme=terminal`](https://hqz.me/?theme=terminal). The parameter is removed from the address bar; unknown values are ignored.
 - Without JavaScript, and for crawlers, the default theme is what's there (`DEFAULT_THEME` in `src/themes/registry.ts`). The other themes sit in inert `<template>`s.
 
 How it works (`src/layouts/Site.astro`, `src/themes/document.ts`): a blocking script at the top of `<head>` resolves the theme (`?theme=` → stored choice → default) and applies its `meta.ts` settings before first paint (`html[data-theme]`, theme colour, font preloads, a `fetchpriority="high"` preload of its hero image, `boot`). At the end of `<body>`, a second script swaps the default theme's markup for the chosen theme's template, so only one theme is ever in the DOM. Every theme's CSS ships on the page, which is why each theme scopes its global styles to `html[data-theme="<slug>"]`. Only the active theme's `client.ts` is downloaded. Switching fades the page out, navigates to `/?theme=<slug>` and fades the new page in (no fades with reduced motion). The switcher slides away while the page scrolls down, so it doesn't sit on text, and comes back on scrolling up, at the end of the page or on keyboard focus.
 
-Known trade-off: the default theme's markup is in the HTML (for crawlers and visitors without JavaScript), so its eager hero photo is always downloaded, even when another theme is shown. The active theme's hero is preloaded from the `<head>` with high priority, so it doesn't wait behind it, but the default theme's hero is a wasted download for those visitors (AVIF, from about 30 KB on a phone to 185 KB on a large high-density screen).
+Known trade-off: the default theme's markup is in the HTML (for crawlers and visitors without JavaScript), so its eager hero images are always downloaded, even when another theme is shown. The active theme's hero is preloaded from the `<head>` with high priority, so it doesn't wait behind it, but the default theme's hero is a wasted download for those visitors (Contemplation's panorama: six WebP landscapes, from about 70 KB each on a phone to about 150 KB on a large screen).
 
 ### Adding a theme
 

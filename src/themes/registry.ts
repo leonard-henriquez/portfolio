@@ -2,7 +2,7 @@ import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 import type { ThemeMeta } from "./types";
 
 /** The theme shown to first-time visitors, crawlers and visitors without JavaScript. */
-export const DEFAULT_THEME = "minimal";
+export const DEFAULT_THEME = "contemplation";
 
 // Every `src/themes/<slug>/Page.astro`, except folders starting with "_" (drafts, examples).
 // Imported eagerly on purpose: the one page renders every theme, so it ships every theme's CSS.

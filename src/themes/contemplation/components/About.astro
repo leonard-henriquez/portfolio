@@ -1,0 +1,143 @@
+---
+/** About: the short version large, the long version beside it, the stack and the motto; a landscape rises under it. */
+import { Image } from "astro:assets";
+import type { Profile } from "../../../lib/portfolio";
+import { ABOUT_VISTA } from "../vista";
+
+interface Props {
+  profile: Profile;
+}
+
+const { about, stack, quote } = Astro.props.profile;
+---
+
+<section id="about" class="about" aria-labelledby="about-title" style={`--sky: ${ABOUT_VISTA.sky}`}>
+  <div class="text ct-wrap ct-reveal">
+    <div class="main">
+      <h2 id="about-title" class="ct-mono">About</h2>
+      <p class="short">{about.short}</p>
+    </div>
+    <div class="side">
+      {about.long.map((p) => <p>{p}</p>)}
+      {
+        (stack.length > 0 || quote) && (
+          <dl class="facts">
+            {stack.map((group) => (
+              <div>
+                <dt class="ct-mono">{group.label}</dt>
+                <dd>{group.items.join(", ")}</dd>
+              </div>
+            ))}
+            {quote && (
+              <div>
+                <dt class="ct-mono">Motto</dt>
+                <dd>
+                  {quote.text}
+                  {quote.context && <span class="context"> {quote.context}</span>}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )
+      }
+    </div>
+  </div>
+  <Image
+    src={ABOUT_VISTA.src}
+    alt={ABOUT_VISTA.alt}
+    widths={[960, 1280, ABOUT_VISTA.src.width]}
+    sizes="100vw"
+    class="art"
+    loading="lazy"
+    decoding="async"
+  />
+</section>
+
+<style>
+  .about {
+    position: relative;
+    margin-top: var(--section);
+    overflow: hidden;
+    background: var(--sky);
+    color: var(--ink-deep);
+  }
+
+  .text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 64px;
+    padding-top: clamp(64px, 8vw, 120px);
+  }
+
+  .main {
+    flex: 1 1 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .main h2 {
+    margin: 0;
+  }
+
+  .short {
+    margin: 0;
+    font-size: clamp(26px, 2.8vw, 40px);
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+    text-wrap: pretty;
+  }
+
+  .side {
+    flex: 1 1 320px;
+    align-self: end;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+
+  .side > p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .side > p + p {
+    margin-top: 0.8em;
+  }
+
+  .facts {
+    margin: 28px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .facts > div {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid rgb(22 38 58 / 0.35);
+  }
+
+  .facts dt {
+    padding-top: 1px;
+  }
+
+  .facts dd {
+    margin: 0;
+  }
+
+  .context {
+    display: block;
+  }
+
+  .art {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: calc(-1 * clamp(64px, 20vw, 340px));
+  }
+</style>

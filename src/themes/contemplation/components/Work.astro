@@ -1,0 +1,222 @@
+---
+/**
+ * Selected work: shipped and in-progress projects, one row each: its landscape, role, name, summary, the long
+ * description and facts, then status and period. Highlights, when a project has them, follow in a grid.
+ */
+import { Image } from "astro:assets";
+import type { Project } from "../../../lib/portfolio";
+import { vistaOf } from "../vista";
+
+interface Props {
+  projects: Project[];
+  span: string;
+}
+
+const { projects, span } = Astro.props;
+---
+
+{
+  projects.length > 0 && (
+    <section id="work" class="ct-section ct-wrap" aria-labelledby="work-title">
+      <div class="ct-head">
+        <h2 id="work-title" class="ct-mono">Selected work</h2>
+        <span class="ct-mono ct-aside">{span}</span>
+      </div>
+      <ul class="ct-list" role="list">
+        {projects.map((p) => {
+          const vista = vistaOf(p);
+          const img = vista ?? p.image.illustration;
+          const facts = [...p.stack, ...p.tags];
+          return (
+            <li id={p.anchor} class="item ct-reveal">
+              <div class="row">
+                <div class="thumb" style={vista ? `--sky: ${vista.sky}` : undefined}>
+                  <Image
+                    src={img.src}
+                    alt=""
+                    widths={[248, 496]}
+                    sizes="248px"
+                    loading="lazy"
+                    decoding="async"
+                    style={vista ? `object-position: ${vista.x} 66%` : undefined}
+                  />
+                </div>
+                <div class="main">
+                  <span class="ct-mono ct-aside">{p.role}</span>
+                  <h3 class="name">{p.title}</h3>
+                  <p class="ct-body">{p.summary}</p>
+                  {p.hasBody && <div class="prose ct-body" set:html={p.html} />}
+                  {(facts.length > 0 || p.links.length > 0) && (
+                    <p class="facts ct-mono">
+                      {facts.join(" · ")}
+                      {p.links.map((link, i) => (
+                        <>
+                          {(facts.length > 0 || i > 0) && " · "}
+                          <a href={link.href} rel="noopener">
+                            {link.label}
+                            <span aria-hidden="true"> ↗</span>
+                          </a>
+                        </>
+                      ))}
+                    </p>
+                  )}
+                </div>
+                <span class="when ct-mono ct-aside">
+                  {p.statusLabel} — {p.period}
+                </span>
+              </div>
+
+              {p.highlights.length > 0 && (
+                <ul class="highlights" role="list" aria-label={`${p.title} highlights`}>
+                  {p.highlights.map((h) => (
+                    <li>
+                      <h4 class="hl-title">{h.title}</h4>
+                      <p class="ct-body">{h.body}</p>
+                      {h.result && <p class="hl-result ct-mono">{h.result}</p>}
+                      {h.stack.length > 0 && <p class="hl-stack ct-mono">{h.stack.join(" · ")}</p>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .item {
+    padding: 32px 0;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px 40px;
+  }
+
+  .thumb {
+    flex: 0 0 248px;
+    height: 156px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--sky, var(--rule));
+  }
+
+  .thumb :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--ease);
+  }
+
+  .item:hover .thumb :global(img) {
+    transform: scale(1.07);
+  }
+
+  .main {
+    flex: 1 1 320px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .main > * {
+    max-width: 64ch;
+  }
+
+  .name {
+    margin: 0;
+    font-size: clamp(26px, 2.6vw, 38px);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  .prose :global(p) {
+    margin: 0;
+  }
+
+  .prose :global(p + p) {
+    margin-top: 0.6em;
+  }
+
+  .facts {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .when {
+    flex: 0 0 150px;
+    text-align: right;
+  }
+
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px 40px;
+    margin: 36px 0 4px;
+    padding: 20px 0 0 288px;
+    list-style: none;
+  }
+
+  .highlights > li {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .highlights p {
+    margin: 0;
+  }
+
+  .hl-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .hl-result,
+  .hl-stack {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .hl-stack {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1099px) {
+    .highlights {
+      padding-left: 0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .thumb {
+      flex-basis: 100%;
+      height: 168px;
+    }
+
+    .when {
+      flex-basis: 100%;
+      text-align: left;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .thumb :global(img) {
+      transition: none;
+    }
+  }
+</style>
