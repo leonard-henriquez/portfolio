@@ -17,7 +17,9 @@ pnpm build     # outputs dist/
 
 Add a project by dropping a Markdown file in `src/content/projects/`; it shows up in every theme, and `/#project-<file name>` links to it (opened) whatever the theme. Run `pnpm check` before pushing.
 
-Themes never pick content by its wording: what they need is named in the content. `current.project` in `profile.yaml` names the project about the current role, and `taglines` are keyed by an id describing each line (a theme asks for `taglines.night` and falls back to `headline`).
+Themes never pick content by its wording: what they need is named in the content. `taglines` are keyed by an id describing each line (a theme asks for `taglines.night` and falls back to `headline`).
+
+Career lives in `profile.yaml` under `experience` (one entry per organization: `org`, optional `detail`, `formerly`, `href`, `location`, `summary`, `project`, and `roles`, each with `title`, `type`, `start`/`end` as `"YYYY-MM"`, `text`, `highlights`, `skills`) and `education` (`school`, `degree`, `field`, `start`/`end` years, `note`). Both take a `weight` (`high`, `medium`, `low`) that themes use to make more of what matters. The organization with an ongoing role (no `end`) is the current one: `profile.current` (title, organization, since, the role's first highlight, and the project the entry names) is derived from it, never written twice. `getPortfolio()` sorts both newest first and adds periods (`Aug 2020 – Aug 2022`), years and durations (`2 yrs 1 mo`).
 
 ## For LLMs
 

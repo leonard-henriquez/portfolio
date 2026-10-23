@@ -1,0 +1,498 @@
+---
+/**
+ * Experience and Education as Swiss index tables, on the same columns as the project index:
+ * Period · Organization · Role · Type. An organization's roles nest in the Role and Type columns, newest first.
+ * `weight` sets the size of the organization or school name, so what matters most reads first.
+ */
+import type { Profile } from "../../../lib/portfolio";
+import { pad } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { experience, education, sections } = Astro.props.profile;
+
+const first = experience.at(-1);
+const latest = experience[0];
+const orgCount = `${pad(experience.length, 2)} ${experience.length === 1 ? "organization" : "organizations"}${
+  first && latest ? `, ${first.start.year}–${latest.end ? latest.end.year : "present"}` : ""
+}`;
+const schoolCount = `${pad(education.length, 2)} ${education.length === 1 ? "school" : "schools"}`;
+---
+
+{
+  experience.length > 0 && (
+    <section id="experience" class="cv mn-wrap" aria-labelledby="experience-title">
+      <div class="head mn-grid">
+        <h2 id="experience-title" class="mn-label">Experience</h2>
+        {sections.experience.intro && <p class="intro">{sections.experience.intro}</p>}
+        <p class="count">{orgCount}</p>
+      </div>
+
+      <div class="cols mn-grid mn-rule mn-rule--bottom" aria-hidden="true">
+        <span class="c-when">Period</span>
+        <span class="c-main">Organization</span>
+        <span class="c-role">Role</span>
+        <span class="c-type">Type</span>
+      </div>
+
+      <ol class="list" role="list">
+        {experience.map((org) => (
+          <li class:list={["entry mn-grid mn-rule", `w-${org.weight}`]} id={org.anchor}>
+            <p class="when mn-reveal">{org.years}</p>
+
+            <div class="main">
+              <h3 class="name mn-reveal">
+                {org.href ? (
+                  <a class="mn-link" href={org.href}>
+                    {org.org}
+                  </a>
+                ) : (
+                  org.org
+                )}
+                {org.detail && <span class="detail"> ({org.detail})</span>}
+              </h3>
+              {(org.formerly || org.location || org.multiRole) && (
+                <p class="sub mn-reveal">
+                  {[org.formerly && `Formerly ${org.formerly}`, org.location, org.multiRole && `${org.roles.length} roles, ${org.duration}`]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+              {org.summary && <p class="summary mn-reveal">{org.summary}</p>}
+              {org.project && (
+                <p class="more mn-reveal">
+                  <a class="mn-link" href={`#${org.project.anchor}`}>
+                    {org.project.title} in the index <span aria-hidden="true">↑</span>
+                  </a>
+                </p>
+              )}
+            </div>
+
+            <ol class:list={["roles", { nested: org.multiRole }]} role="list">
+              {org.roles.map((role) => (
+                <li class="role">
+                  <h4 class="title mn-reveal">
+                    {role.title}
+                    <span class="sr-only">, {role.typeLabel}</span>
+                  </h4>
+                  <p class="type mn-reveal" aria-hidden="true">
+                    {role.typeLabel}
+                  </p>
+                  <div class="r-body">
+                    <p class="r-when mn-reveal">
+                      <time datetime={role.start.iso}>{role.start.label}</time> –{" "}
+                      {role.end ? <time datetime={role.end.iso}>{role.end.label}</time> : "present"}
+                      {!role.current && <span class="dur">{role.duration}</span>}
+                    </p>
+                    {role.text && <p class="r-text mn-reveal">{role.text}</p>}
+                    {role.highlights.length > 0 && (
+                      <ul class="r-hl mn-reveal" role="list">
+                        {role.highlights.map((h) => (
+                          <li>{h}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {role.skills.length > 0 && (
+                      <p class="r-skills mn-reveal">
+                        <span class="sr-only">Skills: </span>
+                        {role.skills.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+{
+  education.length > 0 && (
+    <section id="education" class="cv cv--edu mn-wrap" aria-labelledby="education-title">
+      <div class="head mn-grid">
+        <h2 id="education-title" class="mn-label">Education</h2>
+        {sections.education.intro && <p class="intro">{sections.education.intro}</p>}
+        <p class="count">{schoolCount}</p>
+      </div>
+
+      <div class="cols mn-grid mn-rule mn-rule--bottom" aria-hidden="true">
+        <span class="c-when">Period</span>
+        <span class="c-main">School</span>
+        <span class="c-prog">Program</span>
+      </div>
+
+      <ol class="list" role="list">
+        {education.map((e) => (
+          <li class:list={["entry mn-grid mn-rule", `w-${e.weight}`]} id={e.anchor}>
+            <p class="when mn-reveal">{e.years}</p>
+            <div class="main">
+              <h3 class="name mn-reveal">
+                {e.href ? (
+                  <a class="mn-link" href={e.href}>
+                    {e.school}
+                  </a>
+                ) : (
+                  e.school
+                )}
+              </h3>
+            </div>
+            <div class="prog">
+              {e.program && <p class="p-name mn-reveal">{e.program}</p>}
+              {e.note && <p class="r-text mn-reveal">{e.note}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  .cv {
+    --t: clamp(22px, 2.2vw, 32px);
+    padding-top: clamp(96px, 11vw, 160px);
+  }
+
+  .cv--edu {
+    padding-top: clamp(72px, 8vw, 120px);
+  }
+
+  .head {
+    align-items: baseline;
+    row-gap: 12px;
+    padding-bottom: clamp(28px, 3vw, 40px);
+  }
+
+  .head .mn-label {
+    grid-column: 1 / span 2;
+  }
+
+  .intro {
+    grid-column: 3 / span 6;
+    margin: 0;
+    max-width: 36em;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .count {
+    grid-column: 10 / -1;
+    margin: 0;
+    text-align: right;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .cols {
+    --rule-color: var(--ink);
+    padding-bottom: 14px;
+  }
+
+  .cols > span {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--mute);
+  }
+
+  /* Columns, shared by the header row and the entries. */
+  .c-when,
+  .when {
+    grid-column: 1 / span 2;
+  }
+
+  .c-main,
+  .main {
+    grid-column: 3 / span 4;
+  }
+
+  .c-role {
+    grid-column: 7 / span 4;
+  }
+
+  .c-type {
+    grid-column: 11 / span 2;
+    text-align: right;
+  }
+
+  .c-prog,
+  .prog {
+    grid-column: 7 / span 6;
+  }
+
+  .roles {
+    grid-column: 7 / span 6;
+  }
+
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .entry {
+    align-items: baseline;
+    row-gap: 6px;
+    padding: 24px 0 28px;
+  }
+
+  .entry:first-child::before {
+    display: none;
+  }
+
+  .when {
+    margin: 0;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .main > *,
+  .prog > * {
+    margin: 0;
+  }
+
+  /* Weight: the name's size says how much an entry matters. */
+  .name {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .w-high .name {
+    font-size: var(--t);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .w-medium .name {
+    font-size: 20px;
+  }
+
+  .w-high {
+    padding: 32px 0 36px;
+  }
+
+  .w-low {
+    padding: 18px 0 22px;
+  }
+
+  .detail {
+    color: var(--mute);
+    font-weight: 400;
+  }
+
+  .sub {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--mute);
+  }
+
+  .summary {
+    margin-top: 12px;
+    max-width: 30em;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .more {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  /* Roles: title and type on the grid, details under the title. */
+  .roles {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .role {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+  }
+
+  /* Several roles at one organization: hairlines between them, as a nested index. */
+  .nested .role + .role {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .title {
+    grid-column: 1 / span 4;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .w-low .title {
+    font-size: 15px;
+  }
+
+  .type {
+    grid-column: 5 / span 2;
+    margin: 0;
+    font-size: 14px;
+    text-align: right;
+    color: var(--mute);
+    white-space: nowrap;
+  }
+
+  .r-body {
+    grid-column: 1 / span 4;
+  }
+
+  .r-body > *,
+  .r-hl {
+    margin: 0;
+  }
+
+  .r-when {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--mute);
+  }
+
+  .dur::before {
+    content: " · ";
+  }
+
+  .r-text,
+  .r-hl {
+    margin-top: 10px;
+    max-width: 34em;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .r-hl {
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A highlight is a result: in ink, marked with a short rule. */
+  .r-hl li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--ink);
+  }
+
+  .r-hl li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 12px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .r-hl li + li {
+    margin-top: 4px;
+  }
+
+  .r-skills {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .p-name {
+    font-size: 17px;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+
+  .w-high .p-name {
+    font-weight: 500;
+  }
+
+  .prog .r-text {
+    margin-top: 6px;
+  }
+
+  @media (max-width: 1099px) {
+    .intro {
+      grid-column: 3 / span 7;
+    }
+  }
+
+  /* Phones: the table becomes a list. Period, then the organization, then its roles; type next to each title. */
+  @media (max-width: 760px) {
+    .head .mn-label {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .count {
+      grid-column: 2 / span 3;
+      grid-row: 1;
+    }
+
+    .intro {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .cols {
+      display: none;
+    }
+
+    .list {
+      border-top: 1px solid var(--ink);
+    }
+
+    .when,
+    .main,
+    .roles,
+    .prog {
+      grid-column: 1 / -1;
+    }
+
+    .when {
+      font-size: 13px;
+      color: var(--mute);
+    }
+
+    .roles {
+      margin-top: 14px;
+    }
+
+    .title {
+      grid-column: 1 / span 3;
+    }
+
+    .r-body {
+      grid-column: 1 / -1;
+    }
+
+    .type {
+      grid-column: 4;
+      font-size: 13px;
+    }
+
+    .prog {
+      margin-top: 6px;
+    }
+  }
+</style>

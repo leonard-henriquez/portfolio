@@ -1,7 +1,7 @@
 import { defineCollection, reference } from "astro:content";
 import { file, glob } from "astro/loaders";
 import { z } from "astro/zod";
-import { IMAGE_STYLES, PROJECT_STATUSES } from "./lib/constants";
+import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES, WEIGHTS } from "./lib/constants";
 
 /**
  * Content for every theme. Themes never read these collections directly:
@@ -69,6 +69,64 @@ const projects = defineCollection({
 
 const sectionText = z.object({ intro: z.string().optional(), summary: z.string().optional() }).prefault({});
 
+/** "2020-08". */
+const yearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Use "YYYY-MM", e.g. "2020-08" (quoted in YAML).');
+
+/** How much a theme should make of an entry: `high` is what matters most, `low` can be compact. Never hides it. */
+const weight = z.enum(WEIGHTS).default("medium");
+
+const role = z
+  .object({
+    /** As the organization titled it: "Head of Engineering". */
+    title: z.string().min(1),
+    type: z.enum(EMPLOYMENT_TYPES),
+    start: yearMonth,
+    /** Last month in the role. Omit while the role is ongoing. */
+    end: yearMonth.optional(),
+    /** What the role was, one or two sentences. Facts only. */
+    text: z.string().optional(),
+    /** Notable results or facts, most important first: "Raised $5.5M in a public token sale…". */
+    highlights: z.array(z.string()).default([]),
+    skills: z.array(z.string()).default([]),
+  })
+  .refine((r) => !r.end || r.end >= r.start, { message: "A role cannot end before it starts." });
+
+const experience = z.object({
+  /** Current name: "Manda". */
+  org: z.string().min(1),
+  /** Shown after the name in parentheses: "YC W24". */
+  detail: z.string().optional(),
+  /** Name at the time, when it changed since: "Flatlooker". */
+  formerly: z.string().optional(),
+  href: z.url().optional(),
+  /** "Paris, France". */
+  location: z.string().optional(),
+  /** What the organization is, one line. */
+  summary: z.string().optional(),
+  /** The project about this organization (a file name in src/content/projects/), e.g. `topo`. */
+  project: reference("projects").optional(),
+  weight,
+  /** One per title held, in any order. */
+  roles: z.array(role).min(1),
+});
+
+const education = z
+  .object({
+    school: z.string().min(1),
+    /** The qualification or programme: "MSc", "Fullstack Developer". */
+    degree: z.string().optional(),
+    /** "Data Analytics and Artificial Intelligence". */
+    field: z.string().optional(),
+    start: z.number().int(),
+    /** Last year. Omit when it is the same as `start`. */
+    end: z.number().int().optional(),
+    /** One short line: "W24 batch, with Topo." */
+    note: z.string().optional(),
+    href: z.url().optional(),
+    weight,
+  })
+  .refine((e) => !e.end || e.end >= e.start, { message: "Education cannot end before it starts." });
+
 const profile = defineCollection({
   loader: file("src/content/profile.yaml"),
   schema: ({ image }) =>
@@ -77,17 +135,6 @@ const profile = defineCollection({
       handle: z.string(),
       location: z.object({ city: z.string(), country: z.string() }),
       roles: z.array(z.string()).min(1),
-      current: z.object({
-        title: z.string(),
-        org: z.string(),
-        orgDetail: z.string().optional(),
-        href: z.url().optional(),
-        since: z.number().int(),
-        /** The headline result in this role, one sentence: "Our AI SDR went from $0 to $1M ARR in three months." */
-        highlight: z.string().optional(),
-        /** The project about this role (a file name in src/content/projects/), e.g. `topo`. */
-        project: reference("projects").optional(),
-      }),
       headline: z.string(),
       intro: z.string(),
       /** Alternate hero lines keyed by a short id describing the line (e.g. `night`). A theme asks for one by id and falls back to `headline`. */
@@ -101,16 +148,12 @@ const profile = defineCollection({
       numbers: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
       principles: z.array(z.object({ title: z.string(), body: z.string() })).default([]),
       talks: z.array(z.object({ year: z.number().int().optional(), text: z.string() })).default([]),
-      earlier: z
-        .array(
-          z.object({
-            start: z.number().int(),
-            end: z.number().int(),
-            title: z.string(),
-            text: z.string(),
-          }),
-        )
-        .default([]),
+      /**
+       * Career, one entry per organization, in any order (getPortfolio() sorts it newest first). The organization
+       * with an ongoing role (no `end`) is the current one: `profile.current` is derived from it.
+       */
+      experience: z.array(experience).min(1),
+      education: z.array(education).default([]),
       stack: z
         .array(z.object({ key: z.string(), label: z.string(), items: z.array(z.string()).min(1) }))
         .default([]),
@@ -126,7 +169,13 @@ const profile = defineCollection({
        * one-line teaser (e.g. in navigation). `work` is about what was built in the current role.
        */
       sections: z
-        .object({ work: sectionText, principles: sectionText, talks: sectionText, earlier: sectionText })
+        .object({
+          work: sectionText,
+          principles: sectionText,
+          talks: sectionText,
+          experience: sectionText,
+          education: sectionText,
+        })
         .prefault({}),
       seo: z.object({ title: z.string(), description: z.string() }),
       heroImage: z.object({

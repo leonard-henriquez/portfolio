@@ -9,16 +9,6 @@ leonard:
     city: Paris
     country: France
   roles: [Founder, Engineer]
-  current:
-    title: Co-founder & CTO
-    org: Topo
-    orgDetail: YC W24
-    href: https://www.topo.io
-    since: 2022
-    highlight: Our AI SDR went from $0 to $1M ARR in three months.
-    # The project about this role: a file name in src/content/projects/.
-    project: topo
-
   # Default hero line, then alternates a theme may use instead, keyed by a short id that describes the line.
   # A theme asks for one by id (e.g. `taglines.night`) and falls back to `headline` when it's missing.
   headline: I build AI agent platforms.
@@ -69,15 +59,102 @@ leonard:
     - text: Judge at AI hackathons in Paris
     - text: Invited to the Élysée by President Macron to help prepare the AI Action Summit
 
-  earlier:
-    - start: 2019
-      end: 2022
-      title: Flatlooker (now Manda)
-      text: "Head of Engineering at Flatlooker (now Manda). Started as product manager, then ran engineering: ~10 developers, recruiting and training."
-    - start: 2015
+  # Career, one entry per organization (getPortfolio() sorts it newest first). Source: LinkedIn, plus facts already
+  # on the site. The organization with an ongoing role (no `end`) is the current one: `current` (title, org, since,
+  # highlight, project) is derived from it. `weight` (high, medium, low; default medium) is how much themes make
+  # of an entry. Months are "YYYY-MM", quoted. Role types: permanent, full-time, part-time, freelance, contract,
+  # internship.
+  experience:
+    - org: Topo
+      detail: YC W24
+      href: https://www.topo.io
+      summary: AI agents for B2B outbound sales, used by 150+ customers including Air France and Aircall.
+      # The project about this organization: a file name in src/content/projects/.
+      project: topo
+      weight: high
+      roles:
+        - title: Co-founder & CTO
+          type: permanent
+          start: "2022-08"
+          text: Designed the platform, hired and led the team, and stayed its top committer.
+          # The first highlight of the current role is the site's headline result.
+          highlights:
+            - Our AI SDR went from $0 to $1M ARR in three months.
+    - org: Manda
+      formerly: Flatlooker
+      weight: high
+      roles:
+        - title: Head of Engineering
+          type: permanent
+          start: "2020-08"
+          end: "2022-08"
+          text: "Ran engineering: a team of about 10 developers, including recruiting and training."
+          skills: [SaaS, Full-stack development]
+        - title: Product Manager
+          type: permanent
+          start: "2019-09"
+          end: "2020-08"
+    - org: BTU Protocol
+      roles:
+        - title: Product Manager
+          type: freelance
+          start: "2018-07"
+          end: "2019-05"
+        - title: CEO's Right Hand
+          type: internship
+          start: "2018-02"
+          end: "2018-07"
+          highlights:
+            - BTU Protocol raised $5.5M in a public token sale, four months after its creation.
+    - org: EY
+      location: Paris, France
+      roles:
+        - title: Analyst
+          type: internship
+          start: "2017-09"
+          end: "2018-02"
+          highlights:
+            - Recommendation letter from a Senior Manager.
+    - org: Course Croisière EDHEC
+      summary: Student-run organization at EDHEC Business School.
+      weight: low
+      roles:
+        - title: CTO
+          type: part-time
+          start: "2015-10"
+          end: "2017-05"
+          skills: [AWS, JavaScript]
+    - org: Jalgos
+      weight: low
+      roles:
+        - title: Data Science
+          type: internship
+          start: "2015-07"
+          end: "2015-08"
+          text: Wrote a neural network from scratch in C++.
+
+  # Newest first is derived; `weight` as for experience.
+  education:
+    - school: Y Combinator
+      start: 2023
+      end: 2024
+      note: W24 batch, with Topo.
+      weight: high
+    - school: EDHEC Business School
+      degree: MSc
+      field: Data Analytics and Artificial Intelligence
+      start: 2015
       end: 2019
-      title: EDHEC, BTU Protocol, Jalgos
-      text: MSc Data Analytics & AI at EDHEC. Product manager at BTU Protocol; data science intern at Jalgos, where I wrote a neural network from scratch in C++.
+      weight: high
+    - school: Le Wagon
+      degree: Fullstack Developer
+      start: 2018
+      weight: low
+    - school: Saint Jean de Douai
+      degree: Prépa HEC (pre-business administration course)
+      start: 2012
+      end: 2015
+      weight: low
 
   # Framing text for page sections, all optional. `intro` introduces a section; `summary` is a one-line
   # teaser (e.g. in navigation) and falls back to `intro`. `work` is about what was built at Topo.
@@ -90,8 +167,12 @@ leonard:
       summary: What production agents taught me.
     talks:
       intro: Talks, juries and recognition.
-    earlier:
-      intro: From product management to running engineering.
+    experience:
+      intro: From product management to running engineering, then co-founding Topo.
+      summary: Topo, Manda, BTU Protocol, EY.
+    education:
+      intro: An MSc in data analytics and AI at EDHEC Business School, then Y Combinator with Topo.
+      summary: EDHEC MSc, Y Combinator.
 
   stack:
     - key: languages

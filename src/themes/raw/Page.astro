@@ -33,8 +33,9 @@ const nav = [
   ...(work.length ? [{ label: "Work", href: "#work", hint: sections.work.summary }] : []),
   ...(hasAbout ? [{ label: "About", href: "#about", hint: profile.focusAreas.join(", ") || undefined }] : []),
   ...(profile.principles.length ? [{ label: "Principles", href: "#principles", hint: sections.principles.summary }] : []),
+  ...(profile.experience.length ? [{ label: "Experience", href: "#experience", hint: sections.experience.summary }] : []),
+  ...(profile.education.length ? [{ label: "Education", href: "#education", hint: sections.education.summary }] : []),
   ...(profile.talks.length ? [{ label: "Talks", href: "#talks", hint: sections.talks.summary }] : []),
-  ...(profile.earlier.length ? [{ label: "Earlier", href: "#earlier", hint: sections.earlier.summary }] : []),
 ];
 
 const links = [
@@ -321,6 +322,90 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
   }
 
   {
+    profile.experience.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="experience" class="section">
+          <div class="section-head">
+            <h2 class="pixel">EXPERIENCE</h2>
+            {sections.experience.intro && <p>{sections.experience.intro}</p>}
+          </div>
+          <ol class="rows cv">
+            {profile.experience.map((org) => (
+              <li class:list={["row", `w-${org.weight}`]} id={org.anchor}>
+                <span class="muted">{org.current ? `${org.start.year}–now` : org.years}</span>
+                <div class="cv-main">
+                  <h3 class:list={["cv-name", { pixel: org.featured }]}>
+                    {org.href ? <a href={org.href}>{org.label}</a> : org.label}
+                  </h3>
+                  {(org.formerly || org.location || org.multiRole) && (
+                    <p class="muted">
+                      {[org.formerly && `Formerly ${org.formerly}`, org.location, org.multiRole && `${org.roles.length} roles, ${org.duration}`]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
+                  {org.summary && <p>{org.summary}</p>}
+                  <ol class:list={["cv-roles", { nested: org.multiRole }]}>
+                    {org.roles.map((role) => (
+                      <li>
+                        <h4>
+                          {role.title} <span class="muted">· {role.typeLabel}</span>
+                        </h4>
+                        <p class="muted">
+                          <time datetime={role.start.iso}>{role.start.label}</time> –{" "}
+                          {role.end ? <time datetime={role.end.iso}>{role.end.label}</time> : "present"}
+                          {!role.current && <span class="nowrap"> · {role.duration}</span>}
+                        </p>
+                        {role.text && <p>{role.text}</p>}
+                        {role.highlights.map((h) => (
+                          <p class="result">{h}</p>
+                        ))}
+                        {role.skills.length > 0 && <p class="stack muted">{role.skills.join(" · ")}</p>}
+                      </li>
+                    ))}
+                  </ol>
+                  {org.project && (
+                    <p>
+                      <a href={`#${org.project.anchor}`}>See the {org.project.title} project ↑</a>
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </>
+    )
+  }
+
+  {
+    profile.education.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="education" class="section">
+          <div class="section-head">
+            <h2 class="pixel">EDUCATION</h2>
+            {sections.education.intro && <p>{sections.education.intro}</p>}
+          </div>
+          <ol class="rows cv">
+            {profile.education.map((e) => (
+              <li class:list={["row", `w-${e.weight}`]} id={e.anchor}>
+                <span class="muted">{e.years}</span>
+                <div class="cv-main">
+                  <h3 class:list={["cv-name", { pixel: e.featured }]}>{e.href ? <a href={e.href}>{e.school}</a> : e.school}</h3>
+                  {e.program && <p>{e.program}</p>}
+                  {e.note && <p class="muted">{e.note}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </>
+    )
+  }
+
+  {
     profile.talks.length > 0 && (
       <>
         <div class="rule-thick" />
@@ -334,28 +419,6 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
               <li class="row">
                 <span class="muted">{t.year ?? ""}</span>
                 <span>{t.text}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </>
-    )
-  }
-
-  {
-    profile.earlier.length > 0 && (
-      <>
-        <div class="rule-thick" />
-        <section id="earlier" class="section">
-          <div class="section-head">
-            <h2 class="pixel">EARLIER</h2>
-            {sections.earlier.intro && <p>{sections.earlier.intro}</p>}
-          </div>
-          <ul class="rows">
-            {profile.earlier.map((e) => (
-              <li class="row">
-                <span class="muted">{e.periodShort}</span>
-                <span>{e.text}</span>
               </li>
             ))}
           </ul>
@@ -614,6 +677,91 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
   footer {
     padding-top: 32px;
+  }
+
+  /* Experience and education: a wider period column, an entry per organization, its roles nested. */
+  /* Phones: the period sits above the entry, so the entry gets the full width. */
+  .cv .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  @media (min-width: 640px) {
+    .cv .row {
+      grid-template-columns: 10ch minmax(0, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .cv .row.w-high {
+    background: var(--card);
+  }
+
+  .cv-main {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .cv-name {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .cv-name.pixel {
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .w-low .cv-name {
+    font-size: 0.875rem;
+  }
+
+  .cv-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  /* Several roles at one organization: a thick rail, like the page's rules. */
+  .cv-roles.nested {
+    padding-left: 14px;
+    border-left: 2px solid var(--fg);
+  }
+
+  .cv-roles li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cv-roles h4 {
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .cv-roles h4 .muted {
+    font-weight: 400;
+  }
+
+  .cv .result {
+    font-weight: 700;
+  }
+
+  .cv .result::before {
+    content: "→ " / "";
+  }
+
+  .cv .stack {
+    font-size: 0.8125rem;
   }
 
   /* Projects */

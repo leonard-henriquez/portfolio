@@ -1,4 +1,4 @@
-import type { Portfolio, Profile, Project } from "./portfolio";
+import type { Education, Experience, Portfolio, Profile, Project } from "./portfolio";
 
 /*
  * The site as Markdown, for LLMs and agents (served by src/pages/llms.txt.ts, index.md.ts, llms-full.txt.ts
@@ -64,6 +64,41 @@ function header(profile: Profile, site: URL): string {
       `Focus: ${profile.focusAreas.join(", ")}`,
       ...contactLines(profile, site),
     ]),
+  );
+}
+
+/** Ends a fragment with a full stop unless it already ends a sentence. */
+const sentence = (s: string) => (/[.!?…]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`);
+
+/**
+ * Experience, one bullet per role, newest first: period, title and organization, then type and length, then what
+ * the organization is (on its latest role), the role, its highlights, skills, and the project about it.
+ */
+function experienceList(experience: Experience[], site: URL): string {
+  return list(
+    experience.flatMap((org) =>
+      org.roles.map((role, i) => {
+        const facts = [role.typeLabel, role.duration, i === 0 && org.location].filter(Boolean).join(", ");
+        const details = [
+          i === 0 && org.summary && `${org.org}: ${sentence(org.summary)}`,
+          role.text && sentence(role.text),
+          ...role.highlights.map(sentence),
+          role.skills.length > 0 && `Skills: ${role.skills.join(", ")}.`,
+          i === 0 && org.project && `More: ${link(org.project.title, url(MARKDOWN_PATHS.project(org.project), site))}.`,
+          i === 0 && org.href && `Website: ${org.href}`,
+        ].filter(Boolean);
+        return `**${role.period}: ${role.title}, ${org.fullLabel}** (${facts})${details.length ? `. ${details.join(" ")}` : ""}`;
+      }),
+    ),
+  );
+}
+
+function educationList(education: Education[]): string {
+  return list(
+    education.map((e) => {
+      const what = [e.program, e.note].filter(Boolean).join(". ");
+      return `**${e.years}: ${e.school}**${what ? `: ${sentence(what)}` : ""}`;
+    }),
   );
 }
 
@@ -140,13 +175,13 @@ export function renderPortfolio(portfolio: Portfolio, site: URL): string {
       list(profile.talks.map((t) => (t.year ? `${t.year}: ${t.text}` : t.text))),
     );
 
-  const earlier =
-    profile.earlier.length > 0 &&
-    blocks(
-      "## Earlier experience",
-      sections.earlier.intro,
-      list(profile.earlier.map((e) => `**${e.period}, ${e.title}**: ${e.text}`)),
-    );
+  const experience =
+    profile.experience.length > 0 &&
+    blocks("## Experience", sections.experience.intro, experienceList(profile.experience, site));
+
+  const education =
+    profile.education.length > 0 &&
+    blocks("## Education", sections.education.intro, educationList(profile.education));
 
   const stack =
     profile.stack.length > 0 &&
@@ -159,8 +194,9 @@ export function renderPortfolio(portfolio: Portfolio, site: URL): string {
       figures,
       work,
       principles,
+      experience,
+      education,
       talks,
-      earlier,
       stack,
       `---\n\nSource: ${url("/", site)} · Generated ${today()}`,
     ) + "\n"
@@ -179,7 +215,8 @@ export function renderLlmsTxt(portfolio: Portfolio, site: URL): string {
       blocks(
         "## Profile",
         list([
-          `${link("Full profile", url(MARKDOWN_PATHS.full, site))}: about, key figures, every project, principles, talks, background, stack and contact, in one Markdown file (same content as ${url(MARKDOWN_PATHS.fullTxt, site)}).`,
+          `${link("Full profile", url(MARKDOWN_PATHS.full, site))}: about, key figures, every project, principles, experience, education, talks, stack and contact, in one Markdown file (same content as ${url(MARKDOWN_PATHS.fullTxt, site)}).`,
+          `${link("Experience and education", url(`${MARKDOWN_PATHS.full}#experience`, site))}: every role with dates (${profile.experience.map((e) => e.org).join(", ")}) and education (${profile.education.map((e) => e.school).join(", ") || "none listed"}), in the full profile.`,
           `${link("Website", url("/", site))}: the HTML version.`,
         ]),
       ),

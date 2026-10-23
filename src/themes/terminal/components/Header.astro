@@ -12,7 +12,8 @@ const nav = [
   { href: "#work", label: "./work" },
   { href: "#stack", label: "./stack" },
   ...(profile.principles.length ? [{ href: "#principles", label: "./principles" }] : []),
-  { href: "#log", label: "./log" },
+  ...(profile.experience.length ? [{ href: "#experience", label: "./experience" }] : []),
+  ...(profile.education.length ? [{ href: "#education", label: "./education" }] : []),
   { href: "#contact", label: "./contact" },
 ];
 ---

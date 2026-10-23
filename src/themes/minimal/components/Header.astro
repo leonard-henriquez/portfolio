@@ -11,6 +11,7 @@ const { profile } = Astro.props;
 const nav = [
   { label: "Index", href: "#index" },
   { label: "About", href: "#about" },
+  ...(profile.experience.length ? [{ label: "Experience", href: "#experience", wide: true }] : []),
   { label: "Contact", href: "#contact" },
 ];
 ---
@@ -21,7 +22,7 @@ const nav = [
     <span class="roles">{asPhrase(profile.roles).join(", ")}</span>
     <span class="place">{profile.location.label}</span>
     <nav class="nav" aria-label="Sections">
-      {nav.map((item) => <a class="mn-link" href={item.href}>{item.label}</a>)}
+      {nav.map((item) => <a class:list={["mn-link", { wide: item.wide }]} href={item.href}>{item.label}</a>)}
     </nav>
   </div>
 </header>
@@ -70,14 +71,20 @@ const nav = [
   }
 
   @media (max-width: 1099px) {
+    .place {
+      grid-column: 7 / span 2;
+    }
+
     .nav {
+      grid-column: 9 / span 4;
       gap: 16px;
     }
   }
 
   @media (max-width: 760px) {
     .roles,
-    .place {
+    .place,
+    .wide {
       display: none;
     }
 

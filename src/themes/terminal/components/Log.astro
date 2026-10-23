@@ -7,77 +7,188 @@ interface Props {
   profile: Profile;
 }
 
+/*
+ * `git log --graph`: one commit per role, newest first. An organization with several roles is a merge commit on
+ * the main line, its roles a side branch under it. `weight` sets how loud a commit is.
+ */
 const { profile } = Astro.props;
-const { current } = profile;
-
-const commits = [
-  {
-    hash: shortHash(current.label),
-    period: `${current.since}–present`,
-    title: current.label,
-    text: profile.intro,
-    href: current.href,
-    head: true,
-  },
-  ...profile.earlier.map((e) => ({
-    hash: shortHash(e.title + e.period),
-    period: e.period,
-    title: e.title,
-    text: e.text,
-    href: undefined,
-    head: false,
-  })),
-];
+const { experience, education } = profile;
+let line = 0;
+const hash = (...parts: string[]) => shortHash(parts.join("|"));
 ---
 
-<section id="log" class="tm-section log" aria-labelledby="log-title">
+<section id="experience" class="tm-section log" aria-labelledby="experience-title">
   <div class="history reveal">
-    <Prompt cmd="git log --graph" label="Experience" id="log-title" />
+    <Prompt cmd="git log --graph" label="Experience" id="experience-title" />
     <ol class="graph" data-print>
       {
-        commits.map((c, i) => (
-          <li class:list={["ln", "commit", { head: c.head }]} style={`--i:${i}`}>
-            <span class="node" aria-hidden="true" />
-            <p class="line1">
-              <span class="hash" aria-hidden="true">
-                {c.hash}
-              </span>
-              {c.head && (
-                <span class="ref" aria-hidden="true">
-                  (HEAD -> now)
-                </span>
+        experience.map((org) => {
+          const head = org.current;
+          const summary = org.summary && <p class="msg">{org.summary}</p>;
+          const trailers = (org.location || org.href || org.project) && (
+            <p class="trailers">
+              {org.location && <span>Location: {org.location}</span>}
+              {org.project && (
+                <a class="ext" href={`#${org.project.anchor}`}>
+                  ls projects/{org.project.id}
+                  <span aria-hidden="true"> ↑</span>
+                </a>
               )}
-              <span class="period">{c.period}</span>
+              {org.href && (
+                <a class="ext" href={org.href} rel="noopener">
+                  {displayHost(org.href)}
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+              )}
             </p>
-            <h3>{c.title}</h3>
-            <p class="msg">{c.text}</p>
-            {c.href && (
-              <a class="ext" href={c.href} rel="noopener">
-                {displayHost(c.href)}
-                <span aria-hidden="true"> ↗</span>
-              </a>
-            )}
-          </li>
-        ))
+          );
+
+          return org.multiRole ? (
+            <li class:list={["ln", "commit", "merge", `w-${org.weight}`, { head }]} style={`--i:${line++}`} id={org.anchor}>
+              <span class="node" aria-hidden="true" />
+              <p class="line1">
+                <span class="hash" aria-hidden="true">
+                  {hash(org.id)}
+                </span>
+                {head && (
+                  <span class="ref" aria-hidden="true">
+                    (HEAD -&gt; now)
+                  </span>
+                )}
+                <span class="merge-msg" aria-hidden="true">
+                  Merge branch '{org.id}'
+                </span>
+              </p>
+              <h3>{org.fullLabel}</h3>
+              <p class="meta">
+                {org.period}
+                <span class="dim">
+                  {" "}
+                  · {org.roles.length} roles, {org.duration}
+                </span>
+              </p>
+              {summary}
+              {trailers}
+              <ol class="branch">
+                {org.roles.map((role) => (
+                  <li class:list={["ln", "commit", { head: role.current }]} style={`--i:${line++}`}>
+                    <span class="node" aria-hidden="true" />
+                    <p class="line1">
+                      <span class="hash" aria-hidden="true">
+                        {hash(org.id, role.title, role.start.iso)}
+                      </span>
+                      <span class="period">{role.period}</span>
+                    </p>
+                    <h4>{role.title}</h4>
+                    <p class="meta">
+                      {role.typeLabel}
+                      {!role.current && <span class="dim"> · {role.duration}</span>}
+                    </p>
+                    {role.text && <p class="msg">{role.text}</p>}
+                    {role.highlights.length > 0 && (
+                      <ul class="diff" role="list">
+                        {role.highlights.map((h) => (
+                          <li>{h}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {role.skills.length > 0 && <p class="trailers">Skills: {role.skills.join(", ")}</p>}
+                  </li>
+                ))}
+              </ol>
+            </li>
+          ) : (
+            org.roles.map((role) => (
+              <li class:list={["ln", "commit", `w-${org.weight}`, { head }]} style={`--i:${line++}`} id={org.anchor}>
+                <span class="node" aria-hidden="true" />
+                <p class="line1">
+                  <span class="hash" aria-hidden="true">
+                    {hash(org.id, role.title, role.start.iso)}
+                  </span>
+                  {head && (
+                    <span class="ref" aria-hidden="true">
+                      (HEAD -&gt; now)
+                    </span>
+                  )}
+                  <span class="period">{role.period}</span>
+                </p>
+                <h3>
+                  {role.title}, {org.fullLabel}
+                </h3>
+                <p class="meta">
+                  {role.typeLabel}
+                  {!role.current && <span class="dim"> · {role.duration}</span>}
+                </p>
+                {summary}
+                {role.text && <p class="msg">{role.text}</p>}
+                {role.highlights.length > 0 && (
+                  <ul class="diff" role="list">
+                    {role.highlights.map((h) => (
+                      <li>{h}</li>
+                    ))}
+                  </ul>
+                )}
+                {role.skills.length > 0 && <p class="trailers">Skills: {role.skills.join(", ")}</p>}
+                {trailers}
+              </li>
+            ))
+          );
+        })
       }
     </ol>
   </div>
 
-  {
-    profile.talks.length > 0 && (
-      <div class="talks reveal">
-        <Prompt cmd="cat talks.txt" label="Talks and recognition" />
-        <ul data-print>
-          {profile.talks.map((t, i) => (
-            <li class="ln" style={`--i:${i}`}>
-              <span class:list={["y", { none: !t.year }]}>{t.year ?? <span aria-hidden="true">····</span>}</span>
-              <span>{t.text}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
+  <div class="side">
+    {
+      education.length > 0 && (
+        <div id="education" class="edu reveal">
+          <Prompt cmd="tree ~/education" label="Education" id="education-title" />
+          <div class="tree" data-print>
+            <p class="ln root" style="--i:0" aria-hidden="true">
+              ~/education
+            </p>
+            <ol class="dirs" role="list">
+              {education.map((e, i) => (
+                <li class:list={["ln", "dir", `w-${e.weight}`]} style={`--i:${i + 1}`} id={e.anchor}>
+                  <p class="d-line">
+                    <span class="d-name">
+                      {/* Like `tree` and `ls`, a name with spaces is quoted. */}
+                      {/\s/.test(e.school) && <span class="q" aria-hidden="true">'</span>}
+                      {e.school}
+                      {/\s/.test(e.school) && <span class="q" aria-hidden="true">'</span>}
+                      <span class="q" aria-hidden="true">/</span>
+                    </span>
+                    <span class="y">{e.years}</span>
+                  </p>
+                  {e.program && <p class="d-prog">{e.program}</p>}
+                  {e.note && <p class="d-note">{e.note}</p>}
+                </li>
+              ))}
+            </ol>
+            <p class="ln count" style={`--i:${education.length + 1}`} aria-hidden="true">
+              {education.length} {education.length === 1 ? "directory" : "directories"}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    {
+      profile.talks.length > 0 && (
+        <div class="talks reveal">
+          <Prompt cmd="cat talks.txt" label="Talks and recognition" />
+          <ul data-print>
+            {profile.talks.map((t, i) => (
+              <li class="ln" style={`--i:${i}`}>
+                <span class:list={["y", { none: !t.year }]}>{t.year ?? <span aria-hidden="true">····</span>}</span>
+                <span>{t.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
 
   {
     profile.quote && (
@@ -138,10 +249,73 @@ const commits = [
     background: var(--bg);
   }
 
-  .head .node {
+  .w-high > .node {
+    border-color: var(--fg);
+  }
+
+  .w-low > .node {
+    border-color: var(--dim);
+  }
+
+  .head > .node {
     border-color: var(--amber);
     background: var(--amber);
     box-shadow: 0 0 12px rgb(240 179 90 / 0.6);
+  }
+
+  /* A merge commit: a ring on the main line. */
+  .merge:not(.head) > .node {
+    background: var(--bg);
+    box-shadow: inset 0 0 0 2px var(--bg), inset 0 0 0 9px currentColor;
+    color: var(--line-2);
+  }
+
+  /*
+   * The side branch, one lane to the right: it forks off the main line under the merge commit (top curve) and
+   * joins it again after its oldest role (bottom curve). The main line runs on past it, on the merge commit.
+   */
+  .branch {
+    position: relative;
+    margin: 20px 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .branch::before,
+  .branch::after {
+    content: "";
+    position: absolute;
+    left: -28px;
+    width: 33px;
+    height: 14px;
+    border: 0 solid var(--line-2);
+    border-right-width: 1px;
+    pointer-events: none;
+  }
+
+  .branch::before {
+    top: -12px;
+    border-top-width: 1px;
+    border-top-right-radius: 12px;
+  }
+
+  .branch::after {
+    bottom: -14px;
+    border-bottom-width: 1px;
+    border-bottom-right-radius: 12px;
+  }
+
+  .branch .commit {
+    padding-bottom: 28px;
+  }
+
+  .branch .commit:last-child {
+    padding-bottom: 4px;
+  }
+
+  .branch .commit:last-child::before {
+    display: block;
+    bottom: 0;
   }
 
   .line1 {
@@ -164,11 +338,80 @@ const commits = [
     color: var(--muted);
   }
 
-  h3 {
-    margin: 6px 0 6px;
-    font-size: 17px;
+  h3,
+  h4 {
+    margin: 6px 0 2px;
+    font-size: 16px;
     font-weight: 500;
     line-height: 1.4;
+  }
+
+  /* Weight: louder titles for what matters most. */
+  .w-high > h3 {
+    font-size: 19px;
+  }
+
+  .w-low > h3 {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .merge-msg {
+    color: var(--muted);
+  }
+
+  .meta {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .dim {
+    color: var(--dim);
+  }
+
+  .msg + .msg,
+  .trailers + .msg {
+    margin-top: 6px;
+  }
+
+  .trailers + .trailers {
+    margin-top: 2px;
+  }
+
+  /* Highlights as added lines of a diff. */
+  .diff {
+    max-width: 62ch;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .diff li {
+    position: relative;
+    padding-left: 2ch;
+    color: var(--green);
+  }
+
+  .diff li::before {
+    content: "+";
+    position: absolute;
+    left: 0;
+  }
+
+  .trailers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 20px;
+    margin: 8px 0 0;
+    color: var(--dim);
+    font-size: 13px;
+  }
+
+  .trailers .ext {
+    margin-top: 0;
   }
 
   .msg {
@@ -191,6 +434,100 @@ const commits = [
 
   .ext:hover {
     text-decoration-color: currentColor;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+
+  /* tree ~/education: rails and ticks drawn in CSS so they stay continuous when lines wrap. */
+  .tree {
+    margin-top: 32px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .tree p {
+    margin: 0;
+  }
+
+  .root {
+    color: var(--blue);
+  }
+
+  .dirs {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dir {
+    position: relative;
+    padding: 10px 0 10px 4.5ch;
+  }
+
+  .dir::before,
+  .dir::after {
+    content: "";
+    position: absolute;
+    left: 0.5ch;
+    background: var(--line-2);
+  }
+
+  /* The rail: through every entry, down to the tick of the last one. */
+  .dir::before {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+  }
+
+  .dir:last-child::before {
+    bottom: auto;
+    height: calc(10px + 0.8em);
+  }
+
+  .dir::after {
+    top: calc(10px + 0.8em);
+    width: 3ch;
+    height: 1px;
+  }
+
+  .d-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 16px;
+  }
+
+  .d-name {
+    color: var(--blue);
+  }
+
+  .q {
+    color: var(--dim);
+  }
+
+  .w-high .d-name {
+    color: var(--fg);
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .w-low .d-name {
+    color: var(--muted);
+  }
+
+  .d-prog,
+  .d-note {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .count {
+    margin-top: 8px !important;
+    color: var(--dim);
   }
 
   .talks ul {
