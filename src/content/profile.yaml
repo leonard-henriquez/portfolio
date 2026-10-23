@@ -34,14 +34,12 @@ leonard:
       - Based in Paris.
 
   numbers:
-    - value: $1M ARR
-      label: three months after launching our AI SDR
-    - value: 80 → 318
-      label: merged PRs per month (×4) with the same five-person team, after moving to coding agents
-    - value: −63%
-      label: bugs per change while releasing four times more
-    - value: < 10h p80
-      label: from customer feedback to production
+    - value: Y Combinator W24
+      label: Co-founded Topo as CTO, selected for the winter 2024 batch
+    - value: $1M ARR in 3 months
+      label: AI SDR built from zero; customers incl. Air France, Aircall
+    - value: ×4 merged PRs/month
+      label: Coding-agent harness, with 63% fewer bugs per PR
 
   # What releasing agents to real customers taught me. Published in every theme and in the Markdown for LLMs.
   principles:
