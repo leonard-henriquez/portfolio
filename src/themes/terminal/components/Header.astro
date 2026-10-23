@@ -1,0 +1,151 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+import { token } from "../lib";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+const user = `${token(profile.firstName)}@${token(profile.location.city)}`;
+const nav = [
+  { href: "#work", label: "./work" },
+  { href: "#stack", label: "./stack" },
+  ...(profile.principles.length ? [{ href: "#principles", label: "./principles" }] : []),
+  { href: "#log", label: "./log" },
+  { href: "#contact", label: "./contact" },
+];
+---
+
+<header class="header tm-container">
+  <a href="#top" class="host">
+    <span class="dot" aria-hidden="true"></span>
+    <span>{user}</span>
+  </a>
+  <nav aria-label="Sections">
+    <ul>
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    /* Centred in the shared .tm-container (see Page.astro). */
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 24px;
+    padding-block: 22px;
+    font-size: 13px;
+    animation: tm-header-in 1.2s 0.2s var(--ease-out) both;
+  }
+
+  a {
+    position: relative;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: var(--amber);
+  }
+
+  .host {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dot {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+
+  .dot::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--amber);
+    opacity: 0;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: 100% 50%;
+    transition: transform 0.35s var(--ease);
+  }
+
+  nav a:hover::after,
+  nav a:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: 0 50%;
+  }
+
+  @keyframes tm-header-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes tm-ping {
+    0% {
+      opacity: 0.5;
+      transform: scale(0.6);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dot::after {
+      animation: tm-ping 2.8s 1.2s var(--ease-out) infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    ul {
+      gap: 4px 16px;
+    }
+  }
+</style>

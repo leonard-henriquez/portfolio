@@ -1,0 +1,47 @@
+---
+/**
+ * A project image that copes with the fallback series: pixel grids stay lossless and crisp,
+ * everything else goes through Astro's responsive pipeline.
+ */
+import { Image } from "astro:assets";
+import type { ProjectImage } from "../../../lib/portfolio";
+
+interface Props {
+  image: ProjectImage;
+  widths: number[];
+  sizes: string;
+  /** Override for duplicates (e.g. the hover preview), which should be `""`. */
+  alt?: string;
+  loading?: "lazy" | "eager";
+  class?: string;
+}
+
+const { image, widths, sizes, alt = image.alt, loading = "lazy", class: className } = Astro.props;
+const style = `object-position: ${image.position}`;
+---
+
+{
+  image.pixelated ? (
+    <img
+      class:list={[className, "pixelated"]}
+      src={image.src.src}
+      width={image.src.width}
+      height={image.src.height}
+      alt={alt}
+      loading={loading}
+      decoding="async"
+      style={`${style}; image-rendering: pixelated`}
+    />
+  ) : (
+    <Image
+      class={className}
+      src={image.src}
+      widths={widths.filter((w) => w <= image.src.width)}
+      sizes={sizes}
+      alt={alt}
+      loading={loading}
+      decoding="async"
+      style={style}
+    />
+  )
+}

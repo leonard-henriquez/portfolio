@@ -1,0 +1,92 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+import { asPhrase } from "../format";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+
+const nav = [
+  { label: "Index", href: "#index" },
+  { label: "About", href: "#about" },
+  { label: "Contact", href: "#contact" },
+];
+---
+
+<header class="header">
+  <div class="inner mn-wrap mn-grid">
+    <a class="name" href="#top">{profile.name}</a>
+    <span class="roles">{asPhrase(profile.roles).join(", ")}</span>
+    <span class="place">{profile.location.label}</span>
+    <nav class="nav" aria-label="Sections">
+      {nav.map((item) => <a class="mn-link" href={item.href}>{item.label}</a>)}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgb(255 255 255 / 0.86);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    backdrop-filter: saturate(1.6) blur(14px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .inner {
+    align-items: baseline;
+    height: var(--header-h);
+    align-content: center;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .name {
+    grid-column: 1 / span 3;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+
+  .roles {
+    grid-column: 4 / span 3;
+    color: var(--mute);
+  }
+
+  .place {
+    grid-column: 7 / span 3;
+    color: var(--mute);
+  }
+
+  .nav {
+    grid-column: 10 / span 3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+  }
+
+  @media (max-width: 1099px) {
+    .nav {
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .roles,
+    .place {
+      display: none;
+    }
+
+    .name {
+      grid-column: 1 / span 2;
+    }
+
+    .nav {
+      grid-column: 3 / span 2;
+    }
+  }
+</style>

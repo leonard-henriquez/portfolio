@@ -1,0 +1,258 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+import { displayHost, shortHash } from "../lib";
+import Prompt from "./Prompt.astro";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+const { current } = profile;
+
+const commits = [
+  {
+    hash: shortHash(current.label),
+    period: `${current.since}–present`,
+    title: current.label,
+    text: profile.intro,
+    href: current.href,
+    head: true,
+  },
+  ...profile.earlier.map((e) => ({
+    hash: shortHash(e.title + e.period),
+    period: e.period,
+    title: e.title,
+    text: e.text,
+    href: undefined,
+    head: false,
+  })),
+];
+---
+
+<section id="log" class="tm-section log" aria-labelledby="log-title">
+  <div class="history reveal">
+    <Prompt cmd="git log --graph" label="Experience" id="log-title" />
+    <ol class="graph" data-print>
+      {
+        commits.map((c, i) => (
+          <li class:list={["ln", "commit", { head: c.head }]} style={`--i:${i}`}>
+            <span class="node" aria-hidden="true" />
+            <p class="line1">
+              <span class="hash" aria-hidden="true">
+                {c.hash}
+              </span>
+              {c.head && (
+                <span class="ref" aria-hidden="true">
+                  (HEAD -> now)
+                </span>
+              )}
+              <span class="period">{c.period}</span>
+            </p>
+            <h3>{c.title}</h3>
+            <p class="msg">{c.text}</p>
+            {c.href && (
+              <a class="ext" href={c.href} rel="noopener">
+                {displayHost(c.href)}
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  {
+    profile.talks.length > 0 && (
+      <div class="talks reveal">
+        <Prompt cmd="cat talks.txt" label="Talks and recognition" />
+        <ul data-print>
+          {profile.talks.map((t, i) => (
+            <li class="ln" style={`--i:${i}`}>
+              <span class:list={["y", { none: !t.year }]}>{t.year ?? <span aria-hidden="true">····</span>}</span>
+              <span>{t.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {
+    profile.quote && (
+      <figure class="fortune reveal">
+        <Prompt cmd="fortune" label="Quote" as="p" />
+        <blockquote>
+          <p>{profile.quote.text}</p>
+        </blockquote>
+        {profile.quote.context && <figcaption>— {profile.quote.context.toLowerCase()}</figcaption>}
+      </figure>
+    )
+  }
+</section>
+
+<style>
+  .log {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 72px clamp(48px, 6vw, 96px);
+    align-items: start;
+  }
+
+  .graph {
+    position: relative;
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .commit {
+    position: relative;
+    padding: 0 0 36px 32px;
+  }
+
+  /* The branch line between nodes. */
+  .commit::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 14px;
+    bottom: -6px;
+    width: 1px;
+    background: var(--line-2);
+  }
+
+  .commit:last-child::before {
+    display: none;
+  }
+
+  .node {
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--muted);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+
+  .head .node {
+    border-color: var(--amber);
+    background: var(--amber);
+    box-shadow: 0 0 12px rgb(240 179 90 / 0.6);
+  }
+
+  .line1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .hash {
+    color: var(--amber);
+  }
+
+  .ref {
+    color: var(--green);
+  }
+
+  .period {
+    color: var(--muted);
+  }
+
+  h3 {
+    margin: 6px 0 6px;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .msg {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .ext {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--amber);
+    font-size: 13px;
+    text-decoration: underline;
+    text-decoration-color: rgb(240 179 90 / 0.4);
+    text-underline-offset: 4px;
+  }
+
+  .ext:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .talks ul {
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .talks li {
+    display: grid;
+    grid-template-columns: 5ch minmax(0, 1fr);
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .y {
+    color: var(--amber);
+  }
+
+  .y.none {
+    color: var(--dim);
+  }
+
+  .fortune {
+    grid-column: 1 / -1;
+    margin: 24px 0 0;
+    padding-top: 48px;
+    border-top: 1px solid var(--line);
+  }
+
+  blockquote {
+    margin: 20px 0 0;
+  }
+
+  blockquote p {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(36px, 5vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  figcaption {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 900px) {
+    .log {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 64px;
+    }
+
+    .fortune {
+      margin-top: 0;
+    }
+  }
+</style>

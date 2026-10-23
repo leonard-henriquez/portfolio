@@ -1,0 +1,242 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+import { tomlKey } from "../lib";
+import Prompt from "./Prompt.astro";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+
+// stack.toml: one table for the stack groups, one for focus areas. Keys padded to align the "=".
+const tables = [
+  { name: "stack", rows: profile.stack.map((g) => ({ key: tomlKey(g.key), items: g.items })) },
+  ...(profile.focusAreas.length ? [{ name: "focus", rows: [{ key: "areas", items: profile.focusAreas }] }] : []),
+];
+const width = Math.max(...tables.flatMap((t) => t.rows.map((r) => r.key.length)));
+let i = 1;
+---
+
+<section id="stack" class="tm-section about" aria-labelledby="about-title">
+  <div class="text reveal">
+    <Prompt cmd="cat about.md" label="About" id="about-title" />
+    <p class="lead">{profile.about.short}</p>
+    {profile.about.long.length > 0 && (
+      <div class="long">
+        {profile.about.long.map((para) => <p>{para}</p>)}
+      </div>
+    )}
+    {
+      profile.numbers.length > 0 && (
+        <dl class="numbers">
+          {profile.numbers.map((n) => (
+            <div>
+              <dt>
+                <span class="sr-only">{n.value}</span>
+                <span aria-hidden="true" data-scramble>
+                  {n.value}
+                </span>
+              </dt>
+              <dd>{n.label}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </div>
+
+  <div class="code reveal">
+    <h2 class="sr-only">Stack</h2>
+    <div class="file" data-print>
+      <p class="ln comment" style="--i:0" aria-hidden="true"># stack.toml</p>
+      {
+        tables.map((t, ti) => (
+          <>
+            {ti > 0 && <p class="ln blank" aria-hidden="true" />}
+            <p class="ln table" style={`--i:${i++}`}>
+              <span aria-hidden="true">[</span>
+              {t.name}
+              <span aria-hidden="true">]</span>
+            </p>
+            <dl>
+              {t.rows.map((r) => (
+                <div class="ln kv" style={`--i:${i++}`}>
+                  <dt>
+                    <span class="key">{r.key}</span>
+                    <span class="pad" aria-hidden="true">
+                      {" ".repeat(width - r.key.length)} ={" "}
+                    </span>
+                  </dt>
+                  <dd>
+                    <span class="punct" aria-hidden="true">
+                      [
+                    </span>
+                    {r.items.map((item, n) => (
+                      <span class="item">
+                        <span class="str">
+                          <span aria-hidden="true">"</span>
+                          {item}
+                          <span aria-hidden="true">"</span>
+                        </span>
+                        <span class="punct" aria-hidden="true">
+                          {n < r.items.length - 1 ? ", " : "]"}
+                        </span>
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px clamp(48px, 6vw, 96px);
+    align-items: start;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .lead {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(28px, 2.8vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+
+  .long {
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .long p {
+    margin: 0;
+  }
+
+  .long p + p {
+    margin-top: 12px;
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 32px;
+    margin: 20px 0 0;
+  }
+
+  .numbers div {
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .numbers dt {
+    color: var(--amber);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .numbers dd {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .file {
+    margin: 0;
+    padding: 24px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .ln {
+    margin: 0;
+  }
+
+  .blank {
+    height: 1.8em;
+  }
+
+  .comment {
+    color: var(--dim);
+  }
+
+  .table {
+    color: var(--amber);
+  }
+
+  .file dl {
+    margin: 0;
+  }
+
+  /* key = [ ... ] with a hanging indent so long arrays wrap under the first item. */
+  .kv {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  .kv dd {
+    margin: 0;
+    padding-left: 1ch;
+    text-indent: -1ch;
+  }
+
+  .key {
+    color: var(--fg);
+  }
+
+  .pad,
+  .punct {
+    color: var(--dim);
+  }
+
+  .pad {
+    white-space: pre;
+  }
+
+  .str {
+    color: var(--string);
+  }
+
+  .item {
+    text-indent: 0;
+  }
+
+  @media (max-width: 900px) {
+    .about {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .file {
+      padding: 18px 16px;
+      font-size: 13px;
+    }
+
+    .numbers {
+      gap: 0 20px;
+    }
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { earlier, talks } = Astro.props.profile;
+---
+
+{
+  earlier.length > 0 && (
+    <section class="record mn-wrap mn-grid" aria-labelledby="earlier-title">
+      <h2 id="earlier-title" class="mn-label">Earlier</h2>
+      <ol class="list" role="list">
+        {earlier.map((e) => (
+          <li class="item mn-rule">
+            <span class="when mn-reveal">
+              <time datetime={String(e.start)}>{e.start}</time>–<time datetime={String(e.end)}>{e.end}</time>
+            </span>
+            <h3 class="what mn-reveal">{e.title}</h3>
+            <p class="text mn-reveal" style="--range-end: 28%">
+              {e.text}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+{
+  talks.length > 0 && (
+    <section class="record mn-wrap mn-grid" aria-labelledby="talks-title">
+      <h2 id="talks-title" class="mn-label">Talks &amp; juries</h2>
+      <ul class="list" role="list">
+        {talks.map((t) => (
+          <li class="item mn-rule">
+            <span class="when mn-reveal">
+              {t.year ? <time datetime={String(t.year)}>{t.year}</time> : <span aria-hidden="true">—</span>}
+            </span>
+            <p class="talk mn-reveal">{t.text}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .record {
+    padding-top: clamp(96px, 11vw, 160px);
+    row-gap: 24px;
+  }
+
+  .record + .record {
+    padding-top: clamp(56px, 6vw, 88px);
+  }
+
+  .mn-label {
+    grid-column: 1 / span 3;
+  }
+
+  .list {
+    grid-column: 4 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .item {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    padding: 16px 0 18px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .when {
+    grid-column: 1;
+    font-size: 14px;
+    color: var(--mute);
+    white-space: nowrap;
+  }
+
+  .what {
+    grid-column: 2 / span 3;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .text {
+    grid-column: 5 / span 5;
+    margin: 0;
+    max-width: 38em;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .talk {
+    grid-column: 2 / span 8;
+    margin: 0;
+  }
+
+  @media (max-width: 1099px) {
+    .mn-label,
+    .list {
+      grid-column: 1 / -1;
+    }
+
+    .when {
+      grid-column: 1 / span 2;
+    }
+
+    .what {
+      grid-column: 3 / span 3;
+    }
+
+    .text {
+      grid-column: 6 / span 7;
+    }
+
+    .talk {
+      grid-column: 3 / -1;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .item {
+      grid-template-columns: 5.75rem minmax(0, 1fr);
+      column-gap: 0;
+      row-gap: 4px;
+    }
+
+    .when {
+      grid-column: 1;
+    }
+
+    .what,
+    .text,
+    .talk {
+      grid-column: 2;
+    }
+  }
+</style>

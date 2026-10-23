@@ -4,8 +4,15 @@
 @import "@fontsource/ia-writer-mono/latin-400-italic.css";
 @import "@fontsource/ia-writer-mono/latin-700.css";
 
+/*
+ * Raw's document-wide rules. Every theme's CSS ships on the one page, so each rule is scoped to
+ * html[data-theme="raw"]. The scope sits in :where() so every selector keeps the specificity it had
+ * as an unscoped stylesheet (e.g. `:root` stays 0-1-0, `*` stays 0-0-0) and the cascade is unchanged.
+ * Light/dark is Raw's own setting: html[data-raw-scheme], set before paint by `boot` in meta.ts.
+ */
+
 /* Ink and fog are sampled from the hero image so the page and the picture share one palette. */
-:root {
+:root:where([data-theme="raw"]) {
   --bg: #eef1f3;
   --card: #f7f9fa;
   --fg: #232729;
@@ -13,9 +20,18 @@
   --fog: #ccd3d9;
   --gutter: 16px;
   color-scheme: light;
+
+  --switcher-font: "iA Writer Mono", ui-monospace, monospace;
+  --switcher-fg: var(--fg);
+  --switcher-muted: var(--muted);
+  --switcher-bg: var(--card);
+  --switcher-border: 2px solid var(--fg);
+  --switcher-radius: 0;
+  --switcher-shadow: none;
+  --switcher-accent: var(--fg);
 }
 
-:root[data-theme="dark"] {
+:root:where([data-theme="raw"])[data-raw-scheme="dark"] {
   --bg: #16191b;
   --card: #1c2023;
   --fg: #dde3e8;
@@ -25,20 +41,24 @@
 }
 
 @media (min-width: 1024px) {
-  :root {
+  :root:where([data-theme="raw"]) {
     --gutter: 64px;
   }
 }
 
-*,
-*::before,
-*::after {
+/* `*` used to match <html> too, hence the first three selectors. */
+:where(html[data-theme="raw"]),
+:where(html[data-theme="raw"])::before,
+:where(html[data-theme="raw"])::after,
+:where([data-theme="raw"]) *,
+:where([data-theme="raw"]) *::before,
+:where([data-theme="raw"]) *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html {
+html:where([data-theme="raw"]) {
   font-family: "iA Writer Mono", ui-monospace, monospace;
   font-size: 16px;
   line-height: 1.6;
@@ -46,91 +66,91 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
+:where([data-theme="raw"]) body {
   background: var(--bg);
   color: var(--fg);
   min-height: 100vh;
 }
 
-a {
+:where([data-theme="raw"]) a {
   color: inherit;
   text-underline-offset: 4px;
 }
 
-ul,
-ol {
+:where([data-theme="raw"]) ul,
+:where([data-theme="raw"]) ol {
   list-style: none;
 }
 
-img {
+:where([data-theme="raw"]) img {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-::selection {
+:where([data-theme="raw"]) ::selection {
   background: var(--fg);
   color: var(--bg);
 }
 
-:focus-visible {
+:where([data-theme="raw"]) :focus-visible {
   outline: 2px solid var(--fg);
   outline-offset: 3px;
 }
 
-.pixel {
+:where([data-theme="raw"]) .pixel {
   font-family: "Tiny5", ui-monospace, monospace;
   font-weight: 400;
   letter-spacing: 0;
 }
 
-.muted {
+:where([data-theme="raw"]) .muted {
   color: var(--muted);
 }
 
-.rule {
+:where([data-theme="raw"]) .rule {
   height: 4px;
   background: var(--fg);
 }
 
-.rule-thick {
+:where([data-theme="raw"]) .rule-thick {
   height: 8px;
   background: var(--fg);
 }
 
 /* Two lines stacked in a one-line window; hovering slides the second into view. */
-.swap {
+:where([data-theme="raw"]) .swap {
   height: 1lh;
   overflow: hidden;
 }
 
-.swap > * {
+:where([data-theme="raw"]) .swap > * {
   transition: transform 300ms ease;
 }
 
 @media (hover: hover) {
-  .swap:hover > * {
+  :where([data-theme="raw"]) .swap:hover > * {
     transform: translateY(-100%);
   }
 }
 
 /* Touch screens can't reveal the second line, so drop it and let the first one wrap. */
 @media (hover: none) {
-  .swap {
+  :where([data-theme="raw"]) .swap {
     height: auto;
   }
 
-  .swap > [aria-hidden="true"] {
+  :where([data-theme="raw"]) .swap > [aria-hidden="true"] {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html:where([data-theme="raw"]) {
     scroll-behavior: auto;
   }
 
-  .swap > * {
+  :where([data-theme="raw"]) .swap > * {
     transition: none;
   }
 }

@@ -1,0 +1,140 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+const { current } = profile;
+---
+
+<section id="about" class="about mn-wrap mn-grid" aria-labelledby="about-title">
+  <h2 id="about-title" class="mn-label">About</h2>
+  <div class="body">
+    <div class="text">
+      {profile.about.long.map((p) => <p class="mn-reveal">{p}</p>)}
+    </div>
+    <dl class="facts">
+      <div class="fact mn-rule">
+        <dt>Now</dt>
+        <dd class="mn-reveal">
+          {current.title}, {current.href ? <a class="mn-link" href={current.href}>{current.org}</a> : current.org}
+          {current.orgDetail && ` (${current.orgDetail})`}
+          <span class="since">Since {current.since}</span>
+        </dd>
+      </div>
+      {
+        profile.focusAreas.length > 0 && (
+          <div class="fact mn-rule">
+            <dt>Focus</dt>
+            <dd class="mn-reveal" style="--range-end: 26%">
+              {profile.focusAreas.join(", ")}
+            </dd>
+          </div>
+        )
+      }
+      {
+        profile.stackItems.length > 0 && (
+          <div class="fact mn-rule">
+            <dt>Stack</dt>
+            <dd class="mn-reveal" style="--range-end: 30%">
+              {profile.stackItems.join(", ")}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .about {
+    padding-top: clamp(96px, 11vw, 160px);
+    row-gap: 24px;
+  }
+
+  .mn-label {
+    grid-column: 1 / span 3;
+  }
+
+  .body {
+    grid-column: 4 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: clamp(40px, 4vw, 56px);
+  }
+
+  .text {
+    grid-column: 1 / span 8;
+    font-size: clamp(20px, 1.9vw, 27px);
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+  }
+
+  .text p {
+    margin: 0;
+    max-width: 34em;
+    text-wrap: pretty;
+  }
+
+  .text p + p {
+    margin-top: 0.9em;
+  }
+
+  .facts {
+    --rule-color: var(--ink);
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: 24px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .fact {
+    grid-column: span 3;
+    padding-top: 12px;
+  }
+
+  dt {
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  dd {
+    margin: 6px 0 0;
+  }
+
+  .since {
+    display: block;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  @media (max-width: 1099px) {
+    .mn-label {
+      grid-column: 1 / -1;
+    }
+
+    .body {
+      grid-column: 1 / -1;
+    }
+
+    .text {
+      grid-column: 1 / span 11;
+    }
+
+    .fact {
+      grid-column: span 4;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .text,
+    .fact {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

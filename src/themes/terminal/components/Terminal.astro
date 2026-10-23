@@ -1,0 +1,100 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props;
+const lower = (s: string) => s.toLowerCase();
+
+// The visible terminal is decorative (and animated); screen readers get the same facts once, below.
+const lines: { cmd?: string; out?: string }[] = [
+  { cmd: "whoami" },
+  { out: lower(`${profile.nameAscii} — ${profile.roles.join(", ")}`) },
+  { cmd: "cat now.txt" },
+  { out: lower(profile.current.label) },
+  { out: lower(profile.headline) },
+];
+---
+
+<div class="term" data-term aria-hidden="true">
+  {
+    lines.map((line, i) =>
+      line.cmd !== undefined ? (
+        <p class:list={["ln", "cmd", { "is-on": i === 0 }]}>
+          <span class="ps1">~ $</span> <span data-type>{line.cmd}</span>
+        </p>
+      ) : (
+        <p class="ln out">{line.out}</p>
+      ),
+    )
+  }
+  <p class="ln cmd" data-final>
+    <span class="ps1">~ $</span> <span class="caret is-idle"></span>
+  </p>
+</div>
+<p class="sr-only">{profile.name}, {profile.roles.join(" and ").toLowerCase()}. {profile.current.label}. {profile.headline}</p>
+
+<style>
+  .term {
+    max-width: 640px;
+    padding: 20px 22px;
+    border: 1px solid var(--line-2);
+    background: rgb(11 12 14 / 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    line-height: 1.75;
+    box-shadow:
+      0 30px 80px -30px rgb(0 0 0 / 0.8),
+      inset 0 1px 0 rgb(255 255 255 / 0.03);
+    animation: tm-term-in 1s 0.15s var(--ease-out) both;
+  }
+
+  .ln {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .cmd {
+    color: var(--muted);
+  }
+
+  .ps1 {
+    color: var(--amber);
+  }
+
+  @keyframes tm-term-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Hidden (space kept, so no layout shift) until client.ts types them in. */
+    :global(html[data-theme="terminal"].tm-js) .term:not(.is-done) .ln:not(.is-on),
+    :global(html[data-theme="terminal"].tm-js) .term:not(.is-done) [data-type]:not(.is-typing) {
+      visibility: hidden;
+    }
+
+    :global(html[data-theme="terminal"].tm-js:not(.tm-ready)) .ln,
+    :global(html[data-theme="terminal"].tm-js:not(.tm-ready)) [data-type] {
+      animation: tm-failsafe 0s 2.5s forwards;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .term {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .term {
+      padding: 16px;
+      font-size: 13px;
+    }
+  }
+</style>

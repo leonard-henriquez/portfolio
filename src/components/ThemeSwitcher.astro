@@ -1,0 +1,433 @@
+---
+/**
+ * The one theme switcher, rendered by the site layout outside every theme root.
+ * A fixed button in the bottom-right corner opens a popover listing the themes; picking one fades the page
+ * out, navigates to `?theme=<slug>` (which the head script remembers and strips), and the new page fades in.
+ * No fades under prefers-reduced-motion.
+ * Hidden without JavaScript, since only the default theme can show then.
+ * While reading it keeps out of the way: it slides off when the page scrolls down, and comes back when it
+ * scrolls up, near the bottom, or when the switcher gets keyboard focus. It also rises above rows
+ * marked `data-switcher-avoid` (e.g. the last footer line), so it never covers them at the end of the page.
+ *
+ * Neutral by default; each theme blends it in by setting these on html[data-theme="<slug>"]:
+ *   --switcher-font, --switcher-fg, --switcher-muted, --switcher-bg, --switcher-border (a full `border` value),
+ *   --switcher-radius, --switcher-shadow, --switcher-accent (focus ring, current marker), --switcher-inset.
+ */
+import type { Theme } from "../themes/registry";
+
+interface Props {
+  themes: Theme[];
+}
+
+const { themes } = Astro.props;
+---
+
+<div id="theme-switcher" data-theme-switcher hidden>
+  <button
+    type="button"
+    class="toggle"
+    popovertarget="theme-switcher-panel"
+    aria-label="Theme"
+    title="Change theme"
+    data-switcher-toggle
+  >
+    <span class="icon" aria-hidden="true"></span>
+    <span class="current" data-switcher-current></span>
+  </button>
+  <div
+    id="theme-switcher-panel"
+    class="panel"
+    popover
+    role="group"
+    aria-labelledby="theme-switcher-title"
+    data-switcher-panel
+  >
+    <p id="theme-switcher-title" class="title">Theme</p>
+    <ul class="options">
+      {
+        themes.map((theme) => (
+          <li>
+            <button type="button" class="option" data-theme-option={theme.slug} aria-pressed="false">
+              <span>{theme.meta.name}</span>
+              <span class="mark" aria-hidden="true" />
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<script>
+  import { activeTheme } from "../themes/active";
+  import { QUERY_PARAM, SWITCH_KEY } from "../themes/document";
+
+  // Set before a keyboard-triggered switch, so focus comes back to the switcher after the reload.
+  const FOCUS_KEY = "theme-switcher-focus";
+
+  const FADE_MS = 180;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const root = document.documentElement;
+
+  const switcher = document.querySelector<HTMLElement>("[data-theme-switcher]");
+  const toggle = switcher?.querySelector<HTMLButtonElement>("[data-switcher-toggle]");
+  const panel = switcher?.querySelector<HTMLElement>("[data-switcher-panel]");
+  const label = switcher?.querySelector<HTMLElement>("[data-switcher-current]");
+
+  if (switcher && toggle && panel && label) {
+    const active = activeTheme();
+    const hasPopover = Object.prototype.hasOwnProperty.call(HTMLElement.prototype, "popover");
+
+    const close = () => {
+      if (hasPopover) panel.hidePopover();
+      else {
+        panel.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    };
+
+    for (const option of switcher.querySelectorAll<HTMLButtonElement>("[data-theme-option]")) {
+      const slug = option.dataset.themeOption ?? "";
+      const current = slug === active;
+      option.setAttribute("aria-pressed", String(current));
+      if (current) {
+        const name = option.textContent?.trim() ?? slug;
+        label.textContent = name;
+        toggle.setAttribute("aria-label", `Theme: ${name}`);
+      }
+      option.addEventListener("click", (event) => {
+        if (current) return close();
+        // `detail` is 0 when the click comes from the keyboard.
+        if (event.detail === 0) {
+          try {
+            sessionStorage.setItem(FOCUS_KEY, "1");
+          } catch {}
+        }
+        const url = new URL(location.href);
+        url.searchParams.set(QUERY_PARAM, slug);
+        url.hash = "";
+        // A replace keeps theme changes out of the history; the new page starts at the top.
+        const go = () => location.replace(url);
+        if (reduce.matches) return go();
+        try {
+          sessionStorage.setItem(SWITCH_KEY, "1");
+        } catch {}
+        close(); // the popover sits in the top layer, outside the body that fades
+        root.classList.add("theme-leaving");
+        setTimeout(go, FADE_MS);
+        // Never leave the page blank: if the new page hasn't replaced this one after a while, show it again.
+        setTimeout(() => root.classList.remove("theme-leaving"), 3000);
+      });
+    }
+
+    // Browsers without the Popover API: a plain disclosure.
+    if (!hasPopover) {
+      panel.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-controls", panel.id);
+      toggle.addEventListener("click", () => {
+        panel.hidden = !panel.hidden;
+        toggle.setAttribute("aria-expanded", String(!panel.hidden));
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !panel.hidden) {
+          close();
+          toggle.focus();
+        }
+      });
+    }
+
+    // Coming back to this page from the back/forward cache: never show it faded out.
+    addEventListener("pageshow", () => root.classList.remove("theme-leaving"));
+
+    switcher.hidden = false;
+
+    // Out of the way while reading: it would otherwise sit on top of right-aligned text all the way down.
+    // Hysteresis: it leaves after a real scroll down (not a small scroll adjustment) and returns on any scroll up.
+    const HIDE_AFTER = 64;
+    const SHOW_AFTER = 8;
+    let turnY = scrollY; // where the scroll last turned: lowest point while shown, highest while away
+    let away = false;
+    let awayQueued = false;
+    const setAway = (next: boolean) => {
+      if (next === away) return;
+      away = next;
+      switcher.toggleAttribute("data-away", away);
+    };
+    const panelOpen = () => (hasPopover ? panel.matches(":popover-open") : !panel.hidden);
+    const updateAway = () => {
+      awayQueued = false;
+      const y = scrollY;
+      const nearBottom = y + innerHeight >= document.documentElement.scrollHeight - innerHeight / 4;
+      const pinned = nearBottom || switcher.contains(document.activeElement) || panelOpen();
+      const next = pinned ? false : away ? y >= turnY - SHOW_AFTER : y > turnY + HIDE_AFTER;
+      // Measure from here after a change of state; otherwise follow the scroll in the current direction.
+      if (pinned || next !== away) turnY = y;
+      else turnY = away ? Math.max(turnY, y) : Math.min(turnY, y);
+      setAway(next);
+    };
+    addEventListener(
+      "scroll",
+      () => {
+        if (!awayQueued) {
+          awayQueued = true;
+          requestAnimationFrame(updateAway);
+        }
+      },
+      { passive: true },
+    );
+    switcher.addEventListener("focusin", () => setAway(false));
+
+    // Rise above the theme's rows marked `data-switcher-avoid` (e.g. the last footer line) instead of covering them.
+    const avoid = [...document.querySelectorAll<HTMLElement>("[data-switcher-avoid]")];
+    if (avoid.length) {
+      const GAP = 12;
+      let lift = 0;
+      let queued = false;
+      const update = () => {
+        queued = false;
+        // Resting position: offsets of a fixed element are viewport-relative and ignore the `translate` lift.
+        const top = switcher.offsetTop;
+        const bottom = top + switcher.offsetHeight;
+        const left = switcher.offsetLeft;
+        const right = left + switcher.offsetWidth;
+        const rects = avoid
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.width > 0 && r.right > left && r.left < right);
+        // Rising above one row may land on another marked one: repeat until clear.
+        let next = 0;
+        for (let moved = true, i = 0; moved && i < rects.length; i++) {
+          moved = false;
+          for (const r of rects) {
+            if (r.top < bottom - next && r.bottom > top - next) {
+              next = bottom - r.top + GAP;
+              moved = true;
+            }
+          }
+        }
+        if (next !== lift) {
+          lift = next;
+          switcher.style.setProperty("--lift", `${lift}px`);
+        }
+      };
+      const queue = () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(update);
+        }
+      };
+      addEventListener("scroll", queue, { passive: true });
+      addEventListener("resize", queue);
+      addEventListener("load", queue);
+      update();
+    }
+
+    try {
+      if (sessionStorage.getItem(FOCUS_KEY)) {
+        sessionStorage.removeItem(FOCUS_KEY);
+        toggle.focus({ preventScroll: true });
+      }
+    } catch {}
+  }
+</script>
+
+<style>
+  /* Prefixed with the id so no theme's global CSS (which never uses ids) can override these. */
+  #theme-switcher {
+    --inset: var(--switcher-inset, 16px);
+    --radius: var(--switcher-radius, 10px);
+    position: fixed;
+    right: var(--inset);
+    bottom: var(--inset);
+    z-index: 2147483000;
+    /* --lift: set by the script to clear rows marked data-switcher-avoid. */
+    translate: 0 calc(-1 * var(--lift, 0px));
+    color: var(--switcher-fg, CanvasText);
+    font-family: var(--switcher-font, system-ui, sans-serif);
+    font-size: 13px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  #theme-switcher[hidden] {
+    display: none;
+  }
+
+  /* Slid off below the viewport while the page scrolls down (see the script). Still focusable: focus brings it back. */
+  #theme-switcher[data-away] {
+    translate: 0 calc(100% + var(--inset) + 16px);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #theme-switcher .toggle,
+  #theme-switcher .panel,
+  #theme-switcher .option {
+    box-sizing: border-box;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #theme-switcher .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: var(--switcher-border, 1px solid color-mix(in srgb, currentColor 20%, transparent));
+    border-radius: var(--radius);
+    background: var(--switcher-bg, Canvas);
+    box-shadow: var(--switcher-shadow, 0 8px 24px -12px rgb(0 0 0 / 0.35));
+    cursor: pointer;
+  }
+
+  /* Half-filled circle: "appearance". */
+  #theme-switcher .icon {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+  }
+
+  #theme-switcher .panel {
+    position: fixed;
+    /* The popover lives in the top layer, out of the toggle's flow: place it above the toggle by hand. */
+    inset: auto var(--inset) calc(var(--inset) + 52px + var(--lift, 0px)) auto;
+    min-width: 200px;
+    padding: 6px;
+    overflow: visible;
+    border: var(--switcher-border, 1px solid color-mix(in srgb, currentColor 20%, transparent));
+    border-radius: var(--radius);
+    background: var(--switcher-bg, Canvas);
+    box-shadow: var(--switcher-shadow, 0 8px 24px -12px rgb(0 0 0 / 0.35));
+  }
+
+  #theme-switcher .panel[hidden] {
+    display: none;
+  }
+
+  #theme-switcher .title {
+    margin: 0;
+    padding: 8px 10px 6px;
+    color: var(--switcher-muted, color-mix(in srgb, currentColor 65%, transparent));
+    font-size: 12px;
+  }
+
+  #theme-switcher .options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #theme-switcher .option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: max(0px, calc(var(--radius) - 4px));
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  #theme-switcher .option:hover {
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  #theme-switcher .mark {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  #theme-switcher .option[aria-pressed="true"] .mark {
+    background: var(--switcher-accent, currentColor);
+  }
+
+  #theme-switcher :focus-visible {
+    outline: 2px solid var(--switcher-accent, currentColor);
+    outline-offset: 2px;
+  }
+
+  #theme-switcher .option:focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* Phones: the icon alone, so it covers as little as possible. */
+  @media (max-width: 640px) {
+    #theme-switcher .current {
+      display: none;
+    }
+
+    #theme-switcher .toggle {
+      justify-content: center;
+      width: 44px;
+      padding: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    #theme-switcher {
+      transition:
+        translate 0.25s ease,
+        opacity 0.25s ease;
+    }
+
+    #theme-switcher .panel {
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        overlay 0.15s allow-discrete,
+        display 0.15s allow-discrete;
+    }
+
+    #theme-switcher .panel:not(:popover-open) {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    @starting-style {
+      #theme-switcher .panel:popover-open {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+    }
+  }
+</style>
+
+<style is:global>
+  /*
+   * Switching: the page fades out before navigating (html.theme-leaving, set by the script above) and the new
+   * page fades in (html.theme-arriving, set by the head script). The fade-in animation ends opaque by itself.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    html.theme-leaving body {
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    html.theme-arriving body {
+      animation: site-theme-fade-in 0.2s ease backwards;
+    }
+  }
+
+  @keyframes site-theme-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

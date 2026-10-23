@@ -1,0 +1,863 @@
+---
+/**
+ * Raw: the original site. Tiny5 pixel type over iA Writer Mono, Friedrich's Wanderer as a dithered
+ * pixel image, thick rules, and its own light/dark toggle (html[data-raw-scheme], see meta.ts and client.ts).
+ * Everything is readable without JavaScript: project details are native <details>.
+ */
+import { Image } from "astro:assets";
+import { pad, PROJECT_STATUSES, STATUS_LABELS } from "../../lib/portfolio";
+import type { ThemePageProps } from "../types";
+import "./global.css";
+import { heroImage } from "./hero";
+
+type Props = ThemePageProps;
+
+const { profile, projects, span, statusCounts } = Astro.props.portfolio;
+const { current, contact, sections } = profile;
+const credit = profile.heroImage.credit;
+
+// "Work" is the current company's work streams: the profile's current project, or the first with highlights.
+const company = current.project ?? projects.find((p) => p.highlights.length > 0);
+// Shared with meta.ts, which preloads exactly this image.
+const hero = heroImage(Astro.props.portfolio);
+const work = company?.highlights ?? [];
+
+const projectCount = `${pad(projects.length, 2)} ${projects.length === 1 ? "project" : "projects"}, ${span.label}`;
+const statusLine = PROJECT_STATUSES.filter((s) => statusCounts[s] > 0)
+  .map((s) => `${statusCounts[s]} ${STATUS_LABELS[s].toLowerCase()}`)
+  .join(" · ");
+const hasAbout = profile.about.long.length > 0 || profile.stack.length > 0 || profile.focusAreas.length > 0;
+
+const nav = [
+  ...(projects.length ? [{ label: "Projects", href: "#projects", hint: projectCount }] : []),
+  ...(work.length ? [{ label: "Work", href: "#work", hint: sections.work.summary }] : []),
+  ...(hasAbout ? [{ label: "About", href: "#about", hint: profile.focusAreas.join(", ") || undefined }] : []),
+  ...(profile.principles.length ? [{ label: "Principles", href: "#principles", hint: sections.principles.summary }] : []),
+  ...(profile.talks.length ? [{ label: "Talks", href: "#talks", hint: sections.talks.summary }] : []),
+  ...(profile.earlier.length ? [{ label: "Earlier", href: "#earlier", hint: sections.earlier.summary }] : []),
+];
+
+const links = [
+  ...contact.links.map(({ label, href }) => ({ label, href })),
+  { label: "Email", href: contact.mailto },
+];
+
+const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+---
+
+<main>
+  <header class="hero">
+    <div class="swap pixel name">
+      <h1>{profile.name.toUpperCase()}</h1>
+      <div class="muted" aria-hidden="true">{profile.handle.toUpperCase()}</div>
+    </div>
+    <div class="hero-bar">
+      <div class="swap pixel tagline">
+        <p>{profile.headline}</p>
+        <p class="muted" aria-hidden="true">{current.label}.</p>
+      </div>
+      <button id="raw-scheme-toggle" class="pixel scheme-toggle" type="button" aria-label="Toggle dark mode">
+        <span class="when-light">DARK</span><span class="when-dark">LIGHT</span>
+      </button>
+    </div>
+    <div class="rule"></div>
+  </header>
+
+  <section class="intro">
+    <div class="intro-text">
+      <p>
+        {profile.intro}<br />
+        I'm {lowerFirst(current.title)} of {current.href ? <a href={current.href}>{current.org}</a> : current.org}{
+          current.orgDetail && ` (${current.orgDetail})`
+        }{current.highlight ? `, where ${lowerFirst(current.highlight)}` : "."}<br />
+        {profile.about.facts.join(" ")}
+      </p>
+
+      <nav aria-label="Sections" class="nav">
+        {
+          nav.map((item) => (
+            <a href={item.href} class="nav-link">
+              <span class="nav-label">{item.label}</span>
+              <span aria-hidden="true">→</span>
+              {item.hint && <span class="nav-hint muted">{item.hint}</span>}
+            </a>
+          ))
+        }
+      </nav>
+
+      <ul class="links">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <figure class="art">
+      <Image {...hero} loading="eager" fetchpriority="high" />
+    </figure>
+  </section>
+
+  {
+    profile.numbers.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <dl class="numbers">
+          {profile.numbers.map((n) => (
+            <div class="number">
+              <dt class="pixel">{n.value}</dt>
+              <dd class="muted">{n.label}</dd>
+            </div>
+          ))}
+        </dl>
+      </>
+    )
+  }
+
+  {
+    projects.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="projects" class="section">
+          <div class="section-head">
+            <h2 class="pixel">PROJECTS</h2>
+            <p>
+              {projectCount}.<br />
+              <span class="muted">{statusLine}</span>
+            </p>
+          </div>
+          <ol class="cards">
+            {projects.map((p) => {
+              const img = p.image.pixel;
+              const isWork = p.id === company?.id && work.length > 0;
+              const more = p.dek !== p.summary || p.hasBody || (p.highlights.length > 0 && !isWork);
+              return (
+                <li class="card project" id={p.anchor} data-raw-project>
+                  <figure class="p-img">
+                    {img.pixelated ? (
+                      <img
+                        class="pixelated"
+                        src={img.src.src}
+                        width={img.src.width}
+                        height={img.src.height}
+                        alt={img.alt}
+                        loading="lazy"
+                        decoding="async"
+                        style={`object-position: ${img.position}`}
+                      />
+                    ) : (
+                      <Image
+                        src={img.src}
+                        widths={[240, 360, 480, 720].filter((w) => w <= img.src.width)}
+                        sizes="(min-width: 640px) 240px, calc(100vw - 72px)"
+                        alt={img.alt}
+                        loading="lazy"
+                        decoding="async"
+                        style={`object-position: ${img.position}`}
+                      />
+                    )}
+                    <figcaption class="muted">{img.caption}</figcaption>
+                  </figure>
+                  <div class="p-main">
+                    <p class="p-status">
+                      <span class="pixel" data-status={p.status}>{p.statusLabel.toUpperCase()}</span>
+                      <span class="muted">{p.period}</span>
+                    </p>
+                    <h3>{p.title}</h3>
+                    <p class="muted p-role">{p.role}</p>
+                    <p>{p.summary}</p>
+                    {p.stack.length > 0 && <p class="stack muted">{p.stack.join(" · ")}</p>}
+                    {p.tags.length > 0 && <p class="stack muted">{p.tags.map((t) => `#${t}`).join(" ")}</p>}
+                    {p.links.length > 0 && (
+                      <ul class="p-links">
+                        {p.links.map((link) => (
+                          <li>
+                            <a href={link.href}>
+                              {link.label}
+                              <span aria-hidden="true"> ↗</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  {more && (
+                    <details class="p-more">
+                      <summary>
+                        <span class="pixel" aria-hidden="true">
+                          README
+                        </span>
+                        <span class="sr-only">More about {p.title}</span>
+                      </summary>
+                      <div class="p-body">
+                        {p.dek !== p.summary && <p class="dek">{p.dek}</p>}
+                        {p.hasBody && <div class="prose" set:html={p.html} />}
+                        {isWork ? (
+                          <p class="muted">
+                            Work streams: <a href="#work">see Work</a>.
+                          </p>
+                        ) : (
+                          p.highlights.length > 0 && (
+                            <ol class="p-hl">
+                              {p.highlights.map((h) => (
+                                <li>
+                                  <h4>{h.title}</h4>
+                                  <p>{h.body}</p>
+                                  {h.result && <p class="result">{h.result}</p>}
+                                  {h.stack.length > 0 && <p class="stack muted">{h.stack.join(" · ")}</p>}
+                                </li>
+                              ))}
+                            </ol>
+                          )
+                        )}
+                      </div>
+                    </details>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      </>
+    )
+  }
+
+  {
+    work.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="work" class="section">
+          <div class="section-head">
+            <h2 class="pixel">WORK</h2>
+            {sections.work.intro && <p>{sections.work.intro}</p>}
+          </div>
+          <div class="cards">
+            {work.map((item) => (
+              <article class="card">
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+                {item.result && <p class="result">{item.result}</p>}
+                {item.stack.length > 0 && <p class="stack muted">{item.stack.join(" · ")}</p>}
+              </article>
+            ))}
+          </div>
+        </section>
+      </>
+    )
+  }
+
+  {
+    hasAbout && (
+      <>
+        <div class="rule-thick" />
+        <section id="about" class="section">
+          <div class="section-head">
+            <h2 class="pixel">ABOUT</h2>
+            {profile.quote && (
+              <figure class="quote">
+                <blockquote class="pixel">
+                  <p>{profile.quote.text}</p>
+                </blockquote>
+                {profile.quote.context && <figcaption class="muted">{profile.quote.context}</figcaption>}
+              </figure>
+            )}
+          </div>
+          <div class="about-body">
+            {profile.about.long.length > 0 && (
+              <div class="about-text">
+                {profile.about.long.map((para) => (
+                  <p>{para}</p>
+                ))}
+              </div>
+            )}
+            {(profile.focusAreas.length > 0 || profile.stack.length > 0) && (
+              <dl class="rows">
+                {profile.focusAreas.length > 0 && (
+                  <div class="row">
+                    <dt class="muted">Focus</dt>
+                    <dd>{profile.focusAreas.join(" · ")}</dd>
+                  </div>
+                )}
+                {profile.stack.map((g) => (
+                  <div class="row">
+                    <dt class="muted">{g.label}</dt>
+                    <dd>{g.items.join(" · ")}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+        </section>
+      </>
+    )
+  }
+
+  {
+    profile.principles.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="principles" class="section">
+          <div class="section-head">
+            <h2 class="pixel">PRINCIPLES</h2>
+            {sections.principles.intro && <p>{sections.principles.intro}</p>}
+          </div>
+          <ol class="cards">
+            {profile.principles.map((p) => (
+              <li class="card principle">
+                <span class="pixel index">{p.no2}</span>
+                <div>
+                  <h3>{p.title}</h3>
+                  <p>{p.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </>
+    )
+  }
+
+  {
+    profile.talks.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="talks" class="section">
+          <div class="section-head">
+            <h2 class="pixel">TALKS</h2>
+            {sections.talks.intro && <p>{sections.talks.intro}</p>}
+          </div>
+          <ul class="rows">
+            {profile.talks.map((t) => (
+              <li class="row">
+                <span class="muted">{t.year ?? ""}</span>
+                <span>{t.text}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
+    )
+  }
+
+  {
+    profile.earlier.length > 0 && (
+      <>
+        <div class="rule-thick" />
+        <section id="earlier" class="section">
+          <div class="section-head">
+            <h2 class="pixel">EARLIER</h2>
+            {sections.earlier.intro && <p>{sections.earlier.intro}</p>}
+          </div>
+          <ul class="rows">
+            {profile.earlier.map((e) => (
+              <li class="row">
+                <span class="muted">{e.periodShort}</span>
+                <span>{e.text}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
+    )
+  }
+
+  <footer>
+    <div class="rule"></div>
+    <div class="footer-inner" data-switcher-avoid>
+      <p>
+        Write to me at <a href={contact.mailto}>{contact.email}</a>
+      </p>
+      <p class="muted colophon">
+        Set in Tiny5 and iA Writer Mono.{
+          credit && (
+            <>
+              {" "}Image after {credit.artist}, <i>{credit.title}</i> ({credit.year}).
+            </>
+          )
+        }
+      </p>
+    </div>
+  </footer>
+</main>
+
+<style>
+  main {
+    padding: 48px var(--gutter) 64px;
+  }
+
+  /* Sized so the 17-character name fills the line without wrapping. */
+  .name {
+    font-size: clamp(2rem, 9.4vw, 11rem);
+    /* Leaves room above the cap height for the accent on É. */
+    line-height: 1.2;
+  }
+
+  .name h1 {
+    font-size: inherit;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .hero-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .tagline {
+    font-size: clamp(1.125rem, 2.6vw, 2.25rem);
+    line-height: 1.2;
+  }
+
+  .scheme-toggle {
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.875rem;
+    padding: 4px 0;
+  }
+
+  .scheme-toggle:hover {
+    color: var(--fg);
+  }
+
+  :root[data-raw-scheme="dark"] .when-light,
+  :root:not([data-raw-scheme="dark"]) .when-dark {
+    display: none;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 0;
+  }
+
+  .intro-text {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 8px;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .nav-link:hover .nav-label {
+    text-decoration: underline;
+  }
+
+  .nav-hint {
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+
+  .nav-link:hover .nav-hint,
+  .nav-link:focus-visible .nav-hint {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .name h1 {
+      font-size: clamp(2rem, 17vw, 5rem);
+      white-space: normal;
+      line-height: 1.1;
+    }
+
+    .nav-hint {
+      display: none;
+    }
+  }
+
+  .links {
+    display: flex;
+    gap: 24px;
+    font-size: 0.875rem;
+  }
+
+  .links a {
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    text-decoration: underline;
+  }
+
+  .art {
+    border: 4px solid var(--fg);
+    border-radius: 4px;
+    overflow: hidden;
+    align-self: flex-start;
+    max-width: 560px;
+    background: var(--fog);
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+    padding: 32px 8px;
+  }
+
+  .number dt {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .number dd {
+    font-size: 0.8125rem;
+    margin-top: 8px;
+    max-width: 24ch;
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 0 64px;
+  }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 0 8px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    line-height: 1;
+  }
+
+  .section-head p {
+    font-size: 0.875rem;
+    max-width: 480px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    border: 2px solid var(--fg);
+    background: var(--card);
+    padding: 16px;
+    font-size: 0.875rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card .result {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--fg);
+    font-weight: 700;
+  }
+
+  .card .stack {
+    margin-top: 12px;
+    font-size: 0.8125rem;
+  }
+
+  .principle {
+    display: flex;
+    gap: 16px;
+  }
+
+  .index {
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .rows {
+    font-size: 0.875rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 9ch 1fr;
+    gap: 16px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--fg);
+  }
+
+  .row:first-child {
+    border-top: 2px solid var(--fg);
+  }
+
+  .row:last-child {
+    border-bottom-width: 2px;
+  }
+
+  footer {
+    padding-top: 32px;
+  }
+
+  /* Projects */
+  .cards:has(.project) {
+    container-type: inline-size;
+  }
+
+  .project {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  @container (min-width: 520px) {
+    .project {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 12px 20px;
+    }
+  }
+
+  .p-img img {
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 120 / 74;
+    object-fit: cover;
+    border: 2px solid var(--fg);
+    background: var(--fog);
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+  }
+
+  .p-img figcaption {
+    margin-top: 6px;
+    font-size: 0.75rem;
+  }
+
+  .p-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    margin-bottom: 8px;
+    font-size: 0.8125rem;
+  }
+
+  .p-status .pixel {
+    padding: 0 6px;
+    border: 2px solid var(--fg);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .p-status [data-status="shipped"] {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .card.project h3 {
+    margin-bottom: 0;
+    font-size: 1.125rem;
+    line-height: 1.35;
+  }
+
+  .p-role {
+    margin-bottom: 8px;
+    font-size: 0.8125rem;
+  }
+
+  .p-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 12px;
+  }
+
+  .p-more {
+    grid-column: 1 / -1;
+    border-top: 2px solid var(--fg);
+  }
+
+  .p-more summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .p-more summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .p-more summary::after {
+    content: "+";
+    font-family: "Tiny5", ui-monospace, monospace;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .p-more[open] summary::after {
+    content: "−";
+  }
+
+  .p-more summary:hover .pixel {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .p-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .dek {
+    font-weight: 700;
+  }
+
+  .prose :global(p + p) {
+    margin-top: 0.8em;
+  }
+
+  .p-hl li {
+    padding: 12px 0;
+    border-top: 1px solid var(--fg);
+  }
+
+  .p-hl h4 {
+    margin-bottom: 4px;
+    font-size: 0.875rem;
+  }
+
+  .p-hl .result {
+    margin-top: 6px;
+    font-weight: 700;
+  }
+
+  .p-hl .stack {
+    margin-top: 6px;
+    font-size: 0.8125rem;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* About */
+  .about-body {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .about-text {
+    padding: 0 8px;
+    font-size: 0.875rem;
+  }
+
+  .about-text p + p {
+    margin-top: 1em;
+  }
+
+  .about-body .row dd {
+    overflow-wrap: anywhere;
+  }
+
+  .quote {
+    padding: 0 8px;
+  }
+
+  .section-head .quote p {
+    max-width: 16ch;
+    padding: 0;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  .quote figcaption {
+    margin-top: 12px;
+    font-size: 0.8125rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 8px 0;
+    font-size: 0.875rem;
+  }
+
+  .colophon {
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .numbers {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .intro,
+    .section {
+      flex-direction: row;
+    }
+
+    .intro-text,
+    .section-head,
+    .cards,
+    .rows,
+    .about-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quote {
+      padding: 48px 0 0 48px;
+    }
+
+    .intro-text {
+      padding-top: 48px;
+    }
+
+    .section-head p {
+      padding: 48px 0 0 48px;
+    }
+
+    .art {
+      margin-left: auto;
+    }
+
+    .footer-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+  }
+</style>

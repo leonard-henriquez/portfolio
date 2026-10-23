@@ -1,0 +1,857 @@
+---
+import type { Portfolio } from "../../../lib/portfolio";
+import { pad } from "../../../lib/portfolio";
+import ProjectImage from "./ProjectImage.astro";
+
+interface Props {
+  portfolio: Portfolio;
+}
+
+const { projects, span } = Astro.props.portfolio;
+---
+
+<section id="index" class="index mn-wrap" aria-labelledby="index-title">
+  <div class="head mn-grid">
+    <h2 id="index-title" class="mn-label">Index</h2>
+    <p class="count">
+      {pad(projects.length, 2)} projects, {span.label}
+    </p>
+  </div>
+
+  <div class="cols mn-grid mn-rule mn-rule--bottom" aria-hidden="true">
+    <span class="no">No.</span>
+    <span class="title">Project</span>
+    <span class="focus">Focus</span>
+    <span class="status">Status</span>
+    <span class="year">Year</span>
+  </div>
+
+  <ol class="list" role="list" data-mn-list>
+    {
+      projects.map((p) => (
+        <li class="item mn-rule" id={p.anchor} data-index={p.index}>
+          <h3 class="item-h">
+            <button
+              type="button"
+              class="row mn-grid"
+              id={`${p.anchor}-button`}
+              aria-controls={`${p.anchor}-panel`}
+              data-index={p.index}
+            >
+              <span class="no mn-reveal">
+                <span class="sr-only">No. </span>
+                {p.no3}
+              </span>
+              <span class="title mn-reveal">
+                <span class="title-in">{p.shortTitle}</span>
+              </span>
+              <span class="focus mn-reveal" style="--range-end: 26%">
+                {p.focus}
+              </span>
+              <span class="meta">
+                <span class="status mn-reveal" style="--range-end: 30%">
+                  <span class="sr-only">, </span>
+                  {p.statusLabel}
+                </span>
+                <span class="year mn-reveal" style="--range-end: 34%">
+                  <span class="sr-only">, </span>
+                  {p.period}
+                </span>
+              </span>
+              <span class="plus" aria-hidden="true" />
+            </button>
+          </h3>
+
+          <div class="panel" id={`${p.anchor}-panel`} role="region" aria-labelledby={`${p.anchor}-button`} hidden="until-found">
+            <div class="panel-in mn-grid">
+              <div class="p-body">
+                {p.title !== p.shortTitle && <p class="p-title">{p.title}</p>}
+                <p class="dek">{p.dek}</p>
+                {p.hasBody && (
+                  <div class="prose">
+                    <p.Content />
+                  </div>
+                )}
+              </div>
+
+              <dl class="p-meta">
+                <div>
+                  <dt>Role</dt>
+                  <dd>{p.role}</dd>
+                </div>
+                <div>
+                  <dt>Period</dt>
+                  <dd>{p.period}</dd>
+                </div>
+                {p.stack.length > 0 && (
+                  <div>
+                    <dt>Stack</dt>
+                    <dd>{p.stack.join(", ")}</dd>
+                  </div>
+                )}
+                {p.tags.length > 0 && (
+                  <div>
+                    <dt>Tags</dt>
+                    <dd>{p.tags.join(", ")}</dd>
+                  </div>
+                )}
+                {p.links.length > 0 && (
+                  <div>
+                    <dt>Links</dt>
+                    <dd class="links">
+                      {p.links.map((link) => (
+                        <a class="mn-link" href={link.href}>
+                          {link.label}
+                          <span aria-hidden="true"> ↗</span>
+                        </a>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+
+              <figure class="p-fig">
+                <div class="p-frame">
+                  <ProjectImage
+                    image={p.image.photo}
+                    widths={[480, 720, 1080]}
+                    sizes="(min-width: 1100px) 22vw, (min-width: 761px) 30vw, calc(100vw - 32px)"
+                  />
+                </div>
+                <figcaption>
+                  <span>Fig. {p.no3}</span>
+                  <span>{p.image.photo.caption}</span>
+                </figcaption>
+              </figure>
+
+              {p.highlights.length > 0 && (
+                <div class="p-hl">
+                  <p class="p-hl-label">Highlights</p>
+                  <ol class="p-hl-list" role="list">
+                    {p.highlights.map((h, i) => (
+                      <li class="hl">
+                        <h4 class="hl-title">
+                          <span class="hl-no">{pad(i + 1, 2)}</span>
+                          {h.title}
+                        </h4>
+                        <div class="hl-body">
+                          <p>{h.body}</p>
+                          {h.result && <p class="hl-result">{h.result}</p>}
+                        </div>
+                        {h.stack.length > 0 && <p class="hl-stack">{h.stack.join(", ")}</p>}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+
+  <!-- Cursor-following preview for fine pointers. Duplicates the panel images, so it is hidden from assistive tech. -->
+  <div class="preview" aria-hidden="true" data-mn-preview>
+    <div class="pv-frame">
+      {
+        projects.map((p) => (
+          <div class="pv-layer" data-index={p.index}>
+            <ProjectImage image={p.image.photo} widths={[400, 720]} sizes="360px" alt="" class="pv-img" />
+          </div>
+        ))
+      }
+    </div>
+    <div class="pv-caps">
+      {
+        projects.map((p) => (
+          <p class="pv-cap" data-index={p.index}>
+            <span>{p.no3}</span>
+            <span>{p.image.photo.caption}</span>
+          </p>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .index {
+    --pad: 26px;
+    --t: clamp(22px, 2.2vw, 32px);
+    padding-top: clamp(96px, 11vw, 160px);
+  }
+
+  .head {
+    align-items: baseline;
+    padding-bottom: clamp(28px, 3vw, 40px);
+  }
+
+  .head .mn-label {
+    grid-column: 1 / span 6;
+  }
+
+  .count {
+    grid-column: 7 / -1;
+    margin: 0;
+    text-align: right;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .cols {
+    --rule-color: var(--ink);
+    padding-bottom: 14px;
+  }
+
+  .cols > span {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0;
+    color: var(--mute);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .item:first-child::before {
+    display: none;
+  }
+
+  .item-h {
+    margin: 0;
+    font: inherit;
+  }
+
+  .row {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: var(--pad) 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    align-items: baseline;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .row:focus-visible {
+    outline-offset: 6px;
+  }
+
+  .row:focus-visible .title-in {
+    transform: translateX(14px);
+  }
+
+  /* Ink rule that draws in under the hovered or open row. */
+  .row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.7s var(--ease-io);
+    z-index: 1;
+  }
+
+  .item.is-open .row::after {
+    transform: scaleX(1);
+  }
+
+  /* Columns. 12-col grid on desktop, aligned with the header: Focus under the location, Status under the nav. */
+  .no {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 14px;
+    color: var(--mute);
+  }
+
+  .title {
+    grid-column: 2 / span 5;
+    grid-row: 1;
+    font-size: var(--t);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  /* Block, not inline-block: grid baseline alignment must use the title's first line. */
+  .title-in {
+    display: block;
+    width: fit-content;
+    transition:
+      transform 0.55s var(--ease-slide),
+      color 0.35s ease;
+  }
+
+  .focus {
+    grid-column: 7 / span 3;
+    grid-row: 1;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .meta {
+    display: contents;
+  }
+
+  .status {
+    grid-column: 10;
+    grid-row: 1;
+    font-size: 14px;
+    color: var(--mute);
+    white-space: nowrap;
+  }
+
+  .year {
+    grid-column: 11 / span 2;
+    grid-row: 1;
+    padding-right: 32px;
+    font-size: 14px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cols .year {
+    padding-right: 32px;
+  }
+
+  /* Plus that turns into a minus. */
+  .plus {
+    position: absolute;
+    right: 2px;
+    top: calc(var(--pad) + var(--t) * 0.575 - 6px);
+    width: 12px;
+    height: 12px;
+  }
+
+  .plus::before,
+  .plus::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+    transition: transform 0.5s var(--ease-io);
+  }
+
+  .plus::before {
+    left: 0;
+    right: 0;
+    top: 5.5px;
+    height: 1px;
+  }
+
+  .plus::after {
+    top: 0;
+    bottom: 0;
+    left: 5.5px;
+    width: 1px;
+  }
+
+  .item.is-open .plus::after {
+    transform: scaleY(0);
+  }
+
+  .item.is-open .plus::before {
+    transform: rotate(180deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .row:hover .title-in,
+    .item.is-open .title-in {
+      transform: translateX(14px);
+    }
+
+    .row:hover::after {
+      transform: scaleX(1);
+    }
+
+    .list:has(.item:not(.is-open) .row:hover) .item:not(.is-open) .row:not(:hover) .title-in {
+      color: var(--mute-lg);
+    }
+  }
+
+  /*
+   * Without JavaScript (no `mn-js` on <html>, see meta.ts: also crawlers, and the fallback when client.ts fails)
+   * the rows can't toggle: every panel is shown and the +/- marks go. With it, panels start collapsed
+   * (`hidden="until-found"`, so find-in-page still opens them) and client.ts animates them.
+   */
+  :global(html:not(.mn-js)) .panel[hidden] {
+    display: block;
+    content-visibility: visible;
+  }
+
+  :global(html:not(.mn-js)) .plus {
+    display: none;
+  }
+
+  :global(html:not(.mn-js)) .row {
+    cursor: auto;
+  }
+
+  /* Panel */
+  .panel-in {
+    padding: 8px 0 clamp(48px, 5vw, 72px);
+    row-gap: 40px;
+    align-items: start;
+  }
+
+  .p-body {
+    grid-column: 2 / span 5;
+  }
+
+  .p-title {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .dek {
+    margin: 0;
+    max-width: 30em;
+    font-size: clamp(18px, 1.5vw, 22px);
+    line-height: 1.38;
+    letter-spacing: -0.012em;
+    text-wrap: pretty;
+  }
+
+  .prose {
+    margin-top: 20px;
+    max-width: 36em;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  .prose :global(p) {
+    margin: 0 0 0.9em;
+    text-wrap: pretty;
+  }
+
+  .prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .prose :global(a) {
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+  }
+
+  .p-meta {
+    grid-column: 7 / span 3;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .p-meta > div {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .p-meta > div:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .p-meta dt {
+    color: var(--mute);
+    font-size: 13px;
+  }
+
+  .p-meta dd {
+    margin: 0;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .p-fig {
+    grid-column: 10 / span 3;
+    margin: 0;
+  }
+
+  .p-frame {
+    aspect-ratio: 4 / 3;
+    overflow: clip;
+    background: #eceeef;
+  }
+
+  .p-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .p-fig figcaption,
+  .pv-cap {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--mute);
+  }
+
+  /* "Fig. 001" never breaks; a long caption (it falls back to the project title) wraps, or ellipsizes in the one-line preview. */
+  .p-fig figcaption > :first-child,
+  .pv-cap > :first-child {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .p-fig figcaption > :last-child {
+    min-width: 0;
+    text-align: right;
+    text-wrap: balance;
+  }
+
+  .pv-cap > :last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .p-hl {
+    grid-column: 2 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+
+  .p-hl-label {
+    grid-column: 1 / -1;
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  .p-hl-list {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hl {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    padding: 14px 0 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .hl:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hl-no {
+    display: inline-block;
+    width: 2.5rem;
+    margin-left: -2.5rem;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--mute);
+  }
+
+  .hl-title {
+    grid-column: 1 / span 3;
+    margin: 0;
+    padding-left: 2.5rem;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .hl-body {
+    grid-column: 4 / span 5;
+    color: var(--ink-2);
+  }
+
+  .hl-body p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .hl-result {
+    margin-top: 6px !important;
+    color: var(--ink);
+  }
+
+  .hl-stack {
+    grid-column: 9 / span 3;
+    margin: 0;
+    padding-left: 0;
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  /* Preview */
+  .preview {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .preview:global(.is-armed) {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 25;
+      width: clamp(240px, 22vw, 340px);
+      pointer-events: none;
+      will-change: transform;
+    }
+  }
+
+  .pv-frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: clip;
+    background: #eceeef;
+    opacity: 0;
+    transform: scale(0.92);
+    transform-origin: 0 50%;
+    transition:
+      opacity 0.3s ease,
+      transform 0.6s var(--ease-out);
+  }
+
+  .preview:global(.is-flip) .pv-frame {
+    transform-origin: 100% 50%;
+  }
+
+  .preview:global(.is-visible) .pv-frame {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pv-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .pv-layer :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pv-caps {
+    position: relative;
+    height: 28px;
+    background: var(--paper);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .preview:global(.is-visible) .pv-caps {
+    opacity: 1;
+  }
+
+  .pv-cap {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .pv-cap:global(.is-active) {
+    opacity: 1;
+  }
+
+  /* Tablet: Focus moves under the title. */
+  @media (max-width: 1099px) {
+    .title {
+      grid-column: 2 / span 6;
+    }
+
+    .focus {
+      grid-column: 2 / span 6;
+      grid-row: 2;
+      margin-top: 6px;
+    }
+
+    .cols .focus {
+      display: none;
+    }
+
+    .status {
+      grid-column: 8 / span 2;
+    }
+
+    .year {
+      grid-column: 10 / span 3;
+    }
+
+    .p-body {
+      grid-column: 2 / span 7;
+    }
+
+    .p-fig {
+      grid-column: 9 / span 4;
+      grid-row: 1 / span 2;
+    }
+
+    .p-meta {
+      grid-column: 2 / span 7;
+    }
+
+    .hl-title {
+      grid-column: 1 / -1;
+    }
+
+    .hl-body {
+      grid-column: 1 / span 7;
+      padding-left: 2.5rem;
+    }
+
+    .hl-stack {
+      grid-column: 1 / -1;
+      padding-left: 2.5rem;
+      margin-top: 6px;
+    }
+  }
+
+  /* Mobile: number, then a stacked cell with title, focus and a meta line. */
+  @media (max-width: 760px) {
+    .index {
+      --pad: 20px;
+    }
+
+    .head .mn-label {
+      grid-column: 1 / span 2;
+    }
+
+    .count {
+      grid-column: 3 / -1;
+    }
+
+    .row,
+    .cols {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      column-gap: 0;
+    }
+
+    .title {
+      grid-column: 2;
+      padding-right: 32px;
+    }
+
+    .focus {
+      grid-column: 2;
+      font-size: 14px;
+      padding-right: 32px;
+    }
+
+    .meta {
+      display: flex;
+      grid-column: 2;
+      grid-row: 3;
+      gap: 0.5em;
+      margin-top: 6px;
+    }
+
+    .status,
+    .year {
+      grid-column: auto;
+      padding-right: 0;
+      font-size: 13px;
+      color: var(--mute);
+      text-align: left;
+    }
+
+    .status::after {
+      content: "·";
+      margin-left: 0.5em;
+    }
+
+    .cols .status,
+    .cols .year {
+      display: none;
+    }
+
+    .no {
+      font-size: 13px;
+    }
+
+    .panel-in {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      column-gap: 0;
+      row-gap: 28px;
+    }
+
+    .p-body,
+    .p-meta,
+    .p-fig,
+    .p-hl {
+      grid-column: 2;
+      grid-row: auto;
+    }
+
+    .p-fig {
+      order: -1;
+    }
+
+    .p-hl {
+      display: block;
+    }
+
+    .p-hl-list,
+    .hl {
+      display: block;
+    }
+
+    .hl-title,
+    .hl-body,
+    .hl-stack {
+      padding-left: 2rem;
+    }
+
+    .hl-body {
+      margin-top: 4px;
+    }
+
+    .hl-stack {
+      margin-top: 6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .title-in,
+    .row::after,
+    .plus::before,
+    .plus::after,
+    .pv-frame,
+    .pv-cap,
+    .pv-caps {
+      transition: none;
+    }
+  }
+</style>

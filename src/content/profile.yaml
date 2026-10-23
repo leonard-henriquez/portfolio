@@ -1,0 +1,134 @@
+# Everything about Léonard that is not a project. One entry, keyed `leonard`.
+# Themes never read this file: they get it resolved from getPortfolio() (src/lib/portfolio.ts).
+# Sources: the original site (now the Raw theme) won over the design mockups where they disagreed.
+
+leonard:
+  name: Léonard Henriquez
+  handle: hqz
+  location:
+    city: Paris
+    country: France
+  roles: [Founder, Engineer]
+  current:
+    title: Co-founder & CTO
+    org: Topo
+    orgDetail: YC W24
+    href: https://www.topo.io
+    since: 2022
+    highlight: Our AI SDR went from $0 to $1M ARR in three months.
+    # The project about this role: a file name in src/content/projects/.
+    project: topo
+
+  # Default hero line, then alternates a theme may use instead, keyed by a short id that describes the line.
+  # A theme asks for one by id (e.g. `taglines.night`) and falls back to `headline` when it's missing.
+  headline: I build AI agent platforms.
+  intro: I build AI agents that run in production, and the platforms underneath them.
+  taglines:
+    infrastructure: I build the infrastructure AI agents run on.
+    quiet: The quiet machinery behind AI agents.
+    night: Machines that work while we sleep.
+  focusAreas: [Durable execution, Search, Orchestration]
+
+  about:
+    short: Coding since twelve, then business school and product. Co-founder and CTO of Topo (YC W24), where our AI SDR went from $0 to $1M ARR in three months.
+    long:
+      - I have been writing code since I was twelve. Then came business school, then product, then a company. I co-founded Topo (YC W24) and, as CTO, designed the platform, hired and led the team, and stayed its top committer with 1,205 merged PRs.
+      - My work sits underneath AI agents, in the parts nobody demos. Durable execution that survives a crash at 3 a.m. Search built for machines that read faster than we do. Control planes that keep a fleet of coding agents honest.
+      - Business school and product taught me to tie every architecture decision to a business outcome. I care about systems that are simple to run, honest about failure, and cheap enough to leave on.
+    facts:
+      - Coding since I was 12.
+      - Based in Paris.
+
+  numbers:
+    - value: $1M ARR
+      label: three months after launching our AI SDR
+    - value: 10M+
+      label: agent actions executed per month
+    - value: 1B
+      label: documents in our search index
+    - value: ×4
+      label: merged PRs per month after moving to coding agents
+
+  # What shipping agents to real customers taught me. Published in every theme and in the Markdown for LLMs.
+  principles:
+    - title: Agents are distributed systems
+      body: "An agent run is a long-lived workflow that calls slow models and flaky APIs. It needs what any distributed system needs: durable execution, retries, idempotent steps, replay. That is what lets Topo run tens of millions of actions a month."
+    - title: Context beats prompts
+      body: "Most of our quality gains came from what the model sees, not from how we ask: CRM history, call transcripts, the right tools at the right step. Evals tell us whether a change actually helped."
+    - title: Keep humans where mistakes are expensive
+      body: Every email Topo sends is reviewed by a person first. Autonomy should be earned one action at a time, as the evals show the agent is ready.
+    - title: Coding agents need feedback, not freedom
+      body: Strict CI gates and fast feedback let agents catch and fix their own mistakes. That took us from 80 to 318 merged PRs a month with 63% fewer bugs per PR.
+
+  # Talks, juries and recognition. `year` is optional.
+  talks:
+    - year: 2024
+      text: "Talk: LangGraph in production"
+    - year: 2024
+      text: Judge, Mistral AI hackathon, San Francisco
+    - text: Judge at AI hackathons in Paris
+    - text: Invited to the Élysée by President Macron to help prepare the AI Action Summit
+
+  earlier:
+    - start: 2019
+      end: 2022
+      title: Flatlooker (now Manda)
+      text: "Head of Engineering at Flatlooker (now Manda). Started as product manager, then ran engineering: ~10 developers, recruiting and training."
+    - start: 2015
+      end: 2019
+      title: EDHEC, BTU Protocol, Jalgos
+      text: MSc Data Analytics & AI at EDHEC. Product manager at BTU Protocol; data science intern at Jalgos, where I wrote a neural network from scratch in C++.
+
+  # Framing text for page sections, all optional. `intro` introduces a section; `summary` is a one-line
+  # teaser (e.g. in navigation) and falls back to `intro`. `work` is about what was built at Topo.
+  sections:
+    work:
+      intro: "Since 2022 I've been building Topo: AI agents for B2B outbound sales, used by 150+ customers including Air France and Aircall. As CTO I designed the platform, hired and led the team, and stayed its top committer with 1,205 merged PRs."
+      summary: What I built at Topo.
+    principles:
+      intro: Business school and product taught me to tie every architecture decision to a business outcome. These are the lessons from shipping agents to real customers that held up.
+      summary: What production agents taught me.
+    talks:
+      intro: Talks, juries and recognition.
+    earlier:
+      intro: From product management to running engineering.
+
+  stack:
+    - key: languages
+      label: Languages
+      items: [TypeScript, Python]
+    - key: runtimes
+      label: Runtimes
+      items: [Node.js, FastAPI]
+    - key: systems
+      label: Systems
+      items: [Temporal, Elasticsearch, PostgreSQL, SQLAlchemy]
+    - key: agents
+      label: Agents
+      items: [MCP, Claude Code, Codex, Cursor]
+
+  quote:
+    text: Build the truck, not the race car.
+    context: On designing for throughput over spectacle
+
+  contact:
+    email: lhenriquez@proton.me
+    links:
+      - label: GitHub
+        href: https://github.com/leonard-henriquez
+        kind: github
+      - label: LinkedIn
+        href: https://www.linkedin.com/in/leonard-henriquez/
+        kind: linkedin
+
+  seo:
+    title: Léonard Henriquez — AI agent platforms
+    description: Co-founder & CTO of Topo (YC W24). I build AI agents that run in production, and the platforms underneath them.
+
+  heroImage:
+    src: ../assets/wanderer.png
+    alt: Caspar David Friedrich's Wanderer above the Sea of Fog, rendered as a dithered pixel image
+    credit:
+      artist: Caspar David Friedrich
+      title: Wanderer above the Sea of Fog
+      year: 1818

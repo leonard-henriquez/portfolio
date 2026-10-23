@@ -1,0 +1,53 @@
+# Shared landscape imagery for heroes, section breaks and backgrounds, with its alt text. One entry, keyed `art`.
+# Themes never read this file: they get it resolved from getPortfolio() as `portfolio.art` (src/lib/portfolio.ts).
+# Project-specific images (with crops and captions) live in each project's front matter instead.
+# Use `alt: ""` for purely decorative layers.
+
+art:
+  # Filmic landscape renders, 1800×1100 JPG.
+  photo:
+    ridges: { src: ../assets/photo/ridges.jpg, alt: "Layered mountain ridges at dawn, film grain" }
+    sea: { src: ../assets/photo/sea.jpg, alt: "Calm sea at sunrise with a distant headland" }
+    night: { src: ../assets/photo/night.jpg, alt: "Mountain ridge under a starry night sky" }
+    dunes: { src: ../assets/photo/dunes.jpg, alt: "Ochre dunes under a pale sun" }
+    valley: { src: ../assets/photo/valley.jpg, alt: "Misty green valley, film grain" }
+
+  # True pixel grids, PNG. Photo scenes are 120×74, illustration scenes 256×171.
+  # Render with `image-rendering: pixelated` and never let Astro resize them below their size.
+  pixel:
+    ridges: { src: ../assets/pixel/ridges.png, alt: "Pixelated mountain ridges at dawn" }
+    sea: { src: ../assets/pixel/sea.png, alt: "Pixelated sea at sunrise" }
+    night: { src: ../assets/pixel/night.png, alt: "Pixelated mountain ridge under a night sky" }
+    dunes: { src: ../assets/pixel/dunes.png, alt: "Pixelated ochre dunes" }
+    valley: { src: ../assets/pixel/valley.png, alt: "Pixelated green valley in fog" }
+    lake: { src: ../assets/pixel/lake.png, alt: "Pixel art: a hiker facing a turquoise lake below snowy peaks" }
+    clouds: { src: ../assets/pixel/clouds.png, alt: "Pixel art: a hiker resting above a sea of clouds" }
+    trail: { src: ../assets/pixel/trail.png, alt: "Pixel art: a hiker on a rocky mountain trail at sunset" }
+    tundra: { src: ../assets/pixel/tundra.png, alt: "Pixel art: a hiker overlooking a wide valley, a river and a volcano" }
+
+  # Léonard's pixel-art illustrations, 1536×1024 JPG.
+  illustration:
+    lake: &illustration-lake
+      src: ../assets/illustration/lake.jpg
+      alt: "Pixel art: a hiker looks at a turquoise lake below snowy peaks"
+    clouds: &illustration-clouds
+      src: ../assets/illustration/clouds.jpg
+      alt: "Pixel art: a hiker resting on a grassy slope above a sea of clouds"
+    trail: { src: ../assets/illustration/trail.jpg, alt: "Pixel art: a hiker walks a rocky trail toward a sunset over the mountains" }
+    tundra: { src: ../assets/illustration/tundra.jpg, alt: "Pixel art: a hiker overlooking a wide valley with a river and a volcano" }
+
+  # Layered heroes. Each lists its layers back to front.
+  hero:
+    # Parallax ridges, 1440×880; all but `sky` are transparent PNGs anchored to the bottom edge.
+    ridges:
+      sky: { src: ../assets/hero/ridges-sky.jpg, alt: "" }
+      far: { src: ../assets/hero/ridges-far.png, alt: "" }
+      mid: { src: ../assets/hero/ridges-mid.png, alt: "" }
+      front: { src: ../assets/hero/ridges-front.png, alt: "Layered mountain ridges at dawn, film grain" }
+    # Illustration + transparent foreground cut-out (1536×1024), so text can sit between the two.
+    lake:
+      background: *illustration-lake
+      foreground: { src: ../assets/hero/lake-foreground.webp, alt: "" }
+    clouds:
+      background: *illustration-clouds
+      foreground: { src: ../assets/hero/clouds-foreground.webp, alt: "" }

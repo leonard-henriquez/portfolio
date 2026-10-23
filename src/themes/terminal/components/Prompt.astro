@@ -1,0 +1,50 @@
+---
+/**
+ * A shell prompt line, e.g. "~ $ ls -la ~/projects", used as a section heading.
+ * Sighted users get the command (typed in when it scrolls into view); screen readers get `label`.
+ */
+interface Props {
+  cmd: string;
+  label: string;
+  as?: "h2" | "h3" | "p";
+  id?: string;
+  class?: string;
+}
+
+const { cmd, label, as: Tag = "h2", id, class: className } = Astro.props;
+---
+
+<Tag class:list={["prompt", className]} id={id}>
+  <span aria-hidden="true"><span class="ps1">~ $</span> <span data-tv>{cmd}</span></span>
+  <span class="sr-only">{label}</span>
+</Tag>
+
+<style>
+  .prompt {
+    margin: 0;
+    color: var(--muted);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .ps1 {
+    color: var(--amber);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html[data-theme="terminal"].tm-js) [data-tv]:not(.is-done) {
+      visibility: hidden;
+    }
+
+    :global(html[data-theme="terminal"].tm-js:not(.tm-ready)) [data-tv] {
+      animation: tm-failsafe 0s 2.5s forwards;
+    }
+  }
+
+  [data-tv] :global(.typed),
+  [data-tv] :global(.caret) {
+    visibility: visible;
+  }
+</style>

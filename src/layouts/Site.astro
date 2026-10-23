@@ -1,0 +1,92 @@
+---
+/**
+ * The site's one document. Every theme renders into it (see src/pages/index.astro and src/themes/types.ts):
+ * - <head>: one set of metadata from `profile.seo`, the social image of the default theme, every theme's CSS
+ *   (bundled by Astro), and a blocking inline script that resolves the active theme before first paint
+ *   (`?theme=` → stored choice → default) and applies its `meta.ts` settings, including the preload of its
+ *   hero image (`meta.heroImage`, resolved here to the exact URLs the theme renders).
+ * - <body>: the theme roots (slot), the theme switcher, then an inline script that mounts the active theme
+ *   when it isn't the default, and the loader of the active theme's `client.ts`.
+ */
+import { getImage } from "astro:assets";
+import ThemeSwitcher from "../components/ThemeSwitcher.astro";
+import { MARKDOWN_PATHS } from "../lib/markdown";
+import { getPortfolio } from "../lib/portfolio";
+import { documentSettings, headScript, mountScript, rootCss } from "../themes/document";
+import { defaultTheme, themes } from "../themes/registry";
+import type { ThemeHeroImage, ThemePreload } from "../themes/types";
+
+const portfolio = await getPortfolio();
+const { profile } = portfolio;
+const { title, description } = profile.seo;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogSource = defaultTheme.meta.ogImage?.(portfolio) ?? profile.heroImage.src;
+const og = await getImage({ src: ogSource, width: Math.min(1200, ogSource.width), format: "jpg" });
+const ogUrl = new URL(og.src, Astro.site);
+// Static values are the default theme's: what visitors without JavaScript get.
+const initial = documentSettings(defaultTheme.meta);
+
+const MIME: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", svg: "image/svg+xml" };
+
+/**
+ * A theme's hero image as a high-priority preload: `getImage` with the theme's own options returns the same
+ * URLs and srcset as the `<Picture>`/`<Image>` it renders, for the format the browser picks first
+ * (a `<Picture>`'s first source; an `<Image>`'s WebP). Browsers that can't decode that type skip the preload.
+ */
+async function heroPreload({ src, widths, sizes, formats, quality }: ThemeHeroImage): Promise<ThemePreload> {
+  const format = formats?.[0] ?? "webp";
+  const image = await getImage({ src, widths, sizes, format, quality });
+  return {
+    href: image.src,
+    as: "image",
+    type: MIME[format] ?? `image/${format}`,
+    imagesrcset: image.srcSet.attribute,
+    imagesizes: sizes,
+    fetchpriority: "high",
+  };
+}
+
+const heroPreloads = Object.fromEntries(
+  await Promise.all(
+    themes.map(async (t) => [t.slug, t.meta.heroImage ? [await heroPreload(t.meta.heroImage(portfolio))] : []] as const),
+  ),
+);
+---
+
+<!doctype html>
+<html lang="en" data-theme={defaultTheme.slug}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content={initial.colorScheme} />
+    <meta name="theme-color" content={initial.themeColor[0]} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={initial.themeColor[1]} media="(prefers-color-scheme: dark)" />
+    <script is:inline set:html={headScript(themes, defaultTheme.slug, heroPreloads)} />
+    {/* Don't paint until the active theme is mounted (supporting browsers), so it never flashes empty. */}
+    <link rel="expect" href="#theme-mount" blocking="render" />
+    <style is:inline set:html={rootCss(defaultTheme.slug)} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {/* The same content as Markdown, for LLMs and agents (src/lib/markdown.ts). */}
+    <link rel="alternate" type="text/markdown" href={new URL(MARKDOWN_PATHS.full, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <slot />
+    <ThemeSwitcher themes={themes} />
+    <script is:inline id="theme-mount" set:html={mountScript(defaultTheme.slug)} />
+    <script>
+      import { loadActiveThemeClient } from "../themes/active";
+      loadActiveThemeClient();
+    </script>
+  </body>
+</html>

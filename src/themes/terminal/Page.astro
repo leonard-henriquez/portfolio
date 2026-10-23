@@ -1,0 +1,309 @@
+---
+/**
+ * Terminal: dark terminal. A typed whoami, `ls -la projects` with status LEDs, amber on black.
+ * Document-level settings (theme colour, font preloads, the pre-paint `boot`) live in `meta.ts`;
+ * behaviour lives in `client.ts`.
+ */
+import type { ThemePageProps } from "../types";
+import "./fonts.css";
+import Header from "./components/Header.astro";
+import Hero from "./components/Hero.astro";
+import Projects from "./components/Projects.astro";
+import About from "./components/About.astro";
+import Log from "./components/Log.astro";
+import Principles from "./components/Principles.astro";
+import Contact from "./components/Contact.astro";
+import { heroImage } from "./hero";
+
+type Props = ThemePageProps;
+
+const { portfolio } = Astro.props;
+const { profile } = portfolio;
+---
+
+<a class="skip" href="#work">Skip to projects</a>
+<div class="progress" aria-hidden="true"></div>
+
+<Header profile={profile} />
+<main>
+  <Hero profile={profile} hero={heroImage(portfolio)} />
+  <Projects projects={portfolio.projects} statusCounts={portfolio.statusCounts} />
+  <About profile={profile} />
+  <Principles principles={profile.principles} />
+  <Log profile={profile} />
+</main>
+<Contact profile={profile} />
+
+<style is:global>
+  /* Every theme's CSS ships on the one page: everything global is scoped to html[data-theme="terminal"]. */
+  html[data-theme="terminal"] {
+    --bg: #0b0c0e;
+    --bg-2: #101215;
+    --bg-hover: #14161a;
+    --line: #22252a;
+    --line-2: #2a2e35;
+    --fg: #e7e4dc;
+    --muted: #9198a1;
+    /* Darkest grey that still clears 4.5:1 on --bg-hover. */
+    --dim: #80878f;
+    --amber: #f0b35a;
+    --green: #7bc47f;
+    --blue: #8fa3c8;
+    --violet: #b4a2d6;
+    --string: #a9c9a4;
+    --mono: "TM Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --serif: "TM Serif", "Iowan Old Style", Georgia, serif;
+    --gutter: clamp(16px, 4vw, 48px);
+    --max: 1280px;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --switcher-font: var(--mono);
+    --switcher-fg: var(--fg);
+    --switcher-muted: var(--muted);
+    --switcher-bg: var(--bg-2);
+    --switcher-border: 1px solid var(--line-2);
+    --switcher-radius: 3px;
+    --switcher-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.8);
+    --switcher-accent: var(--amber);
+
+    background: var(--bg);
+    color-scheme: dark;
+    scroll-padding-top: 24px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-theme="terminal"] {
+      scroll-behavior: smooth;
+    }
+  }
+
+  html[data-theme="terminal"] body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.6;
+    font-variant-ligatures: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  html[data-theme="terminal"] *,
+  html[data-theme="terminal"] *::before,
+  html[data-theme="terminal"] *::after {
+    box-sizing: border-box;
+  }
+
+  html[data-theme="terminal"] ::selection {
+    background: var(--amber);
+    color: var(--bg);
+  }
+
+  html[data-theme="terminal"] a {
+    color: inherit;
+  }
+
+  html[data-theme="terminal"] :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  html[data-theme="terminal"] img {
+    display: block;
+    max-width: 100%;
+  }
+
+  html[data-theme="terminal"] .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  html[data-theme="terminal"] .skip {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    padding: 8px 12px;
+    background: var(--amber);
+    color: var(--bg);
+    font-size: 13px;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+
+  html[data-theme="terminal"] .skip:focus-visible {
+    transform: none;
+    outline-color: var(--fg);
+  }
+
+  html[data-theme="terminal"] .progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 60;
+    height: 2px;
+    background: var(--amber);
+    box-shadow: 0 0 12px rgb(240 179 90 / 0.6);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  /*
+   * The one container: the header, the hero's content and every section use it, so their left edges line up at
+   * every width. Content is at most --max wide, centred, and never closer than --gutter to the viewport edge.
+   */
+  html[data-theme="terminal"] .tm-container,
+  html[data-theme="terminal"] .tm-section {
+    width: 100%;
+    max-width: calc(var(--max) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* Shared section frame. */
+  html[data-theme="terminal"] .tm-section {
+    padding-top: clamp(88px, 11vw, 150px);
+  }
+
+  /* Blinking block caret, shared by the hero terminal and the typed prompts. */
+  html[data-theme="terminal"] .caret {
+    display: inline-block;
+    position: relative;
+    width: 0;
+    height: 1em;
+    vertical-align: -0.12em;
+  }
+
+  /* Untyped remainder of a line being typed: holds its space, invisible. */
+  html[data-theme="terminal"] .rest {
+    visibility: hidden;
+  }
+
+  html[data-theme="terminal"] .caret::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -0.05em;
+    width: 0.6em;
+    height: 1.15em;
+    background: var(--amber);
+    box-shadow: 0 0 10px rgb(240 179 90 / 0.45);
+  }
+
+  @keyframes tm-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes tm-rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes tm-print {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes tm-failsafe {
+    to {
+      opacity: 1;
+      transform: none;
+      visibility: visible;
+    }
+  }
+
+  @keyframes tm-progress {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-theme="terminal"] .caret.is-idle::after {
+      animation: tm-blink 1.06s infinite;
+    }
+
+    /* Scroll-driven where supported; IntersectionObserver classes otherwise (see client.ts). */
+    @supports (animation-timeline: view()) {
+      html[data-theme="terminal"] .reveal {
+        animation: tm-rise var(--ease) both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 90%;
+      }
+    }
+
+    @supports not (animation-timeline: view()) {
+      html[data-theme="terminal"].tm-js .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 0.9s var(--ease),
+          transform 0.9s var(--ease);
+      }
+
+      html[data-theme="terminal"].tm-js .reveal.is-in {
+        opacity: 1;
+        transform: none;
+      }
+
+      html[data-theme="terminal"].tm-js:not(.tm-ready) .reveal {
+        animation: tm-failsafe 0s 2.5s forwards;
+      }
+    }
+
+    /* "Printed" blocks: lines appear one after another once the block is in view. */
+    html[data-theme="terminal"].tm-js [data-print] .ln {
+      opacity: 0;
+    }
+
+    html[data-theme="terminal"].tm-js [data-print].is-in .ln {
+      animation: tm-print 0.5s var(--ease) both;
+      animation-delay: calc(var(--i, 0) * 55ms);
+    }
+
+    /* If the script never runs, show everything anyway. */
+    html[data-theme="terminal"].tm-js:not(.tm-ready) [data-print] .ln {
+      animation: tm-failsafe 0s 2.5s forwards;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    html[data-theme="terminal"] .progress {
+      animation: tm-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+</style>
