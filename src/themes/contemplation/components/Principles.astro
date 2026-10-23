@@ -22,7 +22,7 @@ const { principles, talks, sections } = Astro.props.profile;
           {sections.principles.summary?.replace(/\.$/, "") ?? "Principles"}
         </h2>
       </div>
-      <div class="split">
+      <div class:list={["split", { solo: !sections.principles.intro }]}>
         {sections.principles.intro && <p class="intro ct-body">{sections.principles.intro}</p>}
         <ol class="ct-list lessons" role="list" data-ct-disclosures>
           {principles.map((r) => (
@@ -79,6 +79,11 @@ const { principles, talks, sections } = Astro.props.profile;
     gap: 24px 64px;
     align-items: start;
     padding-top: 20px;
+  }
+
+  /* Without an intro, the lessons take the whole width. */
+  .solo {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .intro {

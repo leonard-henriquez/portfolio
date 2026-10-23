@@ -23,12 +23,42 @@ export interface Vista {
 }
 
 export const VISTAS: Vista[] = [
-  { src: halong, alt: "Pixel art: limestone karsts rising from the calm water of Ha Long Bay", x: "8%", sky: "#77abda" },
-  { src: glacier, alt: "Pixel art: a glacier flowing between snowy peaks", x: "28%", sky: "#7da8d6" },
-  { src: fuji, alt: "Pixel art: Mount Fuji above a sea of clouds, a pine and pampas grass in front", x: "52%", sky: "#81a9d2" },
-  { src: alpineLake, alt: "Pixel art: a hiker on a rock above an alpine lake, below jagged peaks at dawn", x: "58%", sky: "#7c9add" },
-  { src: larches, alt: "Pixel art: golden larches along a stream in a wide valley", x: "76%", sky: "#84acd5" },
-  { src: volcanic, alt: "Pixel art: a volcanic valley at sunset with giant groundsels", x: "92%", sky: "#a5a9c7" },
+  {
+    src: halong,
+    alt: "Pixel art: limestone karsts rising from the calm water of Ha Long Bay",
+    x: "8%",
+    sky: "#77abda",
+  },
+  {
+    src: glacier,
+    alt: "Pixel art: a glacier flowing between snowy peaks",
+    x: "28%",
+    sky: "#7da8d6",
+  },
+  {
+    src: fuji,
+    alt: "Pixel art: Mount Fuji above a sea of clouds, a pine and pampas grass in front",
+    x: "52%",
+    sky: "#81a9d2",
+  },
+  {
+    src: alpineLake,
+    alt: "Pixel art: a hiker on a rock above an alpine lake, below jagged peaks at dawn",
+    x: "58%",
+    sky: "#7c9add",
+  },
+  {
+    src: larches,
+    alt: "Pixel art: golden larches along a stream in a wide valley",
+    x: "76%",
+    sky: "#84acd5",
+  },
+  {
+    src: volcanic,
+    alt: "Pixel art: a volcanic valley at sunset with giant groundsels",
+    x: "92%",
+    sky: "#a5a9c7",
+  },
 ];
 
 /** The About band and the footer reuse two of the panoramas, under the text. */
@@ -36,8 +66,12 @@ export const ABOUT_VISTA = VISTAS[3];
 export const CONTACT_VISTA = VISTAS[5];
 
 /** Projects shown in the panorama: the first ones in display order, one landscape each. */
-export function panoramaProjects(projects: Project[]): { project: Project; vista: Vista }[] {
-  return projects.slice(0, VISTAS.length).map((project, i) => ({ project, vista: VISTAS[i] }));
+export function panoramaProjects(
+  projects: Project[],
+): { project: Project; vista: Vista }[] {
+  return projects
+    .slice(0, VISTAS.length)
+    .map((project, i) => ({ project, vista: VISTAS[i] }));
 }
 
 /** The landscape of a project, when it has a panel. */

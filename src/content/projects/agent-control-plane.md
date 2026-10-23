@@ -3,10 +3,11 @@ title: Agent Control Plane
 status: building
 start: 2026
 role: Author
-order: 3
-summary: An open-source control plane for background coding agents. Harness-agnostic, self-hostable, extended through composable plugins.
+order: 5
+summary: "A control plane for background coding agents: any harness, any sandbox, self-hosted by small teams. Launching a task is decoupled from where it runs. It grows out of the background-agent platform I built at Topo."
 focus: Open-source orchestration for background coding agents
-dek: Orchestration for background coding agents, in your own infrastructure.
+stack: [TypeScript, Postgres]
+tags: [open source]
 images:
   photo:
     src: ../../assets/photo/valley.jpg
@@ -29,7 +30,4 @@ images:
     caption: Lake, 256×171 px
     position: 80% 70%
     zoom: 2.4
-tags: [open source]
 ---
-
-Harness-agnostic and environment-agnostic, extended through composable plugins, with web, desktop, mobile and API clients. Launching a task is decoupled from where it runs.

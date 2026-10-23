@@ -8,16 +8,15 @@
  *
  * Type scale, the same in every section:
  * - Display (500): the name, the contact link.
- * - Title (500, ink): item names in every list (project, exploration, principle, organization, school), figures.
+ * - Title (500, ink): item names in every list (project, exploration, principle), figures.
  * - Body (400, ink-2): descriptions and prose.
- * - Label (.ct-mono): section labels, navigation, kickers, statuses, periods.
+ * - Label (.ct-mono): section labels, navigation, kickers, results, statuses, periods.
  * Importance shows through order and amount of content, never through per-item styling.
  */
 import "@fontsource-variable/space-grotesk/wght.css";
 import "@fontsource/space-mono/400.css";
 import type { ThemePageProps } from "../types";
 import About from "./components/About.astro";
-import Career from "./components/Career.astro";
 import Explorations from "./components/Explorations.astro";
 import Footer from "./components/Footer.astro";
 import Intro from "./components/Intro.astro";
@@ -29,8 +28,8 @@ type Props = ThemePageProps;
 
 const { portfolio } = Astro.props;
 const { profile, projects } = portfolio;
-// Shipped and in progress here; research and studies under Explorations.
-const work = projects.filter((p) => p.status === "shipped" || p.status === "building");
+// Released and in progress here; research and studies under Explorations.
+const work = projects.filter((p) => p.status === "released" || p.status === "building");
 const explorations = projects.filter((p) => p.status === "exploring" || p.status === "study");
 ---
 
@@ -40,9 +39,8 @@ const explorations = projects.filter((p) => p.status === "exploring" || p.status
   <Intro profile={profile} />
   <About profile={profile} />
   <Work projects={work} span={portfolio.span.label} />
-  <Explorations projects={explorations} />
+  <Explorations projects={explorations} intro={profile.sections.explorations.intro} />
   <Principles profile={profile} />
-  <Career profile={profile} />
 </main>
 <Footer profile={profile} />
 

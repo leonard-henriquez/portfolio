@@ -1,12 +1,12 @@
 ---
-title: The Truck
+title: Low-cost inference ASIC
 status: study
 start: 2026
 role: Feasibility study
-order: 6
-summary: "A fabless inference ASIC aimed at the lowest cost per million tokens: mature 12nm node, LPDDR plus an SRAM cache, no HBM, no CoWoS."
+order: 10
+summary: How low can the cost per million tokens go on a mature 12 nm node, with LPDDR and an SRAM cache instead of HBM?
 focus: Inference ASIC study, lowest cost per token
-dek: An inference chip optimized for the lowest cost per million tokens.
+tags: [ASIC, inference]
 images:
   photo:
     src: ../../assets/photo/ridges.jpg
@@ -30,7 +30,6 @@ images:
     caption: Sunset, 256×171 px
     position: 73% 42%
     zoom: 3
-tags: [ASIC, inference]
 ---
 
-A Transformer ASIC on a mature 12nm node with LPDDR and an SRAM cache, no HBM and no CoWoS, that makes up for the missing bandwidth with heavy batching and low-precision formats. The truck, not the race car.
+A fabless Transformer ASIC with no HBM and no CoWoS, which makes up for the missing bandwidth with heavy batching and low-precision formats.

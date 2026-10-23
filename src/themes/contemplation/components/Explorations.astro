@@ -1,13 +1,14 @@
 ---
-/** Explorations: research and studies. A row shows the name, the summary and the status; it opens on the long description. */
+/** Explorations: research and studies, after a line on what they are. A row shows the name, the summary and the status; it opens on the long description. */
 import type { Project } from "../../../lib/portfolio";
 import Disclosure from "./Disclosure.astro";
 
 interface Props {
   projects: Project[];
+  intro?: string;
 }
 
-const { projects } = Astro.props;
+const { projects, intro } = Astro.props;
 ---
 
 {
@@ -17,6 +18,7 @@ const { projects } = Astro.props;
         <h2 id="explorations-title" class="ct-mono">Explorations</h2>
         <span class="ct-mono ct-aside">{[...new Set(projects.map((p) => p.role))].join(" · ")}</span>
       </div>
+      {intro && <p class="intro ct-body">{intro}</p>}
       <ul class="ct-list" role="list" data-ct-disclosures>
         {projects.map((p) => (
           <Disclosure id={p.anchor} rowClass="ct-cols" panelClass="ct-cols">
@@ -45,6 +47,11 @@ const { projects } = Astro.props;
 }
 
 <style>
+  .intro {
+    max-width: 60ch;
+    margin: 20px 0 0;
+  }
+
   .ct-under :global(p) {
     margin: 0;
   }

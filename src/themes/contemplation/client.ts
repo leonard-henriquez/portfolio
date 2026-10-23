@@ -1,7 +1,7 @@
 /*
  * Contemplation theme behaviour, imported only while it is the active theme. Progressive: the page is complete without it.
  * - the disclosures of every list (components/Disclosure.astro): toggled on click, their height animated
- * - the URL fragment opens the item it names (`#project-<id>`, a bare `#<id>`, `#experience-<id>`…)
+ * - the URL fragment opens the item it names (`#project-<id>`, or a bare `#<id>`)
  */
 
 import { projectFromHash } from "../active";
@@ -21,13 +21,20 @@ function setOpen(item: HTMLElement, open: boolean, animate = true) {
   const button = item.querySelector<HTMLButtonElement>("[data-ct-row]");
   const panel = item.querySelector<HTMLElement>("[data-ct-panel]");
   const inner = panel?.firstElementChild as HTMLElement | null;
-  if (!button || !panel || !inner || open === item.classList.contains("is-open")) return;
+  if (
+    !button ||
+    !panel ||
+    !inner ||
+    open === item.classList.contains("is-open")
+  )
+    return;
 
   for (const a of running.get(item) ?? []) a.cancel();
   running.delete(item);
   button.setAttribute("aria-expanded", String(open));
   item.classList.toggle("is-open", open);
-  const motion = animate && !reduce.matches && typeof panel.animate === "function";
+  const motion =
+    animate && !reduce.matches && typeof panel.animate === "function";
 
   if (open) {
     panel.removeAttribute("hidden");
@@ -38,7 +45,12 @@ function setOpen(item: HTMLElement, open: boolean, animate = true) {
       panel.animate({ height: ["0px", `${h}px`] }, { duration, easing: EASE }),
       inner.animate(
         { opacity: [0, 1], transform: ["translateY(-12px)", "none"] },
-        { duration: duration + 150, delay: 80, easing: EASE, fill: "backwards" },
+        {
+          duration: duration + 150,
+          delay: 80,
+          easing: EASE,
+          fill: "backwards",
+        },
       ),
     ]);
     return;
@@ -51,8 +63,14 @@ function setOpen(item: HTMLElement, open: boolean, animate = true) {
   const h = panel.getBoundingClientRect().height;
   const duration = Math.min(650, 360 + h * 0.3);
   const animations = [
-    panel.animate({ height: [`${h}px`, "0px"] }, { duration, easing: EASE, fill: "forwards" }),
-    inner.animate({ opacity: [1, 0] }, { duration: duration * 0.6, easing: "ease", fill: "forwards" }),
+    panel.animate(
+      { height: [`${h}px`, "0px"] },
+      { duration, easing: EASE, fill: "forwards" },
+    ),
+    inner.animate(
+      { opacity: [1, 0] },
+      { duration: duration * 0.6, easing: "ease", fill: "forwards" },
+    ),
   ];
   running.set(item, animations);
   Promise.all(animations.map((a) => a.finished))
@@ -67,14 +85,22 @@ function setOpen(item: HTMLElement, open: boolean, animate = true) {
 }
 
 if (enhanced) {
-  const items = [...document.querySelectorAll<HTMLElement>("[data-ct-disclosures] > [data-ct-item]")];
+  const items = [
+    ...document.querySelectorAll<HTMLElement>(
+      "[data-ct-disclosures] > [data-ct-item]",
+    ),
+  ];
   for (const item of items) {
     const row = item.querySelector("[data-ct-row]");
     // Not in the markup: without JS every panel is shown (see Page.astro).
     row?.setAttribute("aria-expanded", "false");
-    row?.addEventListener("click", () => setOpen(item, !item.classList.contains("is-open")));
+    row?.addEventListener("click", () =>
+      setOpen(item, !item.classList.contains("is-open")),
+    );
     // Find-in-page reveals `hidden="until-found"` panels; keep the button state in sync.
-    item.querySelector("[data-ct-panel]")?.addEventListener("beforematch", () => setOpen(item, true, false));
+    item
+      .querySelector("[data-ct-panel]")
+      ?.addEventListener("beforematch", () => setOpen(item, true, false));
   }
 
   const openFromHash = () => {

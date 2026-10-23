@@ -21,8 +21,7 @@ export function profilePageJsonLd({ profile }: Portfolio, site: URL): string {
     jobTitle: current.title,
     worksFor: { "@type": "Organization", name: current.org, url: current.href },
     address: { "@type": "PostalAddress", addressLocality: profile.location.city, addressCountry: profile.location.country },
-    alumniOf: profile.education.map((e) => ({ "@type": "Organization", name: e.school, url: e.href })),
-    knowsAbout: [...profile.focusAreas, ...profile.stackItems],
+    knowsAbout: profile.focusAreas,
     sameAs: profile.contact.links.map((l) => l.href),
   };
 

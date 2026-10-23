@@ -1,5 +1,5 @@
 ---
-/** The name, who I am in one sentence, and the key figures. */
+/** The name, who I am in one sentence and where, and the key figures. */
 import type { Profile } from "../../../lib/portfolio";
 
 interface Props {
@@ -12,7 +12,10 @@ const { profile } = Astro.props;
 <section class="intro ct-wrap" aria-labelledby="intro-title">
   <div class="lead">
     <h1 id="intro-title" class="name">{profile.name}</h1>
-    <p class="text">{profile.current.label}. {profile.intro}</p>
+    <div class="about">
+      <p class="place ct-mono">{profile.location.label}</p>
+      <p class="text">{profile.current.label}. {profile.intro}</p>
+    </div>
   </div>
 
   {
@@ -49,6 +52,17 @@ const { profile } = Astro.props;
     line-height: 0.9;
     letter-spacing: -0.055em;
     color: var(--ink-deep);
+  }
+
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .place {
+    margin: 0;
+    color: var(--accent);
   }
 
   .text {

@@ -17,9 +17,9 @@ pnpm build     # outputs dist/
 
 Add a project by dropping a Markdown file in `src/content/projects/`; it shows up in every theme, and `/#project-<file name>` links to it (opened) whatever the theme. Run `pnpm check` before pushing.
 
-Themes never pick content by its wording: what they need is named in the content. `taglines` are keyed by an id describing each line (a theme asks for `taglines.night` and falls back to `headline`).
+Projects with `status: released` or `building` are Selected work in Contemplation; `exploring` and `study` are Explorations. A project's `results` (measured outcomes) are its proof line; without them, its `stack` is.
 
-Career lives in `profile.yaml` under `experience` (one entry per organization: `org`, optional `detail`, `formerly`, `href`, `location`, `summary`, `project`, and `roles`, each with `title`, `type`, `start`/`end` as `"YYYY-MM"`, `text`, `highlights`, `skills`) and `education` (`school`, `program` as one line, `start`/`end` years). The organization with an ongoing role (no `end`) is the current one: `profile.current` (title, organization, since, the role's first highlight, and the project the entry names) is derived from it, never written twice. `getPortfolio()` sorts both newest first and adds the organization's secondary `details` (`YC W24`, `Formerly Flatlooker`, location), periods (`Aug 2020 – Aug 2022`), years and durations (`2 yrs 1 mo`).
+The current role is `current` in `profile.yaml`. The full career (every role, every school) is on LinkedIn only, never in this repo, so the two can't contradict each other: what matters of it is told in `about`.
 
 ## For LLMs
 
@@ -29,13 +29,13 @@ The same content is also published as Markdown, rendered from `getPortfolio()` b
 - `/index.md` and `/llms-full.txt`: the whole site in one document. The HTML page points to it with `<link rel="alternate" type="text/markdown">`.
 - `/projects/<id>.md`: one project.
 
-Everything the themes show is there too, principles included. A new content field shows up there only once `src/lib/markdown.ts` renders it.
+Everything the themes show is there too, principles included; for the career, they point to LinkedIn. A new content field shows up there only once `src/lib/markdown.ts` renders it.
 
 ## Themes
 
-The site is one static page, `/`, that can be shown in several themes: **Contemplation** (the default), **Raw** (the original site), **Minimal** and **Terminal**. A switcher in the bottom-right corner lets visitors pick one; the choice is remembered in `localStorage` (`site-theme`).
+The site is one static page, `/`, that can be shown in several themes: **Contemplation** (the default), **Minimal** and **Terminal**. A switcher in the bottom-right corner lets visitors pick one; the choice is remembered in `localStorage` (`site-theme`).
 
-- `/?theme=<slug>` opens the site in that theme and remembers it, e.g. [`/?theme=raw`](https://hqz.me/?theme=raw) or [`/?theme=terminal`](https://hqz.me/?theme=terminal). The parameter is removed from the address bar; unknown values are ignored.
+- `/?theme=<slug>` opens the site in that theme and remembers it, e.g. [`/?theme=minimal`](https://hqz.me/?theme=minimal) or [`/?theme=terminal`](https://hqz.me/?theme=terminal). The parameter is removed from the address bar; unknown values are ignored.
 - Without JavaScript, and for crawlers, the default theme is what's there (`DEFAULT_THEME` in `src/themes/registry.ts`). The other themes sit in inert `<template>`s.
 
 How it works (`src/layouts/Site.astro`, `src/themes/document.ts`): a blocking script at the top of `<head>` resolves the theme (`?theme=` → stored choice → default) and applies its `meta.ts` settings before first paint (`html[data-theme]`, theme colour, font preloads, a `fetchpriority="high"` preload of its hero image, `boot`). At the end of `<body>`, a second script swaps the default theme's markup for the chosen theme's template, so only one theme is ever in the DOM. Every theme's CSS ships on the page, which is why each theme scopes its global styles to `html[data-theme="<slug>"]`. Only the active theme's `client.ts` is downloaded. Switching fades the page out, navigates to `/?theme=<slug>` and fades the new page in (no fades with reduced motion). The switcher slides away while the page scrolls down, so it doesn't sit on text, and comes back on scrolling up, at the end of the page or on keyboard focus.

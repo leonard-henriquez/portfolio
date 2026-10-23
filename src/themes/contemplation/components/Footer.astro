@@ -1,5 +1,5 @@
 ---
-/** Contact: the invitation, the preferred channel as a large link, the other links; a landscape closes the page. */
+/** Contact: the invitation, the preferred channel as a button, the other links; a landscape closes the page. */
 import { Image } from "astro:assets";
 import { MARKDOWN_PATHS } from "../../../lib/markdown";
 import type { Profile } from "../../../lib/portfolio";
@@ -21,7 +21,7 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
     <h2 id="contact-title" class="ct-mono">Contact</h2>
     {intro && <p class="pitch">{intro}</p>}
     <a class="cta" href={preferred.href} rel="me noopener">
-      Message me on {preferred.label}<span aria-hidden="true"> ↗</span>
+      Message me on {preferred.label}<span class="arrow" aria-hidden="true">↗</span>
     </a>
     <div class="base" data-switcher-avoid>
       <ul class="links" role="list">
@@ -38,9 +38,7 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
           <a class="ct-mono" href={llmsTxt} type="text/plain" title="This site as Markdown, for AI agents">llms.txt</a>
         </li>
       </ul>
-      <p class="ct-mono">{profile.location.label}</p>
       <p class="ct-mono">© {year} {profile.name}</p>
-      <a class="ct-mono" href="#top">Back to top <span aria-hidden="true">↑</span></a>
     </div>
   </div>
   <Image
@@ -89,19 +87,42 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
     text-wrap: balance;
   }
 
-  .cta {
-    font-size: clamp(30px, 3.6vw, 54px);
+  /* A button: ink block, paper text; the arrow lifts on hover. */
+  .footer .cta {
+    display: inline-flex;
+    align-items: baseline;
+    align-self: flex-start;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 4px;
+    background: var(--ink-deep);
+    color: var(--paper);
+    font-size: 16px;
     font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.04em;
     text-decoration: none;
-    overflow-wrap: anywhere;
+    transition: background-color 0.3s var(--ease);
   }
 
-  .cta:hover {
-    text-decoration: underline;
-    text-decoration-thickness: max(2px, 0.04em);
-    text-underline-offset: 0.1em;
+  .arrow {
+    display: inline-block;
+    transition: transform 0.4s var(--ease);
+  }
+
+  .footer .cta:hover,
+  .footer .cta:focus-visible {
+    background: var(--hover);
+  }
+
+  .cta:hover .arrow,
+  .cta:focus-visible .arrow {
+    transform: translate(2px, -2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta,
+    .arrow {
+      transition: none;
+    }
   }
 
   .base {

@@ -1,20 +1,14 @@
 ---
-/**
- * About: the short version large and the first paragraph of the long one; the rest, the stack and the motto open
- * under "More about me". A landscape rises under it.
- */
+/** About: the short version large, the long one beside it. A landscape rises under it. */
 import { Image } from "astro:assets";
 import type { Profile } from "../../../lib/portfolio";
 import { ABOUT_VISTA } from "../vista";
-import Disclosure from "./Disclosure.astro";
 
 interface Props {
   profile: Profile;
 }
 
-const { about, stack, quote } = Astro.props.profile;
-// The first paragraph is shown; the others, the stack and the motto open on demand.
-const [first, ...rest] = about.long;
+const { about } = Astro.props.profile;
 ---
 
 <section id="about" class="about" aria-labelledby="about-title" style={`--sky: ${ABOUT_VISTA.sky}`}>
@@ -24,34 +18,7 @@ const [first, ...rest] = about.long;
       <p class="short">{about.short}</p>
     </div>
     <div class="side">
-      <p>{first}</p>
-      <ul class="ct-list more" role="list" data-ct-disclosures>
-        <Disclosure id="about-more">
-          <span slot="row" class="ct-mono">More about me</span>
-          {rest.map((p) => <p class="para">{p}</p>)}
-          {
-            (stack.length > 0 || quote) && (
-              <dl class="facts">
-                {stack.map((group) => (
-                  <div>
-                    <dt class="ct-mono">{group.label}</dt>
-                    <dd>{group.items.join(", ")}</dd>
-                  </div>
-                ))}
-                {quote && (
-                  <div>
-                    <dt class="ct-mono">Motto</dt>
-                    <dd>
-                      {quote.text}
-                      {quote.context && <span class="context"> {quote.context}</span>}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            )
-          }
-        </Disclosure>
-      </ul>
+      {about.long.map((p) => <p>{p}</p>)}
     </div>
   </div>
   <Image
@@ -106,6 +73,9 @@ const [first, ...rest] = about.long;
   .side {
     flex: 1 1 320px;
     align-self: end;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8em;
     font-size: 18px;
     line-height: 1.55;
   }
@@ -113,65 +83,6 @@ const [first, ...rest] = about.long;
   .side > p {
     margin: 0;
     text-wrap: pretty;
-  }
-
-  .more {
-    margin-top: 20px;
-    border-top: 1px solid rgb(22 38 58 / 0.35);
-  }
-
-  .more > :global(li) {
-    border-bottom-color: rgb(22 38 58 / 0.35);
-  }
-
-  .more :global(.ct-row) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 0;
-  }
-
-  .more :global(.ct-row::after) {
-    background: var(--ink-deep);
-  }
-
-  .more :global(.ct-plus) {
-    margin-top: 0;
-  }
-
-  .more :global(.ct-panel-in) {
-    padding: 8px 0 24px;
-  }
-
-  .para {
-    margin: 0 0 0.8em;
-    text-wrap: pretty;
-  }
-
-  .facts {
-    margin: 20px 0 0;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .facts > div {
-    display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: 12px;
-    padding: 8px 0;
-    border-top: 1px solid rgb(22 38 58 / 0.35);
-  }
-
-  .facts dt {
-    padding-top: 1px;
-  }
-
-  .facts dd {
-    margin: 0;
-  }
-
-  .context {
-    display: block;
   }
 
   .art {

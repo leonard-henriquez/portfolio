@@ -9,9 +9,8 @@ interface Props {
 const { profile } = Astro.props;
 
 const nav = [
-  { label: "Index", href: "#index" },
+  { label: "Projects", href: "#projects" },
   { label: "About", href: "#about" },
-  ...(profile.experience.length ? [{ label: "Experience", href: "#experience", wide: true }] : []),
   { label: "Contact", href: "#contact" },
 ];
 ---
@@ -20,9 +19,8 @@ const nav = [
   <div class="inner mn-wrap mn-grid">
     <a class="name" href="#top">{profile.name}</a>
     <span class="roles">{asPhrase(profile.roles).join(", ")}</span>
-    <span class="place">{profile.location.label}</span>
     <nav class="nav" aria-label="Sections">
-      {nav.map((item) => <a class:list={["mn-link", { wide: item.wide }]} href={item.href}>{item.label}</a>)}
+      {nav.map((item) => <a class="mn-link" href={item.href}>{item.label}</a>)}
     </nav>
   </div>
 </header>
@@ -56,11 +54,6 @@ const nav = [
     color: var(--mute);
   }
 
-  .place {
-    grid-column: 7 / span 3;
-    color: var(--mute);
-  }
-
   .nav {
     grid-column: 10 / span 3;
     display: flex;
@@ -69,10 +62,6 @@ const nav = [
   }
 
   @media (max-width: 1099px) {
-    .place {
-      grid-column: 7 / span 2;
-    }
-
     .nav {
       grid-column: 9 / span 4;
       gap: 16px;
@@ -80,9 +69,7 @@ const nav = [
   }
 
   @media (max-width: 760px) {
-    .roles,
-    .place,
-    .wide {
+    .roles {
       display: none;
     }
 

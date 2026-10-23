@@ -185,7 +185,7 @@ function initScrollFallback(): void {
 }
 
 /* The row a link points at: a project (`#project-<id>`, or a bare `#<id>`, see projectFromHash) or any other
- * row with an id (`#experience-<org>`). Opens it. */
+ * row with an id. Opens it. */
 function initHash(): void {
   const projects = [...document.querySelectorAll<HTMLElement>("[data-row]")];
   const open = () => {

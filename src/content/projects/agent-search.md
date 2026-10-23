@@ -3,10 +3,10 @@ title: Search for agents
 status: exploring
 start: 2026
 role: Research & design
-order: 5
-summary: An S3-native search engine shaped around how agents query, not how people do. Same territory as Turbopuffer and Quickwit, different first principles.
+order: 8
+summary: "An S3-native engine shaped around how agents query: many precise, iterative queries that mix full text, vectors and filters."
 focus: S3-native search shaped around agent queries
-dek: A search engine whose main reader is a machine.
+tags: [S3, search]
 images:
   photo:
     src: ../../assets/photo/night.jpg
@@ -29,7 +29,4 @@ images:
     caption: Volcano, 256×171 px
     position: 80% 34%
     zoom: 2.6
-tags: [S3, search]
 ---
-
-S3-native, in the same territory as Turbopuffer and Quickwit, but shaped around how agents query: many, fast, iterative, and tolerant of a different kind of relevance.

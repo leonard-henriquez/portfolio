@@ -1,13 +1,12 @@
 ---
-title: Durable execution on object storage
-shortTitle: Durable execution on S3
+title: Durable execution on S3
 status: exploring
 start: 2026
 role: Research & design
-order: 4
-summary: "An alternative to Temporal built natively on S3 and R2: durability on the server, thin clients in any language, primitives designed for long-running agents."
+order: 7
+summary: "What Temporal would look like if S3 were the database: durability on the server, thin clients in any language, primitives for agents that run for hours."
 focus: Object-storage-native alternative to Temporal
-dek: What Temporal would look like if S3 were the database.
+tags: [S3, R2]
 images:
   photo:
     src: ../../assets/photo/dunes.jpg
@@ -30,7 +29,4 @@ images:
     caption: Valley, 256×171 px
     position: 82% 72%
     zoom: 2.4
-tags: [S3, R2]
 ---
-
-Durability moves to the server, clients become thin enough to port to any language, and the primitives are chosen for agents that run for hours, not milliseconds.

@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES } from "./constants";
+import { IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES } from "./constants";
 
 /*
  * The one contract between content and themes.
@@ -13,24 +13,13 @@ export type ImageStyle = (typeof IMAGE_STYLES)[number];
 /** The component returned by Astro's `render()`; use as `<project.Content />`. */
 export type ContentComponent = Awaited<ReturnType<typeof render>>["Content"];
 
-export type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
-
-export { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES };
+export { IMAGE_STYLES, PROJECT_STATUSES };
 
 export const STATUS_LABELS: Record<ProjectStatus, string> = {
-  shipped: "Shipped",
+  released: "Released",
   building: "Building",
   exploring: "Exploring",
   study: "Study",
-};
-
-export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
-  permanent: "Permanent",
-  "full-time": "Full-time",
-  "part-time": "Part-time",
-  freelance: "Freelance",
-  contract: "Contract",
-  internship: "Internship",
 };
 
 export interface ProjectImage {
@@ -88,7 +77,7 @@ export interface Project {
   /** For tight layouts. Falls back to `title`. */
   shortTitle: string;
   status: ProjectStatus;
-  /** "Shipped", "Building", "Exploring" or "Study". */
+  /** "Released", "Building", "Exploring" or "Study". */
   statusLabel: string;
 
   /** First year. Use for one-year "Year" columns. */
@@ -116,6 +105,8 @@ export interface Project {
   /** Every series, always defined: the requested one, or the closest available one (see `style`). */
   image: Record<ImageStyle, ProjectImage>;
 
+  /** Measured outcomes, most important first ("Merged PRs a month 80 → 318"). Often empty. */
+  results: string[];
   links: ProjectLink[];
   stack: string[];
   tags: string[];
@@ -123,112 +114,7 @@ export interface Project {
   highlights: ProjectHighlight[];
 }
 
-/** A month, e.g. August 2020. */
-export interface YearMonth {
-  year: number;
-  /** 1–12. */
-  month: number;
-  /** "2020-08", for `<time datetime>`. */
-  iso: string;
-  /** "Aug 2020". */
-  label: string;
-}
-
-/** One title held at an organization. */
-export interface ExperienceRole {
-  title: string;
-  type: EmploymentType;
-  /** "Permanent", "Freelance", "Internship", "Part-time"… */
-  typeLabel: string;
-  start: YearMonth;
-  /** Last month in the role; undefined while it is ongoing. */
-  end?: YearMonth;
-  /** True while the role is ongoing. */
-  current: boolean;
-  /** "Aug 2020 – Aug 2022" or "Aug 2022 – present". */
-  period: string;
-  /** "2020–2022", "2022–present", or "2015" within one year. */
-  years: string;
-  /** Inclusive length, LinkedIn style: "2 yrs 1 mo", "11 mos". Ongoing roles count up to the build month. */
-  duration: string;
-  /** One or two sentences. Empty when the content has none. */
-  text: string;
-  /** Notable results or facts, most important first. Often empty. */
-  highlights: string[];
-  skills: string[];
-}
-
-/** One organization in the career, with every title held there (newest first). */
-export interface Experience {
-  /** Slug of the organization, e.g. "btu-protocol". Stable; usable as a key. */
-  id: string;
-  /** Element id for the entry, `experience-<id>`, so themes deep-link to it the same way. */
-  anchor: string;
-  /** 0-based position, newest first. */
-  index: number;
-  /** Current name: "Manda". */
-  org: string;
-  /** "YC W24". */
-  detail?: string;
-  /** Name at the time, when it changed since: "Flatlooker". */
-  formerly?: string;
-  /** Name with its detail: "Topo (YC W24)", "Manda". */
-  label: string;
-  /** `label`, plus the former name: "Manda (formerly Flatlooker)". Use where there is room for one name only. */
-  fullLabel: string;
-  href?: string;
-  /** "Paris, France". */
-  location?: string;
-  /**
-   * Secondary facts about the organization, for one secondary line: `detail`, "Formerly <name>", `location`,
-   * in that order (e.g. ["YC W24"], ["Formerly Flatlooker"], ["Paris, France"]). Often empty.
-   */
-  details: string[];
-  /** What the organization is, one line. Empty when the content has none. */
-  summary: string;
-  /** The project about this organization, with its own page and highlights, when the content names one. */
-  project?: Project;
-  /** Newest first. Never empty. */
-  roles: ExperienceRole[];
-  /** More than one title held: themes nest the roles under the organization. */
-  multiRole: boolean;
-  /** True while one of its roles is ongoing. */
-  current: boolean;
-  /** First month of the earliest role. */
-  start: YearMonth;
-  /** Last month of the latest role; undefined while current. */
-  end?: YearMonth;
-  /** Whole span, e.g. "Sep 2019 – Aug 2022". */
-  period: string;
-  /** "2019–2022", "2022–present". */
-  years: string;
-  /** Whole span, inclusive: "3 yrs". */
-  duration: string;
-  /** Distinct employment types across roles, newest first: ["Freelance", "Internship"]. */
-  types: string[];
-  /** Every role's skills, deduplicated, in order. */
-  skills: string[];
-}
-
-export interface Education {
-  /** Slug of the school, e.g. "edhec-business-school". */
-  id: string;
-  /** Element id for the entry, `education-<id>`. */
-  anchor: string;
-  /** 0-based position, newest first. */
-  index: number;
-  school: string;
-  /** One line: "MSc, Data Analytics and Artificial Intelligence". */
-  program: string;
-  start: number;
-  /** Last year; equal to `start` for single-year entries. */
-  end: number;
-  /** "2015–2019", or "2018" within one year. */
-  years: string;
-  href?: string;
-}
-
-export type ProfileSection = "work" | "principles" | "talks" | "experience" | "education";
+export type ProfileSection = "work" | "explorations" | "principles" | "talks";
 
 export interface SectionText {
   /** A sentence or two introducing the section. */
@@ -254,7 +140,7 @@ export interface Profile {
   location: { city: string; country: string; /** "Paris, France". */ label: string };
   /** e.g. ["Founder", "Engineer"]. */
   roles: string[];
-  /** Derived from the experience entry with an ongoing role: never set apart from `experience`. */
+  /** The current role. The full career is on LinkedIn only. */
   current: {
     title: string;
     org: string;
@@ -266,20 +152,13 @@ export interface Profile {
     label: string;
     /** The headline result in this role, one sentence (the role's first highlight): "Our AI SDR went from $0 to $1M ARR in three months." */
     highlight?: string;
-    /** The project about this role (e.g. the company's, with its `highlights`), when the experience entry names one. */
+    /** The project about this role (e.g. the company's), when the content names one. */
     project?: Project;
-    /** The experience entry it comes from (also first in `experience`). */
-    experience: Experience;
   };
   /** Default hero line. */
   headline: string;
   /** One-sentence introduction. */
   intro: string;
-  /**
-   * Alternate hero lines, keyed by a short id that describes the line (e.g. `night`). Any may be missing:
-   * ask for one by id and fall back, `profile.taglines.night ?? profile.headline`. Never match on the wording.
-   */
-  taglines: Partial<Record<string, string>>;
   /** e.g. ["Durable execution", "Search", "Orchestration"]. */
   focusAreas: string[];
   about: {
@@ -291,18 +170,10 @@ export interface Profile {
   };
   /** Key figures, e.g. { value: "10M+", label: "agent actions executed per month" }. */
   numbers: { value: string; label: string }[];
-  /** Lessons from shipping agents, numbered in order. Every theme and the Markdown output show them. */
+  /** Lessons from releasing agents, numbered in order. Every theme and the Markdown output show them. */
   principles: { title: string; body: string; number: number; no2: string }[];
   /** Talks, juries and recognition. */
   talks: { year?: number; text: string }[];
-  /** Career, one entry per organization, newest first (the current one first). Roles nested, newest first. */
-  experience: Experience[];
-  /** Newest first (by last year, then first year). */
-  education: Education[];
-  stack: { key: string; label: string; items: string[] }[];
-  /** All stack items, flattened, in order. */
-  stackItems: string[];
-  quote?: { text: string; context?: string };
   contact: {
     /** A sentence inviting people to get in touch. */
     intro?: string;
@@ -384,133 +255,6 @@ function period(start: number, end?: number | "present"): string {
   return String(start);
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** "Course Croisière EDHEC" → "course-croisiere-edhec". */
-function slug(s: string): string {
-  return stripAccents(s)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function yearMonth(iso: string): YearMonth {
-  const [year, month] = iso.split("-").map(Number);
-  return { year, month, iso, label: `${MONTHS[month - 1]} ${year}` };
-}
-
-/** Months as a sortable number. */
-const monthIndex = (m: YearMonth) => m.year * 12 + m.month - 1;
-
-/** Inclusive span, LinkedIn style: "4 yrs 3 mos", "1 yr", "11 mos", "1 mo". Ongoing spans run to `now`. */
-function duration(start: YearMonth, end: YearMonth): string {
-  const months = monthIndex(end) - monthIndex(start) + 1;
-  const years = Math.floor(months / 12);
-  const rest = months % 12;
-  const parts = [
-    years > 0 && `${years} ${years === 1 ? "yr" : "yrs"}`,
-    rest > 0 && `${rest} ${rest === 1 ? "mo" : "mos"}`,
-  ];
-  return parts.filter(Boolean).join(" ");
-}
-
-function monthSpan(start: YearMonth, end: YearMonth | undefined, now: YearMonth) {
-  return {
-    period: `${start.label} – ${end ? end.label : "present"}`,
-    years: period(start.year, end ? end.year : "present"),
-    duration: duration(start, end ?? now),
-  };
-}
-
-function resolveExperience(
-  entries: CollectionEntry<"profile">["data"]["experience"],
-  projects: Project[],
-  now: YearMonth,
-): Experience[] {
-  const resolved = entries.map((e) => {
-    const roles: ExperienceRole[] = e.roles
-      .map((r) => {
-        const start = yearMonth(r.start);
-        const end = r.end ? yearMonth(r.end) : undefined;
-        return {
-          title: r.title,
-          type: r.type,
-          typeLabel: EMPLOYMENT_TYPE_LABELS[r.type],
-          start,
-          end,
-          current: !end,
-          ...monthSpan(start, end, now),
-          text: r.text ?? "",
-          highlights: r.highlights,
-          skills: r.skills,
-        };
-      })
-      .sort((a, b) => monthIndex(b.end ?? now) - monthIndex(a.end ?? now) || monthIndex(b.start) - monthIndex(a.start));
-
-    const project = e.project && projects.find((p) => p.id === e.project!.id);
-    if (e.project && !project) {
-      throw new Error(
-        `src/content/profile.yaml: experience "${e.org}" names project "${e.project.id}", which does not exist (no src/content/projects/${e.project.id}.md).`,
-      );
-    }
-
-    const current = roles.some((r) => r.current);
-    const start = roles.reduce((min, r) => (monthIndex(r.start) < monthIndex(min) ? r.start : min), roles[0].start);
-    const end = current ? undefined : roles[0].end;
-    const label = e.detail ? `${e.org} (${e.detail})` : e.org;
-    const id = slug(e.org);
-
-    return {
-      id,
-      anchor: `experience-${id}`,
-      index: 0,
-      org: e.org,
-      detail: e.detail,
-      formerly: e.formerly,
-      label,
-      fullLabel: e.formerly ? `${e.org} (${e.detail ? `${e.detail}, ` : ""}formerly ${e.formerly})` : label,
-      href: e.href,
-      location: e.location,
-      details: [e.detail, e.formerly && `Formerly ${e.formerly}`, e.location].filter((d): d is string => Boolean(d)),
-      summary: e.summary ?? "",
-      project,
-      roles,
-      multiRole: roles.length > 1,
-      current,
-      start,
-      end,
-      ...monthSpan(start, end, now),
-      types: [...new Set(roles.map((r) => r.typeLabel))],
-      skills: [...new Set(roles.flatMap((r) => r.skills))],
-    } satisfies Experience;
-  });
-
-  return resolved
-    .sort((a, b) => monthIndex(b.end ?? now) - monthIndex(a.end ?? now) || monthIndex(b.start) - monthIndex(a.start))
-    .map((e, index) => ({ ...e, index }));
-}
-
-function resolveEducation(entries: CollectionEntry<"profile">["data"]["education"]): Education[] {
-  return entries
-    .map((e) => {
-      const end = e.end ?? e.start;
-      const id = slug(e.school);
-      return {
-        id,
-        anchor: `education-${id}`,
-        index: 0,
-        school: e.school,
-        program: e.program,
-        start: e.start,
-        end,
-        years: period(e.start, end),
-        href: e.href,
-      } satisfies Education;
-    })
-    .sort((a, b) => b.end - a.end || b.start - a.start)
-    .map((e, index) => ({ ...e, index }));
-}
-
 async function resolveProject(entry: CollectionEntry<"projects">, index: number): Promise<Project> {
   const d = entry.data;
   const { Content } = await render(entry);
@@ -564,6 +308,7 @@ async function resolveProject(entry: CollectionEntry<"projects">, index: number)
     markdown: entry.body?.trim() ?? "",
     hasBody: html.trim().length > 0,
     image,
+    results: d.results,
     links: d.links,
     stack: d.stack,
     tags: d.tags,
@@ -573,15 +318,12 @@ async function resolveProject(entry: CollectionEntry<"projects">, index: number)
 
 function resolveProfile(entry: CollectionEntry<"profile">, projects: Project[]): Profile {
   const d = entry.data;
-  const today = new Date();
-  const now = yearMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`);
-  const experience = resolveExperience(d.experience, projects, now);
-
-  // The current role is the ongoing one; its organization sorts first.
-  const company = experience[0];
-  const role = company.roles[0];
-  if (!role.current) {
-    throw new Error("src/content/profile.yaml: no ongoing role in `experience` (a role without `end`), so there is no current role.");
+  const { current } = d;
+  const project = current.project && projects.find((p) => p.id === current.project!.id);
+  if (current.project && !project) {
+    throw new Error(
+      `src/content/profile.yaml: \`current\` names project "${current.project.id}", which does not exist (no src/content/projects/${current.project.id}.md).`,
+    );
   }
 
   return {
@@ -592,29 +334,22 @@ function resolveProfile(entry: CollectionEntry<"profile">, projects: Project[]):
     location: { ...d.location, label: `${d.location.city}, ${d.location.country}` },
     roles: d.roles,
     current: {
-      title: role.title,
-      org: company.org,
-      orgDetail: company.detail,
-      href: company.href,
-      since: role.start.year,
-      label: `${role.title}, ${company.label}`,
-      highlight: role.highlights[0],
-      project: company.project,
-      experience: company,
+      title: current.title,
+      org: current.org,
+      orgDetail: current.detail,
+      href: current.href,
+      since: current.since,
+      label: `${current.title}, ${current.detail ? `${current.org} (${current.detail})` : current.org}`,
+      highlight: current.highlight,
+      project,
     },
     headline: d.headline,
     intro: d.intro,
-    taglines: d.taglines,
     focusAreas: d.focusAreas,
     about: d.about,
     numbers: d.numbers,
     principles: d.principles.map((p, i) => ({ ...p, number: i + 1, no2: pad(i + 1, 2) })),
     talks: d.talks,
-    experience,
-    education: resolveEducation(d.education),
-    stack: d.stack,
-    stackItems: d.stack.flatMap((g) => g.items),
-    quote: d.quote,
     contact: {
       intro: d.contact.intro,
       // The schema guarantees a link of this kind.

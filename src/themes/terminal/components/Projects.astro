@@ -18,7 +18,6 @@ const nameWidth = Math.max(...projects.map((p) => p.folder.length));
   <ul class="tm-list" data-list="projects" data-print style={`--name:${nameWidth}ch`}>
     {projects.map((project) => <ProjectRow project={project} />)}
   </ul>
-  <p class="tm-hint tm-kb" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> open</p>
 
   <!-- Cursor-following preview (fine pointers only); stays display:none, so its lazy images load on first hover. -->
   <div class="peek" data-peek aria-hidden="true" hidden>

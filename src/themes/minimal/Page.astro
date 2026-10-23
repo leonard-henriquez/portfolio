@@ -18,7 +18,6 @@
 import "@fontsource-variable/inter-tight/wght.css";
 import type { ThemePageProps } from "../types";
 import About from "./components/About.astro";
-import Career from "./components/Career.astro";
 import Footer from "./components/Footer.astro";
 import Header from "./components/Header.astro";
 import Hero from "./components/Hero.astro";
@@ -32,14 +31,13 @@ const { portfolio } = Astro.props;
 const { profile } = portfolio;
 ---
 
-<a class="skip" href="#index">Skip to the index</a>
+<a class="skip" href="#projects">Skip to the projects</a>
 <Header profile={profile} />
 <main>
   <Hero portfolio={portfolio} />
   <ProjectIndex portfolio={portfolio} />
   <About profile={profile} />
   <Principles principles={profile.principles} />
-  <Career profile={profile} />
   <Record talks={profile.talks} />
 </main>
 <Footer profile={profile} />

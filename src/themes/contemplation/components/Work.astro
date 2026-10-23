@@ -1,7 +1,7 @@
 ---
 /**
- * Selected work: shipped and in-progress projects. A row shows the project's landscape, role, name and summary,
- * status and period; it opens on the long description, the facts and links, and the highlights when there are some.
+ * Selected work: released and in-progress projects. A row shows the project's landscape, role, name and summary,
+ * status and period; it opens on the long description, the results, the facts and links, and the highlights when there are some.
  */
 import { Image } from "astro:assets";
 import type { Project } from "../../../lib/portfolio";
@@ -56,9 +56,10 @@ const { projects, span } = Astro.props;
                 </span>
               </Fragment>
 
-              {(p.hasBody || facts.length > 0 || p.links.length > 0) && (
+              {(p.hasBody || p.results.length > 0 || facts.length > 0 || p.links.length > 0) && (
                 <div class="more">
                   {p.hasBody && <div class="prose ct-body" set:html={p.html} />}
+                  {p.results.length > 0 && <p class="results ct-mono">{p.results.join(" · ")}</p>}
                   {(facts.length > 0 || p.links.length > 0) && (
                     <p class="facts ct-mono">
                       {facts.join(" · ")}
@@ -171,6 +172,7 @@ const { projects, span } = Astro.props;
     margin-top: 0.6em;
   }
 
+  .results,
   .facts {
     margin: 0;
     font-size: 11px;

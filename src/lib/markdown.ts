@@ -1,10 +1,10 @@
-import type { Education, Experience, Portfolio, Profile, Project } from "./portfolio";
+import type { Portfolio, Profile, Project } from "./portfolio";
 
 /*
  * The site as Markdown, for LLMs and agents (served by src/pages/llms.txt.ts, index.md.ts, llms-full.txt.ts
  * and projects/[slug].md.ts). Like a theme, it only reads `getPortfolio()`: content lives in src/content/, never here.
- * It keeps the substance (facts, figures, projects, links) and drops what is only presentation (images, numbering,
- * alternate taglines). Every URL is absolute, because these files are often read out of context.
+ * It keeps the substance (facts, figures, projects, links) and drops what is only presentation (images, numbering).
+ * The full CV is on LinkedIn only (the preferred contact link): these files point there instead of repeating it. Every URL is absolute, because these files are often read out of context.
  */
 
 /** URLs of the Markdown documents, relative to the site root. */
@@ -67,40 +67,6 @@ function header(profile: Profile, site: URL): string {
   );
 }
 
-/** Ends a fragment with a full stop unless it already ends a sentence. */
-const sentence = (s: string) => (/[.!?…]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`);
-
-/**
- * Experience, one bullet per role, newest first: period, title and organization, then type and length, then what
- * the organization is (on its latest role), the role, its highlights, skills, and the project about it.
- */
-function experienceList(experience: Experience[], site: URL): string {
-  return list(
-    experience.flatMap((org) =>
-      org.roles.map((role, i) => {
-        const facts = [role.typeLabel, role.duration, i === 0 && org.location].filter(Boolean).join(", ");
-        const details = [
-          i === 0 && org.summary && `${org.org}: ${sentence(org.summary)}`,
-          role.text && sentence(role.text),
-          ...role.highlights.map(sentence),
-          role.skills.length > 0 && `Skills: ${role.skills.join(", ")}.`,
-          i === 0 && org.project && `More: ${link(org.project.title, url(MARKDOWN_PATHS.project(org.project), site))}.`,
-          i === 0 && org.href && `Website: ${org.href}`,
-        ].filter(Boolean);
-        return `**${role.period}: ${role.title}, ${org.fullLabel}** (${facts})${details.length ? `. ${details.join(" ")}` : ""}`;
-      }),
-    ),
-  );
-}
-
-function educationList(education: Education[]): string {
-  return list(
-    education.map((e) => {
-      return `**${e.years}: ${e.school}**: ${sentence(e.program)}`;
-    }),
-  );
-}
-
 /** One project, its heading at `level`, with an optional line under the title. */
 function renderProject(project: Project, level: number, byline?: string): string {
   const h = "#".repeat(level);
@@ -108,6 +74,7 @@ function renderProject(project: Project, level: number, byline?: string): string
     `Status: ${project.statusLabel}`,
     `Period: ${project.period}`,
     `Role: ${project.role}`,
+    project.results.length > 0 && `Results: ${project.results.join("; ")}`,
     project.stack.length > 0 && `Stack: ${project.stack.join(", ")}`,
     project.tags.length > 0 && `Tags: ${project.tags.join(", ")}`,
     project.links.length > 0 && `Links: ${project.links.map((l) => link(l.label, l.href)).join(", ")}`,
@@ -143,11 +110,7 @@ export function renderPortfolio(portfolio: Portfolio, site: URL): string {
   const { profile, projects } = portfolio;
   const { sections } = profile;
 
-  const about = blocks(
-    "## About",
-    ...profile.about.long,
-    profile.quote && `> “${profile.quote.text}”${profile.quote.context ? ` (${profile.quote.context})` : ""}`,
-  );
+  const about = blocks("## About", ...profile.about.long, `Full career: ${profile.contact.preferred.label} (${profile.contact.preferred.href}).`);
 
   const figures =
     profile.numbers.length > 0 &&
@@ -170,21 +133,10 @@ export function renderPortfolio(portfolio: Portfolio, site: URL): string {
   const talks =
     profile.talks.length > 0 &&
     blocks(
-      "## Talks and recognition",
+      "## Recognition",
       list(profile.talks.map((t) => (t.year ? `${t.year}: ${t.text}` : t.text))),
     );
 
-  const experience =
-    profile.experience.length > 0 &&
-    blocks("## Experience", sections.experience.intro, experienceList(profile.experience, site));
-
-  const education =
-    profile.education.length > 0 &&
-    blocks("## Education", sections.education.intro, educationList(profile.education));
-
-  const stack =
-    profile.stack.length > 0 &&
-    blocks("## Stack", list(profile.stack.map((group) => `**${group.label}**: ${group.items.join(", ")}`)));
 
   return (
     blocks(
@@ -193,10 +145,7 @@ export function renderPortfolio(portfolio: Portfolio, site: URL): string {
       figures,
       work,
       principles,
-      experience,
-      education,
       talks,
-      stack,
       `---\n\nSource: ${url("/", site)} · Generated ${today()}`,
     ) + "\n"
   );
@@ -214,8 +163,8 @@ export function renderLlmsTxt(portfolio: Portfolio, site: URL): string {
       blocks(
         "## Profile",
         list([
-          `${link("Full profile", url(MARKDOWN_PATHS.full, site))}: about, key figures, every project, principles, experience, education, talks, stack and contact, in one Markdown file (same content as ${url(MARKDOWN_PATHS.fullTxt, site)}).`,
-          `${link("Experience and education", url(`${MARKDOWN_PATHS.full}#experience`, site))}: every role with dates (${profile.experience.map((e) => e.org).join(", ")}) and education (${profile.education.map((e) => e.school).join(", ") || "none listed"}), in the full profile.`,
+          `${link("Full profile", url(MARKDOWN_PATHS.full, site))}: about, key figures, every project, principles, recognition and contact, in one Markdown file (same content as ${url(MARKDOWN_PATHS.fullTxt, site)}).`,
+          `${link("Career", profile.contact.preferred.href)}: every role and school with dates, on ${profile.contact.preferred.label} only.`,
           `${link("Website", url("/", site))}: the HTML version.`,
         ]),
       ),

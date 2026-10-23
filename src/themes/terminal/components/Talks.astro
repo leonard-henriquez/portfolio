@@ -6,14 +6,14 @@ interface Props {
   talks: Profile["talks"];
 }
 
-/* `cat talks.txt`: year, then the talk, jury or recognition. Undated entries keep the year column, blank. */
+/* `cat awards-and-talks.txt`: year, then the talk, jury or recognition. Undated entries keep the year column, blank. */
 const { talks } = Astro.props;
 ---
 
 {
   talks.length > 0 && (
     <section id="talks" class="tm-section" aria-labelledby="talks-title">
-      <Prompt cmd="cat talks.txt" label="Talks and recognition" id="talks-title" />
+      <Prompt cmd="cat awards-and-talks.txt" label="Talks and recognition" id="talks-title" />
       <ul class="tm-list tm-narrow talks" data-print>
         {talks.map((t, i) => (
           <li class="tm-row tm-line ln" style={`--i:${i}`}>

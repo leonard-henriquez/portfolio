@@ -1,5 +1,5 @@
 /** Project lifecycle, in the order themes should present it. */
-export const PROJECT_STATUSES = ["shipped", "building", "exploring", "study"] as const;
+export const PROJECT_STATUSES = ["released", "building", "exploring", "study"] as const;
 
 /**
  * Image series available per project:
@@ -15,6 +15,3 @@ export const IMAGE_STYLES = ["photo", "pixel", "illustration", "illustrationPixe
  * file named like a section ("about", "contact"…) can never collide with a theme's section anchors.
  */
 export const PROJECT_ANCHOR_PREFIX = "project-";
-
-/** Employment types of a role, as LinkedIn names them. */
-export const EMPLOYMENT_TYPES = ["permanent", "full-time", "part-time", "freelance", "contract", "internship"] as const;

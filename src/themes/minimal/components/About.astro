@@ -1,6 +1,6 @@
 ---
 /**
- * About: the short version and the key figures; the long version, the stack and the motto open on demand.
+ * About: the short version and the key figures; the long version opens on demand.
  * The current role and focus areas are not repeated here: the hero says them.
  */
 import type { Profile } from "../../../lib/portfolio";
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { profile } = Astro.props;
-const { about, numbers, stack, quote } = profile;
+const { about, numbers } = profile;
 ---
 
 <section id="about" class="about mn-section mn-wrap" aria-labelledby="about-title">
@@ -42,28 +42,6 @@ const { about, numbers, stack, quote } = profile;
       <div class="mn-p-text">
         {about.long.map((p) => <p>{p}</p>)}
       </div>
-
-      {
-        (stack.length > 0 || quote) && (
-          <dl class="mn-facts">
-            {stack.map((group) => (
-              <div>
-                <dt>{group.label}</dt>
-                <dd>{group.items.join(", ")}</dd>
-              </div>
-            ))}
-            {quote && (
-              <div>
-                <dt>Motto</dt>
-                <dd>
-                  {quote.text}
-                  {quote.context && <span class="context">{quote.context}</span>}
-                </dd>
-              </div>
-            )}
-          </dl>
-        )
-      }
     </Disclosure>
   </ul>
 </section>
@@ -115,11 +93,6 @@ const { about, numbers, stack, quote } = profile;
 
   .more :global(.mn-plus) {
     top: calc(var(--row-pad) + var(--t-small) * 0.725 - 6px);
-  }
-
-  .context {
-    display: block;
-    color: var(--mute);
   }
 
   @media (max-width: 1099px) {

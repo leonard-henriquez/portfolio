@@ -8,10 +8,10 @@ interface Props {
 
 /*
  * `cat about.md`: the short version by default. "more" swaps it for the long one (the paragraphs retell the
- * short version, so the two are never shown together), the key figures and the quote.
+ * short version, so the two are never shown together) and the key figures.
  */
 const { profile } = Astro.props;
-const { about, numbers, quote } = profile;
+const { about, numbers } = profile;
 const valueWidth = Math.max(0, ...numbers.map((n) => n.value.length));
 ---
 
@@ -41,14 +41,6 @@ const valueWidth = Math.max(0, ...numbers.map((n) => n.value.length));
                 </div>
               ))}
             </dl>
-          )
-        }
-        {
-          quote && (
-            <figure class="quote">
-              <blockquote class="t-lead">{quote.text}</blockquote>
-              {quote.context && <figcaption class="t-meta">— {quote.context.toLowerCase()}</figcaption>}
-            </figure>
           )
         }
       </div>
@@ -121,18 +113,6 @@ const valueWidth = Math.max(0, ...numbers.map((n) => n.value.length));
 
   .numbers dd {
     white-space: normal;
-  }
-
-  .quote {
-    margin: 24px 0 0;
-  }
-
-  blockquote {
-    margin: 0;
-  }
-
-  figcaption {
-    margin-top: 8px;
   }
 
   @media (prefers-reduced-motion: no-preference) {

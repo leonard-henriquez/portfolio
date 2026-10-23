@@ -163,7 +163,7 @@ function disclosures(list: HTMLElement, onToggle: () => void) {
     item.querySelector("[data-mn-panel]")?.addEventListener("beforematch", () => setOpen(item, true, false));
   }
 
-  // The fragment opens the item it names: `#project-<id>` (or a bare `#<id>`, see projectFromHash), `#experience-<id>`…
+  // The fragment opens the item it names: `#project-<id>` (or a bare `#<id>`, see projectFromHash), `#principle-<n>`…
   const openFromHash = () => {
     const target = projectFromHash(items);
     if (!target) return;

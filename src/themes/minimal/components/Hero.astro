@@ -42,6 +42,7 @@ const { current } = profile;
     <span class="cap-role">
       {current.title}, {current.href ? <a class="mn-link" href={current.href}>{current.org}</a> : current.org}
       {current.orgDetail && ` (${current.orgDetail})`}
+      <span class="cap-place">· {profile.location.label}</span>
     </span>
     <span class="cap-period">{current.since}–present</span>
   </figcaption>
@@ -113,6 +114,10 @@ const { current } = profile;
   .cap-role {
     grid-column: 4 / span 6;
     color: var(--ink);
+  }
+
+  .cap-place {
+    color: var(--mute);
   }
 
   .cap-period {

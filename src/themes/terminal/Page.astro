@@ -12,10 +12,7 @@ import Header from "./components/Header.astro";
 import Hero from "./components/Hero.astro";
 import Projects from "./components/Projects.astro";
 import About from "./components/About.astro";
-import Stack from "./components/Stack.astro";
 import Principles from "./components/Principles.astro";
-import Log from "./components/Log.astro";
-import Education from "./components/Education.astro";
 import Talks from "./components/Talks.astro";
 import Contact from "./components/Contact.astro";
 import { heroImage } from "./hero";
@@ -34,10 +31,7 @@ const { profile } = portfolio;
   <Hero profile={profile} hero={heroImage(portfolio)} />
   <Projects projects={portfolio.projects} />
   <About profile={profile} />
-  <Stack profile={profile} />
   <Principles principles={profile.principles} />
-  <Log experience={profile.experience} />
-  <Education education={profile.education} />
   <Talks talks={profile.talks} />
 </main>
 <Contact profile={profile} />
@@ -456,44 +450,6 @@ const { profile } = portfolio;
   html[data-theme="terminal"] .tm-dl dd {
     margin: 0;
     overflow-wrap: anywhere;
-  }
-
-  /*
-   * A hint under a list ("click a commit to show it · j k move"). .tm-kb parts only show where the keys work:
-   * a keyboard-and-mouse device, with client.ts running (without it they stay blank).
-   */
-  html[data-theme="terminal"] .tm-hint {
-    margin: 0;
-    color: var(--dim);
-    font-size: var(--fs-meta);
-  }
-
-  html[data-theme="terminal"] .tm-hint kbd {
-    display: inline-block;
-    min-width: 1.6em;
-    padding: 0 0.4em;
-    border: 1px solid var(--line-2);
-    border-radius: 3px;
-    color: var(--muted);
-    font: inherit;
-    line-height: 1.5;
-    text-align: center;
-  }
-
-  html[data-theme="terminal"] .tm-kb {
-    display: none;
-  }
-
-  /* Space kept while the script loads, so showing it never shifts the page (or a deep link's target). */
-  @media (hover: hover) and (pointer: fine) {
-    html[data-theme="terminal"] .tm-kb {
-      display: revert;
-      visibility: hidden;
-    }
-
-    html[data-theme="terminal"].tm-ready .tm-kb {
-      visibility: visible;
-    }
   }
 
   /* Highlights, as the added lines of a diff. */

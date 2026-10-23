@@ -11,8 +11,7 @@ interface Props {
 }
 
 const { profile, hero } = Astro.props;
-// The night line suits this theme; the headline when the profile has none.
-const tagline = profile.taglines.night ?? profile.headline;
+const tagline = profile.headline;
 const words = tagline.split(/\s+/);
 ---
 

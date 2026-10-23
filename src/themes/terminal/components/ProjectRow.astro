@@ -22,7 +22,8 @@ const teaser = p.focus !== p.summary;
 ---
 
 <li class="tm-row ln" id={p.anchor} data-row={p.id}>
-  <details>
+  <!-- Same name on every project: opening one closes the others. -->
+  <details name="projects">
     <summary class="tm-line">
       <span class="c-meta t-meta t-dim perm" aria-hidden="true">drwxr-xr-x</span>
       <span class="c-meta t-meta status">
@@ -46,10 +47,8 @@ const teaser = p.focus !== p.summary;
     </summary>
 
     <div class="tm-body readme">
-      <p class="t-text" aria-hidden="true"><span class="t-amber">~ $</span> cat {p.folder}README.md</p>
       <div class="grid">
         <div class="doc">
-          <h3 class="t-name"><span class="t-amber" aria-hidden="true"># </span>{p.title}</h3>
           {p.dek !== p.summary && <p class="t-lead">{p.dek}</p>}
           {p.hasBody && <div class="prose t-text" set:html={p.html} />}
           {
@@ -162,7 +161,7 @@ const teaser = p.focus !== p.summary;
       transform 0.3s var(--ease);
   }
 
-  .led[data-status="shipped"] {
+  .led[data-status="released"] {
     --c: var(--green);
   }
 
@@ -204,7 +203,6 @@ const teaser = p.focus !== p.summary;
     max-width: 72ch;
   }
 
-  h3,
   h4 {
     margin: 0;
   }
