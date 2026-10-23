@@ -57,6 +57,7 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
 <style>
   .footer {
     position: relative;
+    margin-top: var(--section);
     overflow: hidden;
     background: var(--sky);
     color: var(--ink-deep);
@@ -89,10 +90,10 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
   }
 
   .cta {
-    font-size: clamp(36px, 6.4vw, 96px);
+    font-size: clamp(30px, 3.6vw, 54px);
     font-weight: 500;
-    line-height: 0.95;
-    letter-spacing: -0.05em;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
     text-decoration: none;
     overflow-wrap: anywhere;
   }

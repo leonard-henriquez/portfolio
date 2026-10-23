@@ -2,7 +2,8 @@
 /**
  * Contemplation: a panorama of six pixel-art landscapes, one per project, then quiet sections on a warm paper ground.
  * Space Grotesk for text, Space Mono in capitals for labels and metadata, one ink blue.
- * Hovering a panel of the panorama widens it and frames it; every other interaction is a link.
+ * Hovering a panel of the panorama widens it and frames it. Scannable by default, details on demand, as in Minimal:
+ * every list is one line per item, and a row opens a panel with the rest (components/Disclosure.astro; open without JS).
  * Document-level settings (theme colour, font preloads, the hero preload) live in `meta.ts`; behaviour in `client.ts`.
  *
  * Type scale, the same in every section:
@@ -55,10 +56,11 @@ const explorations = projects.filter((p) => p.status === "exploring" || p.status
     --accent: #3e617b; /* 5.4:1 on paper: labels and metadata */
     --hover: #2f5576;
     --rule: #cdced2;
+    --dim: #7a8794; /* 3:1 on paper, large text only: the names of rows not hovered */
     --light: #f6f3ec;
     --gutter: clamp(16px, 3vw, 40px);
     --max: 1360px;
-    --section: clamp(96px, 11vw, 160px);
+    --section: clamp(112px, 12vw, 184px);
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     --mono: "Space Mono", ui-monospace, monospace;
 
@@ -200,6 +202,205 @@ const explorations = projects.filter((p) => p.status === "exploring" || p.status
     line-height: 1.5;
     color: var(--ink-2);
     text-wrap: pretty;
+  }
+
+  /*
+   * List columns, shared by every list but Selected work: name · descriptor · period · the + mark.
+   * Panels use the same columns and put their content under the descriptor.
+   */
+  :where([data-theme="contemplation"]) .ct-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr) 150px 16px;
+    column-gap: 40px;
+    align-items: baseline;
+  }
+
+  :where([data-theme="contemplation"]) .ct-cols > * {
+    min-width: 0;
+    margin: 0;
+  }
+
+  :where([data-theme="contemplation"]) .ct-name {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  :where([data-theme="contemplation"]) .ct-desc {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: 68ch;
+  }
+
+  :where([data-theme="contemplation"]) .ct-when {
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--accent);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  :where([data-theme="contemplation"]) .ct-under {
+    grid-column: 2 / span 2;
+    max-width: 68ch;
+  }
+
+  @media (max-width: 860px) {
+    :where([data-theme="contemplation"]) .ct-cols {
+      grid-template-columns: minmax(0, 1fr) 16px;
+      column-gap: 16px;
+      row-gap: 6px;
+    }
+
+    :where([data-theme="contemplation"]) .ct-cols > :is(.ct-name, .ct-desc, .ct-when, .ct-under) {
+      grid-column: 1;
+      grid-row: auto;
+      text-align: left;
+    }
+  }
+
+  /* Disclosures (components/Disclosure.astro): a row that is a button, and a panel under it. */
+  :where([data-theme="contemplation"]) .ct-item-h {
+    margin: 0;
+    font: inherit;
+  }
+
+  :where([data-theme="contemplation"]) .ct-row {
+    position: relative;
+    width: 100%;
+    padding: 22px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where([data-theme="contemplation"]) .ct-row:focus-visible {
+    outline-offset: 6px;
+  }
+
+  /* The name nudges right on hover; the other rows' names fade back. */
+  :where([data-theme="contemplation"]) .ct-row .ct-title {
+    transition:
+      transform 0.55s var(--ease),
+      color 0.35s ease;
+  }
+
+  /* An ink rule under the hovered or open row; full length, it fades in. */
+  :where([data-theme="contemplation"]) .ct-row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+  }
+
+  :where([data-theme="contemplation"]) .ct-item.is-open > .ct-item-h > .ct-row::after,
+  :where([data-theme="contemplation"]) .ct-row:focus-visible::after {
+    opacity: 1;
+  }
+
+  :where([data-theme="contemplation"]) .ct-plus {
+    grid-column: -2;
+    grid-row: 1;
+    position: relative;
+    align-self: start;
+    width: 12px;
+    height: 12px;
+    margin-top: 7px;
+  }
+
+  :where([data-theme="contemplation"]) .ct-plus::before,
+  :where([data-theme="contemplation"]) .ct-plus::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+    transition: transform 0.5s var(--ease);
+  }
+
+  :where([data-theme="contemplation"]) .ct-plus::before {
+    left: 0;
+    right: 0;
+    top: 5.5px;
+    height: 1px;
+  }
+
+  :where([data-theme="contemplation"]) .ct-plus::after {
+    top: 0;
+    bottom: 0;
+    left: 5.5px;
+    width: 1px;
+  }
+
+  :where([data-theme="contemplation"]) .ct-item.is-open .ct-plus::after {
+    transform: scaleY(0);
+  }
+
+  :where([data-theme="contemplation"]) .ct-item.is-open .ct-plus::before {
+    transform: rotate(180deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :where([data-theme="contemplation"]) .ct-item:not(.is-open) > .ct-item-h > .ct-row:hover .ct-title {
+      transform: translateX(10px);
+    }
+
+    :where([data-theme="contemplation"]) .ct-row:hover::after {
+      opacity: 1;
+    }
+
+    :where([data-theme="contemplation"])
+      .ct-list:has(> .ct-item:not(.is-open) > .ct-item-h > .ct-row:hover)
+      > .ct-item:not(.is-open)
+      > .ct-item-h
+      > .ct-row:not(:hover)
+      .ct-title {
+      color: var(--dim);
+    }
+  }
+
+  /* Clipped so its height can animate (client.ts); the margin keeps focus rings inside it visible. */
+  :where([data-theme="contemplation"]) .ct-panel {
+    overflow: clip;
+    overflow-clip-margin: 6px;
+  }
+
+  :where([data-theme="contemplation"]) .ct-panel-in {
+    padding: 20px 0 40px;
+  }
+
+  /*
+   * Without JavaScript (no `ct-js` on <html>, see meta.ts: also crawlers, and the fallback when client.ts fails)
+   * rows can't toggle: every panel is shown and the + marks go.
+   */
+  :where(html[data-theme="contemplation"]:not(.ct-js)) .ct-panel[hidden] {
+    display: block;
+    content-visibility: visible;
+  }
+
+  :where(html[data-theme="contemplation"]:not(.ct-js)) .ct-plus {
+    display: none;
+  }
+
+  :where(html[data-theme="contemplation"]:not(.ct-js)) .ct-row {
+    cursor: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where([data-theme="contemplation"]) .ct-row .ct-title,
+    :where([data-theme="contemplation"]) .ct-row::after,
+    :where([data-theme="contemplation"]) .ct-plus::before,
+    :where([data-theme="contemplation"]) .ct-plus::after {
+      transition: none;
+    }
   }
 
   :where([data-theme="contemplation"]) .sr-only {

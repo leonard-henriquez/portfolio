@@ -1,11 +1,12 @@
 ---
 /**
- * Selected work: shipped and in-progress projects, one row each: its landscape, role, name, summary, the long
- * description and facts, then status and period. Highlights, when a project has them, follow in a grid.
+ * Selected work: shipped and in-progress projects. A row shows the project's landscape, role, name and summary,
+ * status and period; it opens on the long description, the facts and links, and the highlights when there are some.
  */
 import { Image } from "astro:assets";
 import type { Project } from "../../../lib/portfolio";
 import { vistaOf } from "../vista";
+import Disclosure from "./Disclosure.astro";
 
 interface Props {
   projects: Project[];
@@ -22,29 +23,41 @@ const { projects, span } = Astro.props;
         <h2 id="work-title" class="ct-mono">Selected work</h2>
         <span class="ct-mono ct-aside">{span}</span>
       </div>
-      <ul class="ct-list" role="list">
+      <ul class="ct-list" role="list" data-ct-disclosures>
         {projects.map((p) => {
           const vista = vistaOf(p);
           const img = vista ?? p.image.illustration;
           const facts = [...p.stack, ...p.tags];
           return (
-            <li id={p.anchor} class="item ct-reveal">
-              <div class="row">
-                <div class="thumb" style={vista ? `--sky: ${vista.sky}` : undefined}>
+            <Disclosure id={p.anchor} rowClass="work-row" panelClass="work-row">
+              <Fragment slot="row">
+                <span class="thumb" style={vista ? `--sky: ${vista.sky}` : undefined}>
                   <Image
                     src={img.src}
                     alt=""
-                    widths={[248, 496]}
-                    sizes="248px"
+                    widths={[200, 400]}
+                    sizes="200px"
                     loading="lazy"
                     decoding="async"
                     style={vista ? `object-position: ${vista.x} 66%` : undefined}
                   />
-                </div>
-                <div class="main">
+                </span>
+                <span class="main">
                   <span class="ct-mono ct-aside">{p.role}</span>
-                  <h3 class="name">{p.title}</h3>
-                  <p class="ct-body">{p.summary}</p>
+                  <span class="name ct-title">{p.title}</span>
+                  <span class="ct-body">
+                    <span class="sr-only">, </span>
+                    {p.summary}
+                  </span>
+                </span>
+                <span class="when ct-mono">
+                  <span class="sr-only">, </span>
+                  {p.statusLabel} · {p.period}
+                </span>
+              </Fragment>
+
+              {(p.hasBody || facts.length > 0 || p.links.length > 0) && (
+                <div class="more">
                   {p.hasBody && <div class="prose ct-body" set:html={p.html} />}
                   {(facts.length > 0 || p.links.length > 0) && (
                     <p class="facts ct-mono">
@@ -61,10 +74,7 @@ const { projects, span } = Astro.props;
                     </p>
                   )}
                 </div>
-                <span class="when ct-mono ct-aside">
-                  {p.statusLabel} — {p.period}
-                </span>
-              </div>
+              )}
 
               {p.highlights.length > 0 && (
                 <ul class="highlights" role="list" aria-label={`${p.title} highlights`}>
@@ -78,7 +88,7 @@ const { projects, span } = Astro.props;
                   ))}
                 </ul>
               )}
-            </li>
+            </Disclosure>
           );
         })}
       </ul>
@@ -87,20 +97,19 @@ const { projects, span } = Astro.props;
 }
 
 <style>
-  .item {
-    padding: 32px 0;
-  }
-
-  .row {
-    display: flex;
-    flex-wrap: wrap;
+  /* Landscape · role, name, summary · status and period · + (the panel keeps the columns). */
+  :global(.work-row) {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) auto 16px;
+    column-gap: 40px;
     align-items: center;
-    gap: 24px 40px;
   }
 
   .thumb {
-    flex: 0 0 248px;
-    height: 156px;
+    grid-column: 1;
+    grid-row: 1;
+    display: block;
+    height: 124px;
     overflow: hidden;
     border-radius: 3px;
     background: var(--sky, var(--rule));
@@ -114,28 +123,44 @@ const { projects, span } = Astro.props;
     transition: transform 0.7s var(--ease);
   }
 
-  .item:hover .thumb :global(img) {
+  :global(.work-row:hover) .thumb :global(img) {
     transform: scale(1.07);
   }
 
   .main {
-    flex: 1 1 320px;
-    min-width: 0;
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-  }
-
-  .main > * {
+    gap: 6px;
     max-width: 64ch;
   }
 
   .name {
-    margin: 0;
-    font-size: clamp(26px, 2.6vw, 38px);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+    font-size: clamp(24px, 2.2vw, 32px);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .when {
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--accent);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* The panel, under the summary. */
+  .more,
+  .highlights {
+    grid-column: 2 / span 2;
+  }
+
+  .more {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 64ch;
   }
 
   .prose :global(p) {
@@ -152,17 +177,12 @@ const { projects, span } = Astro.props;
     line-height: 1.6;
   }
 
-  .when {
-    flex: 0 0 150px;
-    text-align: right;
-  }
-
   .highlights {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 28px 40px;
-    margin: 36px 0 4px;
-    padding: 20px 0 0 288px;
+    margin: 32px 0 0;
+    padding: 0;
     list-style: none;
   }
 
@@ -196,20 +216,24 @@ const { projects, span } = Astro.props;
     color: var(--accent);
   }
 
-  @media (max-width: 1099px) {
-    .highlights {
-      padding-left: 0;
+  @media (max-width: 860px) {
+    :global(.work-row) {
+      grid-template-columns: minmax(0, 1fr) 16px;
+      column-gap: 16px;
+      row-gap: 14px;
     }
-  }
 
-  @media (max-width: 760px) {
     .thumb {
-      flex-basis: 100%;
-      height: 168px;
+      height: 160px;
     }
 
-    .when {
-      flex-basis: 100%;
+    .thumb,
+    .main,
+    .when,
+    .more,
+    .highlights {
+      grid-column: 1;
+      grid-row: auto;
       text-align: left;
     }
   }

@@ -1,6 +1,11 @@
 ---
-/** What production agents taught me, as a grid, then talks, juries and recognition on one line. */
+/**
+ * What production agents taught me: the section intro on the left, one row per lesson on the right
+ * (number, title), opening on its body.
+ * Then talks, juries and recognition, as plain rows: the text, then the year.
+ */
 import type { Profile } from "../../../lib/portfolio";
+import Disclosure from "./Disclosure.astro";
 
 interface Props {
   profile: Profile;
@@ -17,34 +22,47 @@ const { principles, talks, sections } = Astro.props.profile;
           {sections.principles.summary?.replace(/\.$/, "") ?? "Principles"}
         </h2>
       </div>
-      {sections.principles.intro && <p class="intro ct-body">{sections.principles.intro}</p>}
-      <ol class="grid" role="list">
-        {principles.map((r) => (
-          <li class="ct-reveal">
-            <span class="ct-mono ct-aside">{r.no2}</span>
-            <h3 class="name">{r.title}</h3>
-            <p class="ct-body">{r.body}</p>
-          </li>
-        ))}
-      </ol>
+      <div class="split">
+        {sections.principles.intro && <p class="intro ct-body">{sections.principles.intro}</p>}
+        <ol class="ct-list lessons" role="list" data-ct-disclosures>
+          {principles.map((r) => (
+            <Disclosure id={`principle-${r.no2}`} rowClass="lesson" panelClass="lesson">
+              <Fragment slot="row">
+                <span class="no ct-mono">
+                  <span class="sr-only">No. </span>
+                  {r.no2}
+                </span>
+                <span class="ct-title title">
+                  <span class="sr-only">, </span>
+                  {r.title}
+                </span>
+              </Fragment>
+              <p class="body ct-body">{r.body}</p>
+            </Disclosure>
+          ))}
+        </ol>
+      </div>
     </section>
   )
 }
 
 {
   talks.length > 0 && (
-    <section id="talks" class="talks ct-wrap" aria-labelledby="talks-title">
-      <h2 id="talks-title" class="ct-mono ct-aside">
-        Talks &amp; juries
-      </h2>
-      <ul role="list">
+    <section id="talks" class="ct-section ct-wrap" aria-labelledby="talks-title">
+      <div class="ct-head">
+        <h2 id="talks-title" class="ct-mono">
+          Talks &amp; juries
+        </h2>
+      </div>
+      <ul class="ct-list" role="list">
         {talks.map((t) => (
-          <li>
-            {t.text}
+          <li class="talk ct-cols ct-reveal">
+            <p class="ct-desc ct-body">{t.text}</p>
             {t.year && (
-              <>
-                , <time datetime={String(t.year)}>{t.year}</time>
-              </>
+              <span class="ct-when ct-mono">
+                <span class="sr-only">, </span>
+                <time datetime={String(t.year)}>{t.year}</time>
+              </span>
             )}
           </li>
         ))}
@@ -54,60 +72,73 @@ const { principles, talks, sections } = Astro.props.profile;
 }
 
 <style>
-  .intro {
-    max-width: 60ch;
-    margin: 20px 0 0;
-  }
-
-  .grid {
+  /* The intro beside the lessons: it reads first, then stays in view while they open. */
+  .split {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 32px 48px;
-    margin: 28px 0 0;
-    padding: 0;
-    list-style: none;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 24px 64px;
+    align-items: start;
+    padding-top: 20px;
   }
 
-  .grid > li {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  .intro {
+    position: sticky;
+    top: 24px;
+    max-width: 38ch;
+    font-size: 18px;
+    line-height: 1.55;
   }
 
-  .name {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 1.15;
+  .lessons {
+    margin-top: -20px;
+  }
+
+  /* Number · title · + ; the body opens under the title. */
+  :global(.lesson) {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 16px;
+    column-gap: 12px;
+    align-items: baseline;
+  }
+
+  .no {
+    grid-column: 1;
+    grid-row: 1;
+    color: var(--accent);
+  }
+
+  .title {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: clamp(22px, 1.9vw, 26px);
     letter-spacing: -0.025em;
   }
 
-  .talks {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 10px 28px;
-    margin-top: clamp(56px, 6vw, 88px);
+  .body {
+    grid-column: 2;
+    max-width: 60ch;
   }
 
-  .talks > * {
-    margin: 0;
+  .talk {
+    padding: 16px 0;
   }
 
-  .talks h2 {
-    width: 100%;
-    padding-top: 16px;
-    border-top: 1px solid var(--rule);
+  /* Nothing in the name column: the text starts at the left edge. */
+  .talk .ct-desc {
+    grid-column: 1 / span 2;
   }
 
-  .talks ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 28px;
-    padding: 0;
-    list-style: none;
-    font-size: 15px;
-    line-height: 1.5;
-    color: var(--ink-2);
+  @media (max-width: 860px) {
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .intro {
+      position: static;
+    }
+
+    .lessons {
+      margin-top: 0;
+    }
   }
 </style>

@@ -3,7 +3,7 @@
  * The hero: one frame, one landscape per project. Every image fills the whole frame at the same size, stacked;
  * each panel is a moving mask (clip-path) over its own image, with the project's name in the band below.
  * On hover or focus a panel widens to 40% and the others share the rest; on phones the panels stack.
- * The header (name and navigation) sits over the sky.
+ * The header (name and navigation) sits above it, on the paper: no text over the images.
  */
 import { Image } from "astro:assets";
 import type { Portfolio } from "../../../lib/portfolio";
@@ -25,7 +25,20 @@ const nav = [
 ];
 ---
 
-<section id="top" class="panorama" aria-label="Projects">
+<header id="top" class="header ct-wrap">
+  <a class="ct-mono home" href="#top">{profile.name}</a>
+  <nav aria-label="Sections">
+    {
+      nav.map((item) => (
+        <a class="ct-mono" href={item.href}>
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</header>
+
+<section class="panorama" aria-label="Projects">
   <div class="frame" style={`--n: ${panels.length}`}>
     {
       panels.map(({ project: p, vista }, i) => (
@@ -37,7 +50,6 @@ const nav = [
             loading="eager"
             fetchpriority={i === 0 ? "high" : "auto"}
           />
-          <span class="reticle" aria-hidden="true" />
           <span class="cap">
             <span class="name">{p.shortTitle}</span>
             <span class="kicker ct-mono">
@@ -47,27 +59,13 @@ const nav = [
         </a>
       ))
     }
-    <div class="over">
-      <header class="header ct-wrap">
-        <a class="ct-mono home" href="#top">{profile.name}</a>
-        <nav aria-label="Sections">
-          {
-            nav.map((item) => (
-              <a class="ct-mono" href={item.href}>
-                {item.label}
-              </a>
-            ))
-          }
-        </nav>
-      </header>
-    </div>
   </div>
 </section>
 
 <style>
   .frame {
     /* Image height, then the caption band. */
-    --H: clamp(520px, 56.25vw, 880px);
+    --H: clamp(480px, 50vw, 800px);
     --C: 88px;
     /* E: width of the panel in front; s: width of every other one. k: index of the panel in front. */
     --E: calc(100% / var(--n));
@@ -112,31 +110,6 @@ const nav = [
     background: var(--sky);
   }
 
-  /* Corner marks of a viewfinder, framing the panel in front. */
-  .reticle {
-    --c: var(--light);
-    position: absolute;
-    top: 18px;
-    left: calc(var(--L) + var(--gl) + 18px);
-    width: calc(var(--R) - var(--L) - var(--gl) - var(--gr) - 36px);
-    height: calc(var(--H) - 36px);
-    opacity: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(var(--c), var(--c)) left top / 24px 2px no-repeat,
-      linear-gradient(var(--c), var(--c)) left top / 2px 24px no-repeat,
-      linear-gradient(var(--c), var(--c)) right top / 24px 2px no-repeat,
-      linear-gradient(var(--c), var(--c)) right top / 2px 24px no-repeat,
-      linear-gradient(var(--c), var(--c)) left bottom / 24px 2px no-repeat,
-      linear-gradient(var(--c), var(--c)) left bottom / 2px 24px no-repeat,
-      linear-gradient(var(--c), var(--c)) right bottom / 24px 2px no-repeat,
-      linear-gradient(var(--c), var(--c)) right bottom / 2px 24px no-repeat;
-    transition:
-      opacity 0.45s,
-      left 0.8s var(--ease),
-      width 0.8s var(--ease);
-  }
-
   .cap {
     position: absolute;
     top: var(--H);
@@ -174,26 +147,13 @@ const nav = [
       transform 0.4s 0.15s;
   }
 
-  .over {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 3;
-    pointer-events: none;
-  }
-
-  .over a {
-    pointer-events: auto;
-  }
-
   .header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    padding-block: 22px;
+    padding-block: 20px;
     color: var(--ink);
   }
 
@@ -212,9 +172,10 @@ const nav = [
       outline: none;
     }
 
-    .panel:hover .reticle,
-    .panel:focus-visible .reticle {
-      opacity: 1;
+    /* Focus: the name of the panel in front is underlined (the hover state is its width and colour). */
+    .panel:focus-visible .name {
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
     }
 
     .panel:hover .kicker,
@@ -268,12 +229,6 @@ const nav = [
       gap: 6px;
     }
 
-    .over {
-      position: static;
-      order: -1;
-      pointer-events: auto;
-    }
-
     .panel {
       position: relative;
       inset: auto;
@@ -286,10 +241,6 @@ const nav = [
       height: 168px;
       object-position: var(--x) 64%;
       border-radius: 3px;
-    }
-
-    .reticle {
-      display: none;
     }
 
     .cap {
@@ -308,7 +259,6 @@ const nav = [
 
   @media (prefers-reduced-motion: reduce) {
     .panel,
-    .reticle,
     .cap,
     .kicker,
     .name {

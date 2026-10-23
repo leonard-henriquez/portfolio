@@ -1,6 +1,7 @@
 ---
-/** Explorations: research and studies, one row each: name, summary and the long description, status. */
+/** Explorations: research and studies. A row shows the name, the summary and the status; it opens on the long description. */
 import type { Project } from "../../../lib/portfolio";
+import Disclosure from "./Disclosure.astro";
 
 interface Props {
   projects: Project[];
@@ -16,18 +17,27 @@ const { projects } = Astro.props;
         <h2 id="explorations-title" class="ct-mono">Explorations</h2>
         <span class="ct-mono ct-aside">{[...new Set(projects.map((p) => p.role))].join(" · ")}</span>
       </div>
-      <ul class="ct-list" role="list">
+      <ul class="ct-list" role="list" data-ct-disclosures>
         {projects.map((p) => (
-          <li id={p.anchor} class="row ct-reveal">
-            <h3 class="ct-title name">{p.title}</h3>
-            <div class="text">
-              <p class="ct-body">{p.summary}</p>
-              {p.hasBody && <div class="prose ct-body" set:html={p.html} />}
+          <Disclosure id={p.anchor} rowClass="ct-cols" panelClass="ct-cols">
+            <Fragment slot="row">
+              <span class="ct-name ct-title">{p.shortTitle}</span>
+              <span class="ct-desc ct-body">
+                <span class="sr-only">, </span>
+                {p.focus}
+              </span>
+              <span class="ct-when ct-mono">
+                <span class="sr-only">, </span>
+                {p.statusLabel} · {p.period}
+              </span>
+            </Fragment>
+
+            <div class="ct-under ct-body">
+              {p.title !== p.shortTitle && <p class="ct-mono ct-aside">{p.title}</p>}
+              <p>{p.summary}</p>
+              {p.hasBody && <Fragment set:html={p.html} />}
             </div>
-            <span class="when ct-mono ct-aside">
-              {p.statusLabel} — {p.period}
-            </span>
-          </li>
+          </Disclosure>
         ))}
       </ul>
     </section>
@@ -35,38 +45,11 @@ const { projects } = Astro.props;
 }
 
 <style>
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px 40px;
-    padding: 22px 0;
+  .ct-under :global(p) {
+    margin: 0;
   }
 
-  .name {
-    flex: 0 0 300px;
-  }
-
-  .text {
-    flex: 1 1 360px;
-    min-width: 0;
-    max-width: 68ch;
-  }
-
-  .prose :global(p) {
-    margin: 0.6em 0 0;
-  }
-
-  .when {
-    flex: 0 0 150px;
-    text-align: right;
-  }
-
-  @media (max-width: 760px) {
-    .name,
-    .when {
-      flex-basis: 100%;
-      text-align: left;
-    }
+  .ct-under :global(p + p) {
+    margin-top: 0.6em;
   }
 </style>
