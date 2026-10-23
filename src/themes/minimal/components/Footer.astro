@@ -36,7 +36,7 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
             </li>
           ))
         }
-        <li class="agents">
+        <li>
           <a class="mn-link" href={llmsTxt} type="text/plain" title="This site as Markdown, for AI agents">llms.txt</a>
         </li>
       </ul>
@@ -177,13 +177,6 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
     .top {
       grid-column: 3 / span 2;
       grid-row: 2;
-    }
-  }
-
-  /* Just above the phone layout, the links column is too narrow for a third link. It stays in the markup for agents. */
-  @media (min-width: 761px) and (max-width: 819px) {
-    .agents {
-      display: none;
     }
   }
 
