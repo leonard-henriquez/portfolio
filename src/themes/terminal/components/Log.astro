@@ -8,135 +8,344 @@ interface Props {
 }
 
 /*
- * `git log --oneline --graph`, newest first: one commit per role, every one the same shape. The line is
- * hash · years · title @ organization; opening it prints the commit body: what was done, highlights as added
- * lines, then the same facts for every commit (org, about, date, type, skills).
+ * `git log --graph`, as a terminal prints it: one commit per role, newest first, on one linear graph.
+ * Closed, a commit is its one-line form: `* <hash> - (HEAD -> main) <title> @ <org> (<years>)`.
+ * Opened (click or Enter; a native <details>), it reads like the full format: `* commit <hash>`, then
+ * Org/Date headers, then the indented message (subject, text, highlights as `+` lines, Type/Skills trailers).
+ * Every commit has the same shape; optional fields keep their place. The graph, hashes and decorations are
+ * aria-hidden: screen readers get the title, organization and years, and "current role" for the current one.
  * The first role of each organization carries the organization's anchor (`#experience-<id>`).
  */
 const { experience } = Astro.props;
-const commits = experience.flatMap((org) => org.roles.map((role, n) => ({ org, role, anchor: n === 0 ? org.anchor : undefined })));
-const titleWidth = Math.max(...commits.map((c) => c.role.title.length));
+const commits = experience.flatMap((org) =>
+  org.roles.map((role, n) => ({
+    org,
+    role,
+    anchor: n === 0 ? org.anchor : undefined,
+    hash: shortHash([org.id, role.title, role.start.iso].join("|")),
+  })),
+);
+// HEAD is the newest commit, when it is an ongoing role.
+const headIndex = commits[0]?.role.current ? 0 : -1;
 ---
 
 <section id="experience" class="tm-section" aria-labelledby="experience-title">
-  <Prompt cmd="git log --oneline --graph" label="Experience" id="experience-title" />
-  <ol class="tm-list log" data-list="experience" data-print style={`--name:${titleWidth}ch`}>
-    {
-      commits.map(({ org, role, anchor }, i) => (
-        <li class="tm-row ln" style={`--i:${i}`} id={anchor}>
-          <details>
-            <summary class="tm-line">
-              <span class="c-meta t-meta">
-                <span class="t-dim" aria-hidden="true">
-                  *{" "}
-                </span>
-                <span class="t-amber" aria-hidden="true">
-                  {shortHash([org.id, role.title, role.start.iso].join("|"))}
-                </span>
-              </span>
-              <span class="c-meta t-meta">{role.years}</span>
-              <span class="c-main c-phrase">
-                <span class="c-name t-name">{role.title}</span>{" "}
-                <span class="c-sec t-text">@ {org.org}</span>
-              </span>
-              <span class="tm-tog" aria-hidden="true" />
-            </summary>
-            <div class="tm-body">
-              {role.text && <p class="t-text">{role.text}</p>}
-              {role.highlights.length > 0 && (
-                <ul class="tm-diff t-text">
-                  {role.highlights.map((h) => (
-                    <li>{h}</li>
-                  ))}
-                </ul>
-              )}
-              <dl class="tm-dl t-meta">
-                <div>
-                  <dt>org</dt>
-                  <dd>
-                    {[org.org, ...org.details].join(" · ")}
-                    {org.href && (
+  <Prompt cmd="git log --graph --oneline" label="Experience" id="experience-title" />
+  <div class="out">
+    <ol class="log" data-list="experience" data-print>
+      {
+        commits.map(({ org, role, anchor, hash }, i) => {
+          const head = i === headIndex;
+          return (
+            <li class="ln" style={`--i:${i}`} id={anchor}>
+              <details>
+                <summary>
+                  <span class="g" aria-hidden="true">
+                    *
+                  </span>
+                  <span class="line c-closed">
+                    <span class="h" aria-hidden="true">
+                      {hash}
+                    </span>
+                    <span aria-hidden="true"> - </span>
+                    {head && (
                       <>
-                        {" · "}
-                        <a class="tm-link" href={org.href} rel="noopener">
-                          {displayHost(org.href)}
-                          <span aria-hidden="true"> ↗</span>
-                        </a>
+                        <span class="deco" aria-hidden="true">
+                          (<span class="ref-head">HEAD -&gt;</span> <span class="ref-branch">main</span>)
+                        </span>{" "}
+                        <span class="sr-only">Current role: </span>
                       </>
                     )}
-                    {org.project && (
-                      <>
-                        {" · "}
-                        <a class="tm-link" href={`#${org.project.anchor}`}>
-                          projects/{org.project.id}
-                          <span aria-hidden="true"> ↑</span>
-                        </a>
-                      </>
+                    <span class="s">
+                      {role.title} @ {org.org}
+                    </span>{" "}
+                    <span class="dt">({role.years})</span>
+                  </span>
+                  <span class="line c-open">
+                    <span class="h" aria-hidden="true">
+                      commit {hash}
+                      {head && (
+                        <>
+                          {" "}
+                          <span class="deco">
+                            (<span class="ref-head">HEAD -&gt;</span> <span class="ref-branch">main</span>)
+                          </span>
+                        </>
+                      )}
+                    </span>
+                    <span class="sr-only">
+                      {head && "Current role: "}
+                      {role.title} @ {org.org}, {role.years}
+                    </span>
+                  </span>
+                </summary>
+                <div class="show">
+                  <dl class="hdr">
+                    <div>
+                      <dt>Org:</dt>
+                      <dd>
+                        {[org.org, ...org.details].join(" · ")}
+                        {org.href && (
+                          <>
+                            {" <"}
+                            <a class="tm-link" href={org.href} rel="noopener">
+                              {displayHost(org.href)}
+                            </a>
+                            {">"}
+                          </>
+                        )}
+                      </dd>
+                    </div>
+                    {org.summary && (
+                      <div>
+                        <dt>About:</dt>
+                        <dd>{org.summary}</dd>
+                      </div>
                     )}
-                  </dd>
-                </div>
-                {org.summary && (
-                  <div>
-                    <dt>about</dt>
-                    <dd>{org.summary}</dd>
+                    <div>
+                      <dt>Date:</dt>
+                      <dd>
+                        {role.period}
+                        {!role.current && ` (${role.duration})`}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div class="msg">
+                    <p class="subject" aria-hidden="true">
+                      {role.title} @ {org.org}
+                    </p>
+                    {(role.text || role.highlights.length > 0) && (
+                      <div class="para">
+                        {role.text && <p>{role.text}</p>}
+                        {role.highlights.length > 0 && (
+                          <ul class="add">
+                            {role.highlights.map((h) => (
+                              <li>
+                                <span aria-hidden="true">+ </span>
+                                {h}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                    <dl class="para trailers">
+                      <div>
+                        <dt>Type:</dt>
+                        <dd>{role.typeLabel}</dd>
+                      </div>
+                      {role.skills.length > 0 && (
+                        <div>
+                          <dt>Skills:</dt>
+                          <dd>{role.skills.join(", ")}</dd>
+                        </div>
+                      )}
+                      {org.project && (
+                        <div>
+                          <dt>See:</dt>
+                          <dd>
+                            <a class="tm-link" href={`#${org.project.anchor}`}>
+                              ~/projects/{org.project.folder}
+                            </a>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
                   </div>
-                )}
-                <div>
-                  <dt>date</dt>
-                  <dd>
-                    {role.period}
-                    {!role.current && ` (${role.duration})`}
-                  </dd>
                 </div>
-                <div>
-                  <dt>type</dt>
-                  <dd>{role.typeLabel}</dd>
-                </div>
-                {role.skills.length > 0 && (
-                  <div>
-                    <dt>skills</dt>
-                    <dd>{role.skills.join(", ")}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-          </details>
-        </li>
-      ))
-    }
-  </ol>
+              </details>
+            </li>
+          );
+        })
+      }
+    </ol>
+    <p class="tm-hint hint">
+      click a commit to show it<span class="tm-kb" aria-hidden="true">
+        {" · "}<kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> show
+      </span>
+    </p>
+  </div>
 </section>
 
 <style>
-  /* graph + hash · years · title · @ org · toggle. The body starts under the title. */
+  /*
+   * Terminal output: every line the same size and weight, coloured by token like git does
+   * (graph red, hash yellow, HEAD bold cyan, branch bold green, dates green). No row padding or separators.
+   */
+  .out {
+    --tl: 1.6;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: var(--fs-text);
+    line-height: var(--tl);
+  }
+
   .log {
-    --cols: 9ch 12ch var(--name) minmax(0, 1fr) 2ch;
-    --indent: calc(21ch + 6ch);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  /* The open commit's body hangs off the graph line, like `git log --graph`. */
-  .log .tm-body {
+  details {
+    margin: 0;
+  }
+
+  summary {
+    display: grid;
+    grid-template-columns: 2ch minmax(0, 1fr);
+    list-style: none;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--fg);
+    transition: background-color 0.15s;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* The affordance: the line lights up like a selection under the pointer or the keyboard. */
+  summary:hover,
+  summary:focus-visible {
+    background: var(--bg-hover);
+  }
+
+  summary:hover .s,
+  summary:focus-visible .s {
+    text-decoration: underline;
+    text-decoration-color: var(--dim);
+    text-underline-offset: 4px;
+  }
+
+  summary:focus-visible {
+    outline-offset: 0;
+  }
+
+  .g {
+    color: var(--fg);
+  }
+
+  /* Wrapped lines hang under the subject, past the hash and the dash (7 + 3 characters). */
+  .line {
+    display: block;
+    min-width: 0;
+    padding-left: 10ch;
+    text-indent: -10ch;
+    overflow-wrap: anywhere;
+  }
+
+  .c-open {
+    padding-left: 0;
+    text-indent: 0;
+  }
+
+  .h,
+  .deco {
+    color: var(--amber);
+  }
+
+  .ref-head {
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+  .ref-branch {
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  .dt {
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* The open commit, hanging off the graph line. Blank lines are one line-height of space. */
+  .show {
     position: relative;
+    padding: 0 0 calc(var(--tl) * 1em) 2ch;
+    color: var(--fg);
   }
 
-  .log .tm-body::before {
+  .show::before {
     content: "";
     position: absolute;
-    left: calc(8px + 0.5ch);
+    left: calc(0.5ch - 0.5px);
     top: 0;
-    bottom: 12px;
+    bottom: 0;
     width: 1px;
-    background: var(--line-2);
+    background: var(--red);
   }
 
-  @media (max-width: 900px) {
-    .log .tm-body {
-      padding-left: 3ch;
-    }
+  .show p,
+  .show ul,
+  .show dl {
+    margin: 0;
+  }
 
-    .log .tm-body::before {
-      left: calc(4px + 0.5ch);
-    }
+  /* "Org:    value": keys padded to 8 characters like git's header, values wrapping under themselves. */
+  .hdr > div,
+  .trailers > div {
+    display: grid;
+    grid-template-columns: 8ch minmax(0, 1fr);
+  }
 
+  .trailers > div {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 1ch;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .hdr dt {
+    color: var(--fg);
+  }
+
+  .hdr dd {
+    color: var(--fg);
+  }
+
+  /* The message, indented four spaces. */
+  .msg {
+    margin-top: calc(var(--tl) * 1em);
+    padding-left: 4ch;
+  }
+
+  .para {
+    margin-top: calc(var(--tl) * 1em) !important;
+  }
+
+  .msg p:not(.subject),
+  .trailers {
+    color: var(--muted);
+  }
+
+  .trailers dt {
+    color: var(--muted);
+  }
+
+  .add {
+    padding: 0;
+    list-style: none;
+  }
+
+  .add li {
+    padding-left: 2ch;
+    text-indent: -2ch;
+    color: var(--green);
+  }
+
+  .hint {
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .msg {
+      padding-left: 2ch;
+    }
   }
 </style>

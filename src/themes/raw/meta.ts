@@ -1,12 +1,10 @@
 import type { ThemeMeta } from "../types";
-import { heroImage } from "./hero";
 
 export default {
   name: "Raw",
   order: 1,
   themeColor: { light: "#eef1f3", dark: "#16191b" },
   colorScheme: "light dark",
-  heroImage,
   // Its own light/dark choice, before paint so the stored or system scheme never flashes.
   boot: (root) => {
     let scheme: string | null = null;

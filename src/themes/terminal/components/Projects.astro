@@ -18,7 +18,7 @@ const nameWidth = Math.max(...projects.map((p) => p.folder.length));
   <ul class="tm-list" data-list="projects" data-print style={`--name:${nameWidth}ch`}>
     {projects.map((project) => <ProjectRow project={project} />)}
   </ul>
-  <p class="keys t-meta" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> open</p>
+  <p class="tm-hint tm-kb" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> open</p>
 
   <!-- Cursor-following preview (fine pointers only); stays display:none, so its lazy images load on first hover. -->
   <div class="peek" data-peek aria-hidden="true" hidden>
@@ -58,31 +58,6 @@ const nameWidth = Math.max(...projects.map((p) => p.folder.length));
       --cols: 10ch 12ch var(--name) minmax(0, 1fr) 2ch;
       --indent: calc(22ch + 6ch);
     }
-  }
-
-  .keys {
-    display: none;
-    margin: 0;
-    color: var(--dim);
-  }
-
-  /* Only where the keys work: a keyboard-and-mouse device, with client.ts running. */
-  @media (hover: hover) and (pointer: fine) {
-    :global(html[data-theme="terminal"].tm-ready) .keys {
-      display: block;
-    }
-  }
-
-  kbd {
-    display: inline-block;
-    min-width: 1.6em;
-    padding: 0 0.4em;
-    border: 1px solid var(--line-2);
-    border-radius: 3px;
-    color: var(--muted);
-    font: inherit;
-    line-height: 1.5;
-    text-align: center;
   }
 
   .peek {

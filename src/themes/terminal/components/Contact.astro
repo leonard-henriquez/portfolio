@@ -1,7 +1,6 @@
 ---
 import { MARKDOWN_PATHS } from "../../../lib/markdown";
 import type { Profile } from "../../../lib/portfolio";
-import { token } from "../lib";
 import Prompt from "./Prompt.astro";
 
 interface Props {
@@ -13,7 +12,6 @@ const { contact } = profile;
 const { preferred } = contact;
 // "linkedin.com/in/…": the URL as you would type it after `open`.
 const host = preferred.href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-const year = new Date().getFullYear();
 // For AI agents: the Markdown version of the site (src/lib/markdown.ts).
 const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
 ---
@@ -41,7 +39,6 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
         <a href={llmsTxt} type="text/plain" title="This site as Markdown, for AI agents">llms.txt</a>
       </li>
     </ul>
-    <p>exit 0 — {token(profile.location.city)}, {year}</p>
   </div>
 </footer>
 
@@ -129,12 +126,7 @@ const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
     color: var(--amber);
   }
 
-  .bar p {
-    margin: 0;
-    color: var(--dim);
-  }
-
-  /* Phones: no room for a third link next to the status line. The link stays in the markup for agents. */
+  /* Phones: the two social links only. The llms.txt link stays in the markup for agents. */
   @media (max-width: 479px) {
     .agents {
       display: none;

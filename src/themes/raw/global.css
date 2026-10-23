@@ -11,13 +11,12 @@
  * Light/dark is Raw's own setting: html[data-raw-scheme], set before paint by `boot` in meta.ts.
  */
 
-/* Ink and fog are sampled from the hero image so the page and the picture share one palette. */
+/* Ink on a cool grey paper. */
 :root:where([data-theme="raw"]) {
   --bg: #eef1f3;
   --card: #f7f9fa;
   --fg: #232729;
   --muted: #646b71;
-  --fog: #ccd3d9;
   --gutter: 16px;
   color-scheme: light;
 
@@ -36,7 +35,6 @@
   --card: #1c2023;
   --fg: #dde3e8;
   --muted: #8b939a;
-  --fog: #2a3035;
   color-scheme: dark;
 }
 

@@ -7,57 +7,123 @@ interface Props {
 }
 
 /*
- * `tree ~/education`, one line per school: branch, years, school, program. Every school has exactly one program
- * line, always in the same column; nothing else to open.
+ * `tree ~/education`, as `tree -C` prints it: every school is a directory (bold blue) holding the same two
+ * files, its program then its years, and the usual "N directories, M files" summary.
+ * The guides (├──, │, └──) are drawn in CSS rather than typed, so they stay continuous whatever the line height
+ * and keep their place when a long name wraps (wrapped lines hang under the name). They, the root line and the
+ * summary are decoration: screen readers get nested lists of schools, programs and years.
  */
 const { education } = Astro.props;
-// Like `tree` and `ls`, a name with spaces is quoted.
-const folder = (school: string) => (/\s/.test(school) ? `'${school}'/` : `${school}/`);
-const nameWidth = Math.max(...education.map((e) => folder(e.school).length));
+const files = education.length * 2;
 ---
 
 {
   education.length > 0 && (
     <section id="education" class="tm-section" aria-labelledby="education-title">
       <Prompt cmd="tree ~/education" label="Education" id="education-title" />
-      <ol class="tm-list edu" data-print style={`--name:${nameWidth}ch`}>
-        {education.map((e, i) => (
-          <li class="tm-row tm-line ln" style={`--i:${i}`} id={e.anchor}>
-            <span class="c-meta t-meta t-dim" aria-hidden="true">
-              {i === education.length - 1 ? "└──" : "├──"}
-            </span>
-            <span class="c-meta t-meta">{e.years}</span>
-            <span class="c-main">
-              <span class="c-name t-name">
+      <div class="out" data-print>
+        <p class="ln dir" style="--i:0" aria-hidden="true">
+          ~/education
+        </p>
+        <ul class="tree">
+          {education.map((e, i) => (
+            <li class="ln" style={`--i:${i + 1}`} id={e.anchor}>
+              <span class="dir">
                 {e.href ? (
                   <a href={e.href} rel="noopener">
-                    {folder(e.school)}
+                    {e.school}
                   </a>
                 ) : (
-                  folder(e.school)
+                  e.school
                 )}
               </span>
-              <span class="c-sec t-text">{e.program}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
+              <ul class="tree">
+                <li>{e.program}</li>
+                <li class="years">{e.years}</li>
+              </ul>
+            </li>
+          ))}
+        </ul>
+        <p class="ln count" style={`--i:${education.length + 1}`} aria-hidden="true">
+          {education.length} {education.length === 1 ? "directory" : "directories"}, {files}{" "}
+          {files === 1 ? "file" : "files"}
+        </p>
+      </div>
     </section>
   )
 }
 
 <style>
-  /* branch · years · school · program · (no toggle: nothing more to show). */
-  .edu {
-    --cols: 3ch 12ch var(--name) minmax(0, 1fr) 2ch;
+  .out {
+    --tl: 1.6;
+    color: var(--fg);
+    font-size: var(--fs-text);
+    line-height: var(--tl);
   }
 
-  a {
+  .out p {
+    margin: 0;
+  }
+
+  .tree {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Each entry: 4 columns of guide ("├── "), then the name; wrapped lines hang under the name. */
+  .tree > li {
+    position: relative;
+    padding-left: 4ch;
+    overflow-wrap: anywhere;
+  }
+
+  /* The vertical guide: through the whole entry (and its children), or down to the elbow for the last one. */
+  .tree > li::before,
+  .tree > li::after {
+    content: "";
+    position: absolute;
+    left: calc(0.5ch - 0.5px);
+    background: var(--muted);
+  }
+
+  .tree > li::before {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+  }
+
+  .tree > li:last-child::before {
+    bottom: auto;
+    height: calc(var(--tl) * 0.5em);
+  }
+
+  /* The branch: from the guide to just before the name, at the middle of the first line. */
+  .tree > li::after {
+    top: calc(var(--tl) * 0.5em - 0.5px);
+    width: 2.5ch;
+    height: 1px;
+  }
+
+  .dir {
+    color: var(--dir);
+    font-weight: 700;
+  }
+
+  .dir a {
+    color: inherit;
     text-decoration: none;
-    transition: color 0.2s;
   }
 
-  a:hover {
-    color: var(--amber);
+  .dir a:hover {
+    text-decoration: underline;
+  }
+
+  .years {
+    color: var(--muted);
+  }
+
+  .count {
+    margin-top: calc(var(--tl) * 1em) !important;
   }
 </style>
