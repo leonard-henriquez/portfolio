@@ -1,9 +1,9 @@
 ---
 /**
- * One table row that opens a panel: the theme's one disclosure, for every list (see the table styles in Page.astro).
+ * One table row that opens a panel: the theme's one disclosure, for every list (see the table styles in global.css).
  * The `row` slot holds the row's cells (`.mn-no`, `.mn-name`, `.mn-desc`, `.mn-meta`…, all phrasing content);
  * the default slot the panel's content, laid out on the panel grid (`.mn-p-text`, `.mn-facts`…).
- * Without JS the panel is shown (see Page.astro); with it, client.ts toggles and animates it, and opens it
+ * Without JS the panel is shown (see global.css); with it, client.ts toggles and animates it, and opens it
  * when the URL fragment names `id`.
  */
 interface Props {

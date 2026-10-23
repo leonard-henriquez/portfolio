@@ -101,7 +101,7 @@ function renderProject(project: Project, level: number, byline?: string): string
 /** One project on its own: `/projects/<id>.md`. Says whose project it is, since it is often read alone. */
 export function renderProjectPage(portfolio: Portfolio, project: Project, site: URL): string {
   const { profile } = portfolio;
-  const byline = `A project by ${profile.name} (${profile.current.label}). Full profile: ${url(MARKDOWN_PATHS.full, site)}`;
+  const byline = `A project by ${profile.name} (${profile.current.label}). Web page: ${url(project.href, site)}. Full profile: ${url(MARKDOWN_PATHS.full, site)}`;
   return renderProject(project, 1, byline) + "\n";
 }
 

@@ -15,3 +15,6 @@ export const IMAGE_STYLES = ["photo", "pixel", "illustration", "illustrationPixe
  * file named like a section ("about", "contact"…) can never collide with a theme's section anchors.
  */
 export const PROJECT_ANCHOR_PREFIX = "project-";
+
+/** URL of a project's own page, relative to the site root: `/projects/<id>/` (src/pages/projects/[slug]/index.astro). */
+export const projectPath = (id: string) => `/projects/${id}/`;

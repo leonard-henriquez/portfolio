@@ -1,0 +1,396 @@
+---
+/**
+ * Contemplation, one project: its landscape under the header, then quiet sections on the paper, as on the home page.
+ * Kicker, title and dek; the landscape (the project's panorama, or its illustration); the results as figures (the
+ * Intro's cards); the long description beside the facts; the highlights; the projects before and after it.
+ * Everything is open: there is nothing to disclose on a page about one project.
+ */
+import "@fontsource-variable/space-grotesk/wght.css";
+import "@fontsource/space-mono/400.css";
+import { Image } from "astro:assets";
+import type { ThemeProjectPageProps } from "../types";
+import "./global.css";
+import Footer from "./components/Footer.astro";
+import Header from "./components/Header.astro";
+import { projectBanner } from "./vista";
+
+type Props = ThemeProjectPageProps;
+
+const { portfolio, project: p, previous, next } = Astro.props;
+const { profile } = portfolio;
+const banner = projectBanner(p);
+// The home page's section the project is listed in (Page.astro).
+const section = p.status === "released" || p.status === "building" ? "Selected work" : "Explorations";
+const facts = [
+  { label: "Role", value: p.role },
+  { label: "Status", value: `${p.statusLabel} · ${p.period}` },
+  ...(p.stack.length > 0 ? [{ label: "Stack", value: p.stack.join(" · ") }] : []),
+  ...(p.tags.length > 0 ? [{ label: "Tags", value: p.tags.join(" · ") }] : []),
+];
+const neighbours = [
+  ...(previous ? [{ rel: "prev", label: "Previous", project: previous }] : []),
+  ...(next ? [{ rel: "next", label: "Next", project: next }] : []),
+];
+---
+
+<a class="ct-skip" href="#project">Skip to the project</a>
+<Header profile={profile} base="/" />
+<main id="project">
+  <article aria-labelledby="project-title">
+    <header class="head ct-wrap">
+      <a class="back ct-mono" href={`/#${p.anchor}`}><span aria-hidden="true">← </span>{section}</a>
+      <p class="kicker ct-mono ct-aside">{p.role} · {p.statusLabel} · {p.period}</p>
+      <h1 id="project-title" class="title">{p.title}</h1>
+      <p class="dek">{p.dek}</p>
+    </header>
+
+    {
+      banner && (
+        <div class="ct-wrap">
+          <div class="banner" style={banner.sky ? `--sky: ${banner.sky}` : undefined}>
+            <Image
+              src={banner.src}
+              widths={banner.widths}
+              sizes={banner.sizes}
+              alt={banner.alt}
+              loading="eager"
+              fetchpriority="high"
+              style={`object-position: ${banner.position}`}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    {
+      p.results.length > 0 && (
+        <section class="ct-wrap results-wrap" aria-label="Results">
+          <ul class="results" role="list">
+            {p.results.map((result) => (
+              <li class="result">{result}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="ct-section ct-wrap" aria-labelledby="about-project-title">
+      <div class="ct-head">
+        <h2 id="about-project-title" class="ct-mono">The project</h2>
+        <span class="ct-mono ct-aside">{p.no2}</span>
+      </div>
+      <div class="body">
+        {
+          (p.hasBody || p.summary !== p.dek) && (
+            <div class="prose">{p.hasBody ? <Fragment set:html={p.html} /> : <p>{p.summary}</p>}</div>
+          )
+        }
+        <dl class="facts">
+          {
+            facts.map((f) => (
+              <div>
+                <dt class="ct-mono">{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))
+          }
+          {
+            p.links.length > 0 && (
+              <div>
+                <dt class="ct-mono">Links</dt>
+                <dd class="links">
+                  {p.links.map((link) => (
+                    <a href={link.href} rel="noopener">
+                      {link.label}
+                      <span aria-hidden="true"> ↗</span>
+                    </a>
+                  ))}
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+      </div>
+    </section>
+
+    {
+      p.highlights.length > 0 && (
+        <section class="ct-section ct-wrap" aria-labelledby="highlights-title">
+          <div class="ct-head">
+            <h2 id="highlights-title" class="ct-mono">Highlights</h2>
+            <span class="ct-mono ct-aside">{p.highlights.length}</span>
+          </div>
+          <ul class="highlights" role="list">
+            {p.highlights.map((h) => (
+              <li class="ct-reveal">
+                <h3 class="hl-title">{h.title}</h3>
+                <p class="ct-body">{h.body}</p>
+                {h.result && <p class="hl-result ct-mono">{h.result}</p>}
+                {h.stack.length > 0 && <p class="hl-stack ct-mono">{h.stack.join(" · ")}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+
+  <nav class="ct-section ct-wrap" aria-labelledby="more-title">
+    <div class="ct-head">
+      <h2 id="more-title" class="ct-mono">More projects</h2>
+      <a class="ct-mono ct-aside" href="/#work">All projects</a>
+    </div>
+    <ul class="ct-list" role="list">
+      {
+        neighbours.map(({ rel, label, project }) => (
+          <li>
+            <a class="step ct-cols" href={project.href} rel={rel}>
+              <span class="ct-name ct-title">
+                <span class="sr-only">{label} project: </span>
+                {project.shortTitle}
+              </span>
+              <span class="ct-desc ct-body">
+                <span class="sr-only">, </span>
+                {project.focus}
+              </span>
+              <span class="ct-when ct-mono" aria-hidden="true">
+                {rel === "prev" ? "← " : ""}
+                {label}
+                {rel === "next" ? " →" : ""}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</main>
+<Footer profile={profile} />
+
+<style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: clamp(28px, 3vw, 44px);
+  }
+
+  .head > * {
+    margin: 0;
+  }
+
+  .back {
+    align-self: flex-start;
+    margin-bottom: clamp(24px, 4vw, 56px);
+    text-decoration: none;
+  }
+
+  /* The Intro's display style, for one project. */
+  .title {
+    max-width: 18ch;
+    font-size: clamp(44px, 6.4vw, 104px);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: var(--ink-deep);
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 40ch;
+    font-size: clamp(19px, 1.6vw, 23px);
+    line-height: 1.4;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .banner {
+    height: clamp(260px, 40vw, 600px);
+    margin-top: clamp(40px, 5vw, 72px);
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--sky, var(--rule));
+  }
+
+  .banner :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The Intro's figures (components/Intro.astro): a rule on top, the claim. */
+  .results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 32px 40px;
+    margin: clamp(56px, 6vw, 88px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .result {
+    padding-top: 18px;
+    border-top: 3px solid var(--accent);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  /* The long description, large, beside the facts. */
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+    gap: 40px clamp(40px, 6vw, 120px);
+    align-items: start;
+    padding-top: 28px;
+  }
+
+  .prose {
+    max-width: 60ch;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .prose :global(p) {
+    margin: 0;
+  }
+
+  .prose :global(p + p) {
+    margin-top: 0.8em;
+  }
+
+  .facts {
+    margin: 0;
+  }
+
+  .facts > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .facts > div:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .facts dt {
+    color: var(--accent);
+  }
+
+  .facts dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 18px;
+  }
+
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 40px;
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .highlights > li {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .highlights p {
+    margin: 0;
+  }
+
+  .hl-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .hl-result,
+  .hl-stack {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .hl-stack {
+    color: var(--accent);
+  }
+
+  /* Previous and next: the lists' rows, as links; the name nudges right and an ink rule fades in on hover. */
+  .step {
+    position: relative;
+    padding: 22px 0;
+    text-decoration: none;
+  }
+
+  .step .ct-title {
+    transition: transform 0.55s var(--ease);
+  }
+
+  .step::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .step:hover .ct-title,
+  .step:focus-visible .ct-title {
+    transform: translateX(10px);
+  }
+
+  .step:hover::after,
+  .step:focus-visible::after {
+    opacity: 1;
+  }
+
+  .step:focus-visible {
+    outline-offset: 6px;
+  }
+
+  /* No + mark here: the period column runs to the edge. */
+  .step.ct-cols {
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr) 150px;
+  }
+
+  @media (max-width: 860px) {
+    .body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .step.ct-cols {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step .ct-title,
+    .step::after {
+      transition: none;
+    }
+  }
+</style>

@@ -1,6 +1,6 @@
 ---
-import { Image } from "astro:assets";
 import type { Project } from "../../../lib/portfolio";
+import Readme from "./Readme.astro";
 
 interface Props {
   project: Project;
@@ -8,16 +8,9 @@ interface Props {
 
 /*
  * One `ls -la` line: permissions, status, period, folder, teaser. Opening it swaps the teaser (`focus`) for the
- * full `summary` in place and prints the README below: dek, body, links, picture, facts, highlights.
+ * full `summary` in place and prints the README below (components/Readme.astro), then a link to the project's page.
  */
 const { project: p } = Astro.props;
-const img = p.image.photo;
-// Status and period are on the line itself.
-const facts = [
-  { key: "role", value: p.role },
-  ...(p.stack.length ? [{ key: "stack", value: p.stack.join(" · ") }] : []),
-  ...(p.tags.length ? [{ key: "tags", value: p.tags.map((t) => `#${t}`).join(" ") }] : []),
-];
 const teaser = p.focus !== p.summary;
 ---
 
@@ -46,86 +39,12 @@ const teaser = p.focus !== p.summary;
       <span class="tm-tog" aria-hidden="true"></span>
     </summary>
 
-    <div class="tm-body readme">
-      <div class="grid">
-        <div class="doc">
-          {p.dek !== p.summary && <p class="t-lead">{p.dek}</p>}
-          {p.hasBody && <div class="prose t-text" set:html={p.html} />}
-          {
-            p.links.length > 0 && (
-              <ul class="links t-text">
-                {p.links.map((link) => (
-                  <li>
-                    <a class="tm-link" href={link.href} rel="noopener">
-                      {link.label}
-                      <span aria-hidden="true"> ↗</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )
-          }
-        </div>
-        <div class="side">
-          <figure>
-            <Image
-              src={img.src}
-              alt={img.alt}
-              widths={[360, 720]}
-              sizes="(min-width: 600px) 340px, calc(100vw - 40px)"
-              format={img.pixelated ? "png" : undefined}
-              loading="lazy"
-              decoding="async"
-              class:list={["shot", { pixelated: img.pixelated }]}
-              style={`object-position:${img.position}`}
-            />
-            <figcaption class="t-meta t-dim"><span aria-hidden="true"># </span>{img.caption}</figcaption>
-          </figure>
-          <dl class="tm-dl t-meta">
-            {
-              facts.map((f) => (
-                <div>
-                  <dt>{f.key}</dt>
-                  <dd>{f.value}</dd>
-                </div>
-              ))
-            }
-          </dl>
-        </div>
-      </div>
-      {
-        p.highlights.length > 0 && (
-          <div class="hl">
-            <h4 class="t-name">
-              <span class="t-amber" aria-hidden="true">## </span>highlights
-            </h4>
-            <ol class="tm-list tm-narrow hl-list">
-              {p.highlights.map((h, n) => (
-                <li class="tm-row">
-                  <details>
-                    <summary class="tm-line">
-                      <span class="c-meta t-meta t-amber">{String(n + 1).padStart(2, "0")}</span>
-                      <span class="c-main">
-                        <span class="c-name t-name">{h.title}</span>
-                      </span>
-                      <span class="tm-tog" aria-hidden="true" />
-                    </summary>
-                    <div class="tm-body">
-                      <p class="t-text">{h.body}</p>
-                      {h.result && (
-                        <ul class="tm-diff t-text">
-                          <li>{h.result}</li>
-                        </ul>
-                      )}
-                      {h.stack.length > 0 && <p class="t-meta">{h.stack.join(" · ")}</p>}
-                    </div>
-                  </details>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )
-      }
+    <div class="tm-body more">
+      <Readme project={p} />
+      <p class="t-meta page">
+        <a class="tm-link" href={p.href}>cd ~/projects/{p.folder}</a>
+        <span class="t-dim"> # the project's own page</span>
+      </p>
     </div>
   </details>
 </li>
@@ -180,123 +99,17 @@ const teaser = p.focus !== p.summary;
   }
 
   /* The README is wider than plain text bodies: it has a picture beside it. */
-  .readme {
+  .more {
     gap: 20px;
   }
 
-  .readme > .grid,
-  .readme > .hl {
+  .more > :global(.readme) {
     max-width: none;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
-    gap: 24px 48px;
-    align-items: start;
-  }
-
-  .doc {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 72ch;
-  }
-
-  h4 {
-    margin: 0;
-  }
-
-  .doc .t-lead {
-    max-width: 34ch;
-  }
-
-  .prose {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .prose :global(p) {
-    margin: 0;
-  }
-
-  .prose :global(a) {
-    color: var(--amber);
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 20px;
-    padding: 0;
-    list-style: none;
-  }
-
-  .side {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  figure {
-    margin: 0;
-  }
-
-  .shot {
-    width: 100%;
-    aspect-ratio: 18 / 11;
-    height: auto;
-    object-fit: cover;
-    border: 1px solid var(--line-2);
-    background: var(--bg-2);
-  }
-
-  .pixelated {
-    image-rendering: pixelated;
-  }
-
-  figcaption {
-    margin-top: 8px;
-  }
-
-  .hl {
-    display: flex;
-    max-width: calc(72ch + 320px + 48px);
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
-  }
-
-  /* Nested rows: number · title · toggle. */
-  .hl-list {
-    --cols: 2ch minmax(0, 1fr) 2ch;
-    --indent: 5ch;
-  }
-
-  /* Below this, the README's text gets the full width; picture and facts sit side by side under it. */
-  @media (max-width: 1180px) {
-    .grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .side {
-      display: grid;
-      grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
-      gap: 24px;
-      align-items: start;
-    }
   }
 
   @media (max-width: 1100px) {
     .perm {
       display: none;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .side {
-      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

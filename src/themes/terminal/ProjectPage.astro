@@ -1,0 +1,219 @@
+---
+/**
+ * Terminal, one project: `cat README.md` in the project's folder. A header line (status LED, period, role), the
+ * title in the display serif, the summary and results, then the same README the project's line opens on the home
+ * page (components/Readme.astro), its highlights open. `ls` lists the projects before and after it.
+ */
+import type { ThemeProjectPageProps } from "../types";
+import "./fonts.css";
+import "./global.css";
+import Contact from "./components/Contact.astro";
+import Header from "./components/Header.astro";
+import Prompt from "./components/Prompt.astro";
+import Readme from "./components/Readme.astro";
+
+type Props = ThemeProjectPageProps;
+
+const { portfolio, project: p, previous, next } = Astro.props;
+const { profile } = portfolio;
+const neighbours = [
+  ...(previous ? [{ rel: "prev", label: "prev", project: previous }] : []),
+  ...(next ? [{ rel: "next", label: "next", project: next }] : []),
+];
+const nameWidth = Math.max(...neighbours.map((n) => n.project.folder.length + 3), 4);
+---
+
+<a class="skip" href="#project">Skip to the project</a>
+<div class="progress" aria-hidden="true"></div>
+
+<Header profile={profile} base="/" />
+<main>
+  <article id="project" class="tm-section project" aria-labelledby="project-title">
+    <Prompt cmd={`cat ~/projects/${p.folder}README.md`} label={`${p.title}, README`} as="p" />
+    <header class="head">
+      <p class="t-meta line">
+        <span class="status"><span class="led" data-status={p.status} aria-hidden="true"></span>{p.status}</span>
+        <span aria-hidden="true">·</span>
+        <span>{p.period}</span>
+        <span aria-hidden="true">·</span>
+        <span>{p.role}</span>
+      </p>
+      <h1 id="project-title" class="title">{p.title}</h1>
+      <p class="t-text summary">{p.summary}</p>
+      {
+        p.results.length > 0 && (
+          <ul class="tm-diff t-text" aria-label="Results">
+            {p.results.map((result) => (
+              <li>{result}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+    <Readme project={p} page level={2} />
+  </article>
+
+  <nav class="tm-section more" aria-labelledby="more-title">
+    <Prompt cmd="ls ~/projects" label="More projects" id="more-title" />
+    <ul class="tm-list" style={`--name:${nameWidth}ch`}>
+      {
+        neighbours.map(({ rel, label, project }) => (
+          <li class="tm-row">
+            <a class="tm-line" href={project.href} rel={rel}>
+              <span class="c-meta t-meta t-dim">{label}</span>
+              <span class="c-main">
+                <span class="c-name t-name">../{project.folder}</span>
+                <span class="c-sec t-text">{project.focus}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+      <li class="tm-row">
+        <a class="tm-line" href={`/#${p.anchor}`}>
+          <span class="c-meta t-meta t-dim">all</span>
+          <span class="c-main">
+            <span class="c-name t-name">cd ~</span>
+            <span class="c-sec t-text">every project, on the home page</span>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</main>
+<Contact profile={profile} />
+
+<style>
+  /* The header is laid over the top of the page (components/Header.astro): leave it room. */
+  .project {
+    padding-top: clamp(140px, 14vw, 176px);
+  }
+
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 72ch;
+  }
+
+  .head > * {
+    margin: 0;
+  }
+
+  .line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 1.5ch;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Status LEDs, as in the project list (components/ProjectRow.astro). */
+  .led {
+    --c: var(--blue);
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 10px var(--c);
+  }
+
+  .led[data-status="released"] {
+    --c: var(--green);
+  }
+
+  .led[data-status="building"] {
+    --c: var(--amber);
+  }
+
+  .led[data-status="study"] {
+    --c: var(--violet);
+  }
+
+  /* The display style (the hero headline, components/Hero.astro), a size down. */
+  .title {
+    color: var(--fg);
+    font-family: var(--serif);
+    font-size: clamp(44px, 6.4vw, 96px);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .summary {
+    color: var(--fg);
+  }
+
+  .tm-diff {
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The README's top rule separates it from the header. */
+  .project > :global(.readme) {
+    padding-top: var(--gap);
+    border-top: 1px solid var(--line);
+  }
+
+  /* prev/next · folder · teaser. Links, not toggles: the same row, without the toggle. */
+  .more .tm-list {
+    --cols: 6ch var(--name) minmax(0, 1fr);
+  }
+
+  .more a.tm-line {
+    text-decoration: none;
+  }
+
+  .more a.tm-line::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-hover);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .more a.tm-line:hover::before,
+  .more a.tm-line:focus-visible::before {
+    transform: none;
+  }
+
+  .more a.tm-line:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .more .c-name {
+    transition: color 0.25s;
+  }
+
+  .more a.tm-line:hover .c-name,
+  .more a.tm-line:focus-visible .c-name {
+    color: var(--amber);
+  }
+
+  @media (max-width: 700px) {
+    .more .tm-list {
+      --cols: 6ch minmax(0, 1fr);
+    }
+
+    .more .c-sec {
+      grid-column: 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .more a.tm-line::before {
+      transition: none;
+    }
+  }
+</style>

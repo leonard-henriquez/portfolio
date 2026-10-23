@@ -1,0 +1,43 @@
+---
+/**
+ * `/projects/<id>/`: one project's page, in every theme (each theme's `ProjectPage.astro`, mounted like the home
+ * page's, see src/components/ThemeRoots.astro). Its Markdown twin is `/projects/<id>.md` (src/pages/projects/[slug].md.ts).
+ */
+import type { GetStaticPaths } from "astro";
+import ThemeRoots from "../../../components/ThemeRoots.astro";
+import Site from "../../../layouts/Site.astro";
+import { MARKDOWN_PATHS } from "../../../lib/markdown";
+import { getPortfolio, type Project } from "../../../lib/portfolio";
+import { projectPageJsonLd } from "../../../lib/structured-data";
+import { defaultTheme, themes } from "../../../themes/registry";
+
+export const getStaticPaths = (async () => {
+  const { projects } = await getPortfolio();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const portfolio = await getPortfolio();
+const { profile, projects } = portfolio;
+const previous = projects[project.index - 1];
+const next = projects[project.index + 1];
+
+const heroImages = Object.fromEntries(themes.map((t) => [t.slug, t.meta.projectHeroImage?.(portfolio, project)]));
+const ogImage = heroImages[defaultTheme.slug]?.src ?? project.image.photo.src;
+---
+
+<Site
+  title={`${project.title} · ${profile.name}`}
+  description={project.summary}
+  ogType="article"
+  ogImage={ogImage}
+  jsonLd={projectPageJsonLd(portfolio, project, Astro.site!)}
+  markdownPath={MARKDOWN_PATHS.project(project)}
+  heroImages={heroImages}
+>
+  <ThemeRoots page="ProjectPage" props={{ portfolio, project, previous, next }} />
+</Site>

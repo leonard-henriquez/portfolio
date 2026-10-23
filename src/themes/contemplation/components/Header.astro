@@ -1,0 +1,55 @@
+---
+/** The name and the navigation, on the paper, at the top of every page. */
+import type { Profile } from "../../../lib/portfolio";
+
+interface Props {
+  profile: Profile;
+  /** Where the home page's sections are: "" on the home page, "/" elsewhere. */
+  base?: string;
+}
+
+const { profile, base = "" } = Astro.props;
+
+const nav = [
+  { label: "Work", href: `${base}#work` },
+  { label: "Explorations", href: `${base}#explorations` },
+  { label: "About", href: `${base}#about` },
+  // The contact footer is on every page.
+  { label: "Contact", href: "#contact" },
+];
+---
+
+<header id="top" class="header ct-wrap">
+  <a class="ct-mono home" href={`${base}#top`}>{profile.name}</a>
+  <nav aria-label="Sections">
+    {
+      nav.map((item) => (
+        <a class="ct-mono" href={item.href}>
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</header>
+
+<style>
+  .header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-block: 20px;
+    color: var(--ink);
+  }
+
+  .header a {
+    text-decoration: none;
+  }
+
+  .header nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+</style>

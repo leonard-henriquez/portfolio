@@ -1,7 +1,7 @@
 import groteskLatin from "@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url";
 import monoLatin from "@fontsource/space-mono/files/space-mono-latin-400-normal.woff2?url";
 import type { ThemeMeta } from "../types";
-import { heroImage } from "./vista";
+import { heroImage, projectHeroImage } from "./vista";
 
 export default {
   name: "Contemplation",
@@ -13,6 +13,7 @@ export default {
     { href: monoLatin, as: "font", type: "font/woff2" },
   ],
   heroImage,
+  projectHeroImage,
   ogImage: (portfolio) => heroImage(portfolio).src,
   // Collapsed panels only apply under `ct-js`, so the page reads fine without JS.
   boot: (root) => {

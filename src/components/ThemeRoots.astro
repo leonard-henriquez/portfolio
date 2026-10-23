@@ -1,0 +1,33 @@
+---
+/**
+ * Every theme's markup for one page (see src/themes/types.ts): the default theme rendered as-is, first, for crawlers
+ * and visitors without JavaScript; the others inert in <template>s until Site.astro's scripts mount the one the
+ * visitor picked. `page` names the component each theme renders here (`Page` on `/`, `ProjectPage` on a project).
+ */
+import type { ThemePageProps, ThemeProjectPageProps } from "../themes/types";
+import { defaultTheme, themes } from "../themes/registry";
+
+type Props =
+  | { page: "Page"; props: ThemePageProps }
+  | { page: "ProjectPage"; props: ThemeProjectPageProps };
+
+const { page, props } = Astro.props;
+const Default = defaultTheme[page];
+const others = themes.filter((theme) => theme !== defaultTheme);
+---
+
+<div data-theme-root={defaultTheme.slug}>
+  <Default {...props} />
+</div>
+{
+  others.map((theme) => {
+    const Page = theme[page];
+    return (
+      <template data-theme-root={theme.slug}>
+        <div data-theme-root={theme.slug}>
+          <Page {...props} />
+        </div>
+      </template>
+    );
+  })
+}

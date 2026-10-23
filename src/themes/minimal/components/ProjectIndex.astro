@@ -1,7 +1,7 @@
 ---
 /**
  * The project index: No. · Project · Focus · Status · Year, one line per project. A row opens the project
- * (dek, description, facts, image, highlights); on fine pointers a preview of its image follows the cursor.
+ * (dek, description, a link to its own page, facts, image, highlights); on fine pointers a preview of its image follows the cursor.
  */
 import type { Portfolio } from "../../../lib/portfolio";
 import { pad } from "../../../lib/portfolio";
@@ -52,6 +52,11 @@ const { projects } = Astro.props.portfolio;
                 <p.Content />
               </div>
             )}
+            <p>
+              <a class="mn-link p-page" href={p.href}>
+                The project's page<span aria-hidden="true"> →</span>
+              </a>
+            </p>
           </div>
 
           <dl class="mn-facts">
@@ -150,9 +155,13 @@ const { projects } = Astro.props.portfolio;
 </section>
 
 <style>
-  /* Only what is particular to projects; the table, the row and the panel grid are in Page.astro. */
+  /* Only what is particular to projects; the table, the row and the panel grid are in global.css. */
   .p-title {
     color: var(--mute);
+  }
+
+  .p-page {
+    color: var(--ink);
   }
 
   .prose :global(p) {
@@ -412,7 +421,7 @@ const { projects } = Astro.props.portfolio;
       order: -1;
     }
 
-    /* Beats the panel's one-column rule (Page.astro): highlights keep their number column. */
+    /* Beats the panel's one-column rule (global.css): highlights keep their number column. */
     :global(.mn-panel-in) > .p-hl {
       --indent: 2.75rem;
       grid-column: 1 / -1;

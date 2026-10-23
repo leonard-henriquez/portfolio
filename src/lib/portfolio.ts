@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import { IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES } from "./constants";
+import { IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES, projectPath } from "./constants";
 
 /*
  * The one contract between content and themes.
@@ -62,6 +62,8 @@ export interface Project {
    * Every theme uses it, so a deep link opens the project whatever the theme.
    */
   anchor: string;
+  /** The project's own page, relative to the site root: "/projects/durable-exec-s3/". Every theme renders it. */
+  href: string;
   /** `id` + "/", for directory-listing layouts. */
   folder: string;
   /** 0-based position in display order. */
@@ -287,6 +289,7 @@ async function resolveProject(entry: CollectionEntry<"projects">, index: number)
   return {
     id: entry.id,
     anchor: `${PROJECT_ANCHOR_PREFIX}${entry.id}`,
+    href: projectPath(entry.id),
     folder: `${entry.id}/`,
     index,
     number,

@@ -1,8 +1,8 @@
 import type { ImageMetadata, ImageOutputFormat } from "astro";
-import type { Portfolio } from "../lib/portfolio";
+import type { Portfolio, Project } from "../lib/portfolio";
 
 /**
- * Every theme renders on the one page at `/`; the visitor picks which one is shown.
+ * Every theme renders on every page (`/`, and each project's `/projects/<id>/`); the visitor picks which one is shown.
  * A theme is a folder `src/themes/<slug>/` (folders starting with "_" are ignored) containing:
  *
  * - `Page.astro` (required): the theme's markup, without `<html>`, `<head>` or `<body>`.
@@ -17,15 +17,28 @@ import type { Portfolio } from "../lib/portfolio";
  *   - It sets the theme switcher's custom properties (`--switcher-*`, see
  *     `src/components/ThemeSwitcher.astro`) on `html[data-theme="<slug>"]` to blend it in, and marks
  *     rows the fixed switcher must not cover (e.g. the last footer line) with `data-switcher-avoid`.
+ * - `ProjectPage.astro` (required): the theme's page for one project, `/projects/<id>/`. Same rules as
+ *   `Page.astro` (it is mounted the same way, see src/pages/projects/[slug]/index.astro), but it receives
+ *   `ThemeProjectPageProps`. It links back to the home page (`/`, and `/#<project.anchor>` for the project's row).
+ *   Global CSS shared with `Page.astro` belongs in a file both import (each theme's `global.css`).
  * - `meta.ts` (optional): `export default { name, … } satisfies ThemeMeta`. Document-level settings
  *   that used to be `<head>` content: they are applied by an inline script when the theme is active.
  * - `client.ts` (optional): a browser module, imported only when this theme is active, after its
- *   markup is in the DOM. It runs on import. `src/themes/active.ts` has helpers.
+ *   markup is in the DOM, on every page (so it must cope with elements that only one of them has).
+ *   It runs on import. `src/themes/active.ts` has helpers.
  *
  * Adding the folder is enough: the page and the switcher pick it up (restart the dev server if needed).
  */
 export interface ThemePageProps {
   portfolio: Portfolio;
+}
+
+export interface ThemeProjectPageProps {
+  portfolio: Portfolio;
+  project: Project;
+  /** The projects before and after it in display order, for the page's navigation. */
+  previous?: Project;
+  next?: Project;
 }
 
 export interface ThemePreload {
@@ -71,6 +84,11 @@ export interface ThemeMeta {
    * Return the same object the theme renders its hero with (see `ThemeHeroImage`).
    */
   heroImage?: (portfolio: Portfolio) => ThemeHeroImage;
+  /**
+   * The same for `ProjectPage.astro`: its hero image for this project, preloaded the same way. When the theme is the
+   * default, it is also the project page's social image (which otherwise is the project's photo).
+   */
+  projectHeroImage?: (portfolio: Portfolio, project: Project) => ThemeHeroImage | undefined;
   /** Social preview image, used when this theme is the default. Defaults to the profile hero image. */
   ogImage?: (portfolio: Portfolio) => ImageMetadata;
   /**
