@@ -2,8 +2,8 @@
  * Minimal theme behaviour, imported only while Minimal is the active theme. Progressive: the page is complete without it.
  * (The load sequence is CSS plus a few lines in meta.ts's `boot`, so it never waits for this module.)
  * - IntersectionObserver reveals where CSS scroll-driven animations are missing
- * - project disclosures, animated with FLIP (transform and clip-path only)
- * - the cursor-following preview on fine pointers
+ * - the disclosures of every table (components/Disclosure.astro), animated with FLIP (transform and clip-path only)
+ * - the cursor-following preview of the project index on fine pointers
  */
 
 import { projectFromHash } from "../active";
@@ -36,7 +36,7 @@ function revealFallback() {
     },
     { rootMargin: "0px 0px -6% 0px" },
   );
-  document.querySelectorAll(".mn-reveal, .mn-rule").forEach((el) => io.observe(el));
+  document.querySelectorAll(".mn-reveal").forEach((el) => io.observe(el));
 }
 
 /* Disclosures */
@@ -89,8 +89,8 @@ function stop(item: HTMLElement): Running {
 }
 
 function setOpen(item: HTMLElement, open: boolean, animate = true) {
-  const button = item.querySelector<HTMLButtonElement>(".row");
-  const panel = item.querySelector<HTMLElement>(".panel");
+  const button = item.querySelector<HTMLButtonElement>("[data-mn-row]");
+  const panel = item.querySelector<HTMLElement>("[data-mn-panel]");
   const inner = panel?.firstElementChild as HTMLElement | null;
   if (!button || !panel || !inner) return;
   if (open === item.classList.contains("is-open")) return;
@@ -150,19 +150,20 @@ function setOpen(item: HTMLElement, open: boolean, animate = true) {
 }
 
 function disclosures(list: HTMLElement, onToggle: () => void) {
-  const items = [...list.querySelectorAll<HTMLElement>(".item")];
+  const items = [...list.querySelectorAll<HTMLElement>("[data-mn-item]")];
   for (const item of items) {
-    // Not in the markup: without JS every panel is shown (see ProjectIndex.astro).
-    item.querySelector(".row")?.setAttribute("aria-expanded", "false");
-    item.querySelector(".row")?.addEventListener("click", () => {
+    const row = item.querySelector("[data-mn-row]");
+    // Not in the markup: without JS every panel is shown (see Page.astro).
+    row?.setAttribute("aria-expanded", "false");
+    row?.addEventListener("click", () => {
       setOpen(item, !item.classList.contains("is-open"));
       onToggle();
     });
     // Find-in-page reveals `hidden="until-found"` panels; keep the button state in sync.
-    item.querySelector(".panel")?.addEventListener("beforematch", () => setOpen(item, true, false));
+    item.querySelector("[data-mn-panel]")?.addEventListener("beforematch", () => setOpen(item, true, false));
   }
 
-  // `#project-<id>` (or a bare `#<id>`, see projectFromHash) opens that project.
+  // The fragment opens the item it names: `#project-<id>` (or a bare `#<id>`, see projectFromHash), `#experience-<id>`…
   const openFromHash = () => {
     const target = projectFromHash(items);
     if (!target) return;
@@ -268,8 +269,8 @@ function preview(list: HTMLElement) {
   };
 
   const rowAt = (px: number, py: number) => {
-    const row = document.elementFromPoint(px, py)?.closest<HTMLElement>(".row");
-    return row && list.contains(row) && !row.closest(".item")?.classList.contains("is-open") ? row : null;
+    const row = document.elementFromPoint(px, py)?.closest<HTMLElement>("[data-mn-row]");
+    return row && list.contains(row) && !row.closest("[data-mn-item]")?.classList.contains("is-open") ? row : null;
   };
 
   const update = () => {
@@ -312,9 +313,9 @@ function preview(list: HTMLElement) {
 
   // Keyboard: park the preview beside the focused row.
   list.addEventListener("focusin", (e) => {
-    const row = (e.target as HTMLElement).closest<HTMLElement>(".row");
+    const row = (e.target as HTMLElement).closest<HTMLElement>("[data-mn-row]");
     if (!row || !finePointer.matches || pointerInside || !row.matches(":focus-visible")) return;
-    if (row.closest(".item")?.classList.contains("is-open")) return hide();
+    if (row.closest("[data-mn-item]")?.classList.contains("is-open")) return hide();
     const r = row.getBoundingClientRect();
     const wasVisible = visible;
     show(Number(row.dataset.index));
@@ -331,10 +332,12 @@ function preview(list: HTMLElement) {
 /* Boot */
 
 revealFallback();
-const list = document.querySelector<HTMLElement>("[data-mn-list]");
-if (list && enhanced) {
-  const hidePreview = preview(list);
-  disclosures(list, hidePreview);
+if (enhanced) {
+  const projects = document.querySelector<HTMLElement>("[data-mn-list]");
+  const hidePreview = projects ? preview(projects) : () => undefined;
+  for (const list of document.querySelectorAll<HTMLElement>("[data-mn-disclosures]")) {
+    disclosures(list, list === projects ? hidePreview : () => undefined);
+  }
 }
 
 export {}; // A module, so its top-level names stay private.

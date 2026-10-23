@@ -10,7 +10,7 @@ export default {
   preload: [{ href: interLatin, as: "font", type: "font/woff2" }],
   heroImage,
   ogImage: (portfolio) => heroImage(portfolio).src,
-  // Hidden-until-revealed states (and collapsed project panels) only apply under `mn-js`, so the page reads fine without JS.
+  // Hidden-until-revealed states (and collapsed table panels) only apply under `mn-js`, so the page reads fine without JS.
   boot: (root) => {
     root.classList.add("mn-js");
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;

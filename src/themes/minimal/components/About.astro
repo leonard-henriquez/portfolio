@@ -1,140 +1,149 @@
 ---
+/**
+ * About: the short version and the key figures; the long version, the stack and the motto open on demand.
+ * The current role and focus areas are not repeated here: the hero says them.
+ */
 import type { Profile } from "../../../lib/portfolio";
+import Disclosure from "./Disclosure.astro";
 
 interface Props {
   profile: Profile;
 }
 
 const { profile } = Astro.props;
-const { current } = profile;
+const { about, numbers, stack, quote } = profile;
 ---
 
-<section id="about" class="about mn-wrap mn-grid" aria-labelledby="about-title">
+<section id="about" class="about mn-section mn-wrap" aria-labelledby="about-title">
   <h2 id="about-title" class="mn-label">About</h2>
-  <div class="body">
-    <div class="text">
-      {profile.about.long.map((p) => <p class="mn-reveal">{p}</p>)}
-    </div>
-    <dl class="facts">
-      <div class="fact mn-rule">
-        <dt>Now</dt>
-        <dd class="mn-reveal">
-          {current.title}, {current.href ? <a class="mn-link" href={current.href}>{current.org}</a> : current.org}
-          {current.orgDetail && ` (${current.orgDetail})`}
-          <span class="since">Since {current.since}</span>
-        </dd>
-      </div>
-      {
-        profile.focusAreas.length > 0 && (
-          <div class="fact mn-rule">
-            <dt>Focus</dt>
-            <dd class="mn-reveal" style="--range-end: 26%">
-              {profile.focusAreas.join(", ")}
-            </dd>
-          </div>
-        )
-      }
-      {
-        profile.stackItems.length > 0 && (
-          <div class="fact mn-rule">
-            <dt>Stack</dt>
-            <dd class="mn-reveal" style="--range-end: 30%">
-              {profile.stackItems.join(", ")}
-            </dd>
-          </div>
-        )
-      }
-    </dl>
+
+  <div class="summary mn-grid">
+    <p class="short mn-title mn-reveal">{about.short}</p>
+    {
+      numbers.length > 0 && (
+        <dl class="figures mn-reveal" style={`--n: ${Math.min(numbers.length, 4)}`}>
+          {numbers.map((n) => (
+            <div class="fig">
+              <dt class="value mn-title">{n.value}</dt>
+              <dd class="caption mn-small">{n.label}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
   </div>
+
+  <ul class="mn-table more" role="list" data-mn-disclosures>
+    <Disclosure id="about-more">
+      <Fragment slot="row">
+        <span class="toggle mn-small">More about me</span>
+      </Fragment>
+
+      <div class="mn-p-text">
+        {about.long.map((p) => <p>{p}</p>)}
+      </div>
+
+      {
+        (stack.length > 0 || quote) && (
+          <dl class="mn-facts">
+            {stack.map((group) => (
+              <div>
+                <dt>{group.label}</dt>
+                <dd>{group.items.join(", ")}</dd>
+              </div>
+            ))}
+            {quote && (
+              <div>
+                <dt>Motto</dt>
+                <dd>
+                  {quote.text}
+                  {quote.context && <span class="context">{quote.context}</span>}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )
+      }
+    </Disclosure>
+  </ul>
 </section>
 
 <style>
-  .about {
-    padding-top: clamp(96px, 11vw, 160px);
-    row-gap: 24px;
+  /* The ink rule and the columns of the tables, so About reads on the same grid. */
+  .summary {
+    row-gap: 32px;
+    padding: var(--row-pad) 0 calc(var(--row-pad) + 12px);
+    border-top: 1px solid var(--ink);
   }
 
-  .mn-label {
-    grid-column: 1 / span 3;
-  }
-
-  .body {
-    grid-column: 4 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-    row-gap: clamp(40px, 4vw, 56px);
-  }
-
-  .text {
-    grid-column: 1 / span 8;
-    font-size: clamp(20px, 1.9vw, 27px);
-    line-height: 1.4;
-    letter-spacing: -0.015em;
-  }
-
-  .text p {
+  .short {
+    grid-column: 2 / span 8;
     margin: 0;
-    max-width: 34em;
+    max-width: 38em;
     text-wrap: pretty;
   }
 
-  .text p + p {
-    margin-top: 0.9em;
-  }
-
-  .facts {
-    --rule-color: var(--ink);
-    grid-column: 1 / -1;
+  .figures {
+    grid-column: 2 / span 8;
     display: grid;
-    grid-template-columns: subgrid;
-    row-gap: 24px;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 24px var(--gap);
     margin: 0;
-    font-size: 15px;
-    line-height: 1.5;
   }
 
-  .fact {
-    grid-column: span 3;
-    padding-top: 12px;
+  .value {
+    white-space: nowrap;
   }
 
-  dt {
-    font-size: 13px;
+  .caption {
+    margin: 4px 0 0;
+    max-width: 22ch;
     color: var(--mute);
+    text-wrap: pretty;
   }
 
-  dd {
-    margin: 6px 0 0;
+  /* The toggle row: a control, in the small style, on the name column. */
+  ul.more {
+    border-top-color: var(--rule);
   }
 
-  .since {
+  .toggle {
+    grid-column: 2 / span 8;
+    grid-row: 1;
+    color: var(--ink);
+  }
+
+  .more :global(.mn-plus) {
+    top: calc(var(--row-pad) + var(--t-small) * 0.725 - 6px);
+  }
+
+  .context {
     display: block;
     color: var(--mute);
-    font-size: 14px;
   }
 
   @media (max-width: 1099px) {
-    .mn-label {
-      grid-column: 1 / -1;
+    .short,
+    .figures,
+    .toggle {
+      grid-column: 2 / span 10;
     }
 
-    .body {
-      grid-column: 1 / -1;
-    }
-
-    .text {
-      grid-column: 1 / span 11;
-    }
-
-    .fact {
-      grid-column: span 4;
+    .figures {
+      grid-template-columns: repeat(min(var(--n), 2), minmax(0, 1fr));
     }
   }
 
   @media (max-width: 760px) {
-    .text,
-    .fact {
-      grid-column: 1 / -1;
+    .summary {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      column-gap: 0;
+    }
+
+    .short,
+    .figures,
+    .toggle {
+      grid-column: 2;
     }
   }
 </style>

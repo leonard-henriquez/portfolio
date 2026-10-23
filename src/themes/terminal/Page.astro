@@ -1,6 +1,8 @@
 ---
 /**
  * Terminal: dark terminal. A typed whoami, `ls -la projects` with status LEDs, amber on black.
+ * One column of shell commands, each printing compact one-line entries; details open on click or Enter
+ * (native <details>, so it all works without JavaScript).
  * Document-level settings (theme colour, font preloads, the pre-paint `boot`) live in `meta.ts`;
  * behaviour lives in `client.ts`.
  */
@@ -10,8 +12,11 @@ import Header from "./components/Header.astro";
 import Hero from "./components/Hero.astro";
 import Projects from "./components/Projects.astro";
 import About from "./components/About.astro";
-import Log from "./components/Log.astro";
+import Stack from "./components/Stack.astro";
 import Principles from "./components/Principles.astro";
+import Log from "./components/Log.astro";
+import Education from "./components/Education.astro";
+import Talks from "./components/Talks.astro";
 import Contact from "./components/Contact.astro";
 import { heroImage } from "./hero";
 
@@ -27,10 +32,13 @@ const { profile } = portfolio;
 <Header profile={profile} />
 <main>
   <Hero profile={profile} hero={heroImage(portfolio)} />
-  <Projects projects={portfolio.projects} statusCounts={portfolio.statusCounts} />
+  <Projects projects={portfolio.projects} />
   <About profile={profile} />
+  <Stack profile={profile} />
   <Principles principles={profile.principles} />
-  <Log profile={profile} />
+  <Log experience={profile.experience} />
+  <Education education={profile.education} />
+  <Talks talks={profile.talks} />
 </main>
 <Contact profile={profile} />
 
@@ -55,6 +63,14 @@ const { profile } = portfolio;
     --serif: "TM Serif", "Iowan Old Style", Georgia, serif;
     --gutter: clamp(16px, 4vw, 48px);
     --max: 1280px;
+    /* Type scale (see "The five text styles" below). */
+    --fs-lead: clamp(26px, 2.8vw, 40px);
+    --fs-text: 15px;
+    --fs-meta: 13px;
+    --lh: 1.6;
+    /* Vertical rhythm: between sections, and from a section's prompt to its output. */
+    --rhythm: clamp(80px, 9vw, 128px);
+    --gap: 24px;
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -86,8 +102,8 @@ const { profile } = portfolio;
     background: var(--bg);
     color: var(--fg);
     font-family: var(--mono);
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: var(--fs-text);
+    line-height: var(--lh);
     font-variant-ligatures: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -140,7 +156,7 @@ const { profile } = portfolio;
     padding: 8px 12px;
     background: var(--amber);
     color: var(--bg);
-    font-size: 13px;
+    font-size: var(--fs-meta);
     text-decoration: none;
     transform: translateY(-200%);
   }
@@ -174,9 +190,360 @@ const { profile } = portfolio;
     padding-inline: var(--gutter);
   }
 
-  /* Shared section frame. */
+  /* Shared section frame: a prompt, then its output, the same distance apart everywhere. */
   html[data-theme="terminal"] .tm-section {
-    padding-top: clamp(88px, 11vw, 150px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    padding-top: var(--rhythm);
+  }
+
+  @media (max-width: 480px) {
+    html[data-theme="terminal"] {
+      --fs-text: 14px;
+      --fs-meta: 12px;
+    }
+  }
+
+  /*
+   * The five text styles, the only ones in the theme (one per field kind, the same in every list):
+   * 1. display  serif italic, hero headline only (Hero.astro).
+   * 2. lead     serif italic, --fs-lead: one-sentence statements (about, a project's dek, the quote, the contact pitch).
+   * 3. name     mono --fs-text/500, --fg: what an entry is called (project, role, school, principle, talk).
+   * 4. text     mono --fs-text/400, --muted: descriptions and prose; prompts and the hero terminal use the same size.
+   *             Highlights are this style in --green, links in --amber.
+   * 5. meta     mono --fs-meta/400, --muted: dates, hashes, status, types, keys, skills, captions, nav, footer.
+   *             Purely structural glyphs (permissions, tree, graph) in --dim.
+   */
+  html[data-theme="terminal"] .t-lead {
+    margin: 0;
+    color: var(--fg);
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--fs-lead);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  html[data-theme="terminal"] .t-name {
+    color: var(--fg);
+    font-size: var(--fs-text);
+    font-weight: 500;
+    line-height: var(--lh);
+  }
+
+  html[data-theme="terminal"] .t-text {
+    color: var(--muted);
+    font-size: var(--fs-text);
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  html[data-theme="terminal"] .t-meta {
+    color: var(--muted);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: var(--lh);
+  }
+
+  html[data-theme="terminal"] .t-dim {
+    color: var(--dim);
+  }
+
+  html[data-theme="terminal"] .t-amber {
+    color: var(--amber);
+  }
+
+  html[data-theme="terminal"] .tm-link {
+    color: var(--amber);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 179 90 / 0.4);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.2s;
+  }
+
+  html[data-theme="terminal"] .tm-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /*
+   * The one list pattern. Every list (projects, principles, git log, education, talks, numbers, highlights) is a
+   * .tm-list of .tm-row, each a single .tm-line: leading .c-meta columns, then .c-main (.c-name, then .c-sec), then
+   * the .tm-tog toggle. The list sets its columns in --cols and the body's indent (the name column) in --indent.
+   * Expandable rows are <details>: the line is the <summary>, the details are in .tm-body.
+   */
+  html[data-theme="terminal"] .tm-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  html[data-theme="terminal"] .tm-row {
+    border-bottom: 1px solid var(--line);
+  }
+
+  html[data-theme="terminal"] .tm-line {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--cols);
+    gap: 0 3ch;
+    align-items: baseline;
+    margin: 0;
+    padding: 12px 8px;
+    isolation: isolate;
+  }
+
+  html[data-theme="terminal"] .c-main {
+    display: contents;
+  }
+
+  html[data-theme="terminal"] .c-name,
+  html[data-theme="terminal"] .c-sec {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* A teaser that holds to one line while its row is closed (the full text is in the open row). */
+  html[data-theme="terminal"] details:not([open]) > summary .c-clip {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Text that differs between a closed and an open row (a project's teaser, then its full summary). */
+  html[data-theme="terminal"] details[open] > summary .c-closed,
+  html[data-theme="terminal"] details:not([open]) > summary .c-open {
+    display: none !important;
+  }
+
+  html[data-theme="terminal"] summary.tm-line {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  html[data-theme="terminal"] summary.tm-line::-webkit-details-marker {
+    display: none;
+  }
+
+  html[data-theme="terminal"] summary.tm-line:focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* Selection-style highlight that sweeps in from the left, and an amber bar on the open row. */
+  html[data-theme="terminal"] summary.tm-line::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-hover);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  html[data-theme="terminal"] summary.tm-line::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--amber);
+    transform: scaleY(0);
+    transition: transform 0.35s var(--ease);
+  }
+
+  html[data-theme="terminal"] summary.tm-line:hover::before,
+  html[data-theme="terminal"] summary.tm-line:focus-visible::before,
+  html[data-theme="terminal"] details[open] > summary.tm-line::before,
+  html[data-theme="terminal"] summary.tm-line:hover::after,
+  html[data-theme="terminal"] summary.tm-line:focus-visible::after,
+  html[data-theme="terminal"] details[open] > summary.tm-line::after {
+    transform: none;
+  }
+
+  html[data-theme="terminal"] summary.tm-line .c-name {
+    transition: color 0.25s;
+  }
+
+  html[data-theme="terminal"] summary.tm-line:hover .c-name,
+  html[data-theme="terminal"] summary.tm-line:focus-visible .c-name,
+  html[data-theme="terminal"] details[open] > summary.tm-line .c-name {
+    color: var(--amber);
+  }
+
+  /* Plus that turns into a cross when open. */
+  html[data-theme="terminal"] .tm-tog {
+    position: relative;
+    width: 11px;
+    height: 11px;
+    align-self: center;
+    justify-self: end;
+    color: var(--dim);
+    transition:
+      transform 0.45s var(--ease-out),
+      color 0.2s;
+  }
+
+  html[data-theme="terminal"] .tm-tog::before,
+  html[data-theme="terminal"] .tm-tog::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    margin-top: -0.75px;
+    background: currentColor;
+  }
+
+  html[data-theme="terminal"] .tm-tog::after {
+    transform: rotate(90deg);
+  }
+
+  html[data-theme="terminal"] summary:hover .tm-tog,
+  html[data-theme="terminal"] details[open] > summary .tm-tog {
+    color: var(--amber);
+  }
+
+  html[data-theme="terminal"] details[open] > summary .tm-tog {
+    transform: rotate(135deg);
+  }
+
+  /* An open row's details, aligned with the name column. */
+  html[data-theme="terminal"] .tm-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 4px 8px 32px calc(8px + var(--indent, 0px));
+  }
+
+  /* A readable measure for everything printed in a body. */
+  html[data-theme="terminal"] .tm-body > * {
+    max-width: 72ch;
+  }
+
+  html[data-theme="terminal"] .tm-body p,
+  html[data-theme="terminal"] .tm-body ul,
+  html[data-theme="terminal"] .tm-body ol {
+    margin: 0;
+  }
+
+  /* Key/value facts (a project's role and stack, a commit's org and date), keys in one column. */
+  html[data-theme="terminal"] .tm-dl {
+    margin: 0;
+  }
+
+  html[data-theme="terminal"] .tm-dl > div {
+    display: grid;
+    grid-template-columns: 8ch minmax(0, 1fr);
+    gap: 2ch;
+    padding: 6px 0;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  html[data-theme="terminal"] .tm-dl dt {
+    color: var(--dim);
+  }
+
+  html[data-theme="terminal"] .tm-dl dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Highlights, as the added lines of a diff. */
+  html[data-theme="terminal"] .tm-diff {
+    padding: 0;
+    list-style: none;
+  }
+
+  html[data-theme="terminal"] .tm-diff li {
+    position: relative;
+    padding-left: 2ch;
+    color: var(--green);
+  }
+
+  html[data-theme="terminal"] .tm-diff li::before {
+    content: "+";
+    position: absolute;
+    left: 0;
+  }
+
+  /*
+   * Phones and narrow tablets: the meta columns on one line, then the name, then the secondary text.
+   * Lists with a single short meta column (.tm-narrow: principles, talks, figures, highlights) keep their columns.
+   */
+  @media (max-width: 900px) {
+    html[data-theme="terminal"] .tm-line {
+      padding: 14px 4px;
+    }
+
+    /* Child combinators only: a narrow list nested in a wide one (a README's highlights) keeps its own layout. */
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-line,
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 2ch;
+    }
+
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-line > .c-main,
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-line > .c-main {
+      display: block;
+      order: 2;
+      flex: 1 0 100%;
+      min-width: 0;
+    }
+
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-line > .c-main > *,
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-line > .c-main > * {
+      display: block;
+    }
+
+    /* A name and its secondary text that read as one phrase ("Title @ org") stay on one line, wrapping as text. */
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-line > .c-main.c-phrase > *,
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-line > .c-main.c-phrase > * {
+      display: inline;
+    }
+
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-line > .tm-tog,
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-line > .tm-tog {
+      order: 1;
+      margin-left: auto;
+    }
+
+    html[data-theme="terminal"] .tm-list:not(.tm-narrow) > .tm-row > details > .tm-body {
+      padding: 4px 4px 28px;
+    }
+
+    html[data-theme="terminal"] .tm-narrow .tm-body {
+      padding-right: 4px;
+      padding-left: calc(4px + var(--indent, 0px));
+    }
+  }
+
+  @keyframes tm-body-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-theme="terminal"] details[open] > .tm-body > * {
+      animation: tm-body-in 0.5s var(--ease-out) both;
+    }
+
+    html[data-theme="terminal"] details[open] > .tm-body > :nth-child(2) {
+      animation-delay: 40ms;
+    }
+
+    html[data-theme="terminal"] details[open] > .tm-body > :nth-child(n + 3) {
+      animation-delay: 80ms;
+    }
   }
 
   /* Blinking block caret, shared by the hero terminal and the typed prompts. */

@@ -61,8 +61,8 @@ leonard:
 
   # Career, one entry per organization (getPortfolio() sorts it newest first). Source: LinkedIn, plus facts already
   # on the site. The organization with an ongoing role (no `end`) is the current one: `current` (title, org, since,
-  # highlight, project) is derived from it. `weight` (high, medium, low; default medium) is how much themes make
-  # of an entry. Months are "YYYY-MM", quoted. Role types: permanent, full-time, part-time, freelance, contract,
+  # highlight, project) is derived from it. Importance shows through order and amount of content, never styling.
+  # Months are "YYYY-MM", quoted. Role types: permanent, full-time, part-time, freelance, contract,
   # internship.
   experience:
     - org: Topo
@@ -71,7 +71,6 @@ leonard:
       summary: AI agents for B2B outbound sales, used by 150+ customers including Air France and Aircall.
       # The project about this organization: a file name in src/content/projects/.
       project: topo
-      weight: high
       roles:
         - title: Co-founder & CTO
           type: permanent
@@ -82,7 +81,6 @@ leonard:
             - Our AI SDR went from $0 to $1M ARR in three months.
     - org: Manda
       formerly: Flatlooker
-      weight: high
       roles:
         - title: Head of Engineering
           type: permanent
@@ -117,7 +115,6 @@ leonard:
             - Recommendation letter from a Senior Manager.
     - org: Course Croisière EDHEC
       summary: Student-run organization at EDHEC Business School.
-      weight: low
       roles:
         - title: CTO
           type: part-time
@@ -125,7 +122,6 @@ leonard:
           end: "2017-05"
           skills: [AWS, JavaScript]
     - org: Jalgos
-      weight: low
       roles:
         - title: Data Science
           type: internship
@@ -133,28 +129,23 @@ leonard:
           end: "2015-08"
           text: Wrote a neural network from scratch in C++.
 
-  # Newest first is derived; `weight` as for experience.
+  # Sorted newest first by getPortfolio().
   education:
     - school: Y Combinator
       start: 2023
       end: 2024
-      note: W24 batch, with Topo.
-      weight: high
+      program: Startup accelerator, W24 batch with Topo
     - school: EDHEC Business School
-      degree: MSc
-      field: Data Analytics and Artificial Intelligence
+      program: MSc, Data Analytics and Artificial Intelligence
       start: 2015
       end: 2019
-      weight: high
     - school: Le Wagon
-      degree: Fullstack Developer
+      program: Fullstack Developer
       start: 2018
-      weight: low
     - school: Saint Jean de Douai
-      degree: Prépa HEC (pre-business administration course)
+      program: Prépa HEC (pre-business administration course)
       start: 2012
       end: 2015
-      weight: low
 
   # Framing text for page sections, all optional. `intro` introduces a section; `summary` is a one-line
   # teaser (e.g. in navigation) and falls back to `intro`. `work` is about what was built at Topo.
@@ -192,8 +183,11 @@ leonard:
     text: Build the truck, not the race car.
     context: On designing for throughput over spectacle
 
+  # No email address on the site, on purpose: `preferred` (a `kind` from `links`) is the one channel every theme
+  # puts forward, introduced by `intro`.
   contact:
-    email: lhenriquez@proton.me
+    intro: Building AI agents for production, or about to? I'm always happy to compare notes.
+    preferred: linkedin
     links:
       - label: GitHub
         href: https://github.com/leonard-henriquez

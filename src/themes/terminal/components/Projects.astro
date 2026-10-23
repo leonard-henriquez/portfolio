@@ -1,27 +1,24 @@
 ---
 import { Image } from "astro:assets";
-import type { Project, ProjectStatus } from "../../../lib/portfolio";
-import { directorySummary } from "../lib";
+import type { Project } from "../../../lib/portfolio";
 import Prompt from "./Prompt.astro";
 import ProjectRow from "./ProjectRow.astro";
 
 interface Props {
   projects: Project[];
-  statusCounts: Record<ProjectStatus, number>;
 }
 
-const { projects, statusCounts } = Astro.props;
+const { projects } = Astro.props;
+// The name column fits the longest folder name, so every row's teaser starts at the same column, like `ls`.
+const nameWidth = Math.max(...projects.map((p) => p.folder.length));
 ---
 
 <section id="work" class="tm-section work" aria-labelledby="work-title">
-  <Prompt cmd="ls -la ~/projects" label="Projects" id="work-title" class="reveal" />
-  <ul class="list" data-list>
+  <Prompt cmd="ls -la ~/projects" label="Projects" id="work-title" />
+  <ul class="tm-list" data-list="projects" data-print style={`--name:${nameWidth}ch`}>
     {projects.map((project) => <ProjectRow project={project} />)}
   </ul>
-  <div class="foot">
-    <p>{directorySummary(projects.length, statusCounts)}</p>
-    <p class="keys" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> open</p>
-  </div>
+  <p class="keys t-meta" aria-hidden="true"><kbd>j</kbd> <kbd>k</kbd> move · <kbd>enter</kbd> open</p>
 
   <!-- Cursor-following preview (fine pointers only); stays display:none, so its lazy images load on first hover. -->
   <div class="peek" data-peek aria-hidden="true" hidden>
@@ -50,25 +47,30 @@ const { projects, statusCounts } = Astro.props;
 </section>
 
 <style>
-  .list {
-    margin: 28px 0 0;
-    padding: 0;
-    list-style: none;
-    border-top: 1px solid var(--line);
+  /* permissions · status · period · name · teaser · toggle. The body starts under the name. */
+  .tm-list {
+    --cols: 10ch 10ch 12ch var(--name) minmax(0, 1fr) 2ch;
+    --indent: calc(32ch + 9ch);
   }
 
-  .foot {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 8px 24px;
-    margin-top: 20px;
-    color: var(--dim);
-    font-size: 13px;
+  @media (max-width: 1100px) {
+    .tm-list {
+      --cols: 10ch 12ch var(--name) minmax(0, 1fr) 2ch;
+      --indent: calc(22ch + 6ch);
+    }
   }
 
-  .foot p {
+  .keys {
+    display: none;
     margin: 0;
+    color: var(--dim);
+  }
+
+  /* Only where the keys work: a keyboard-and-mouse device, with client.ts running. */
+  @media (hover: hover) and (pointer: fine) {
+    :global(html[data-theme="terminal"].tm-ready) .keys {
+      display: block;
+    }
   }
 
   kbd {
@@ -79,19 +81,8 @@ const { projects, statusCounts } = Astro.props;
     border-radius: 3px;
     color: var(--muted);
     font: inherit;
-    font-size: 12px;
     line-height: 1.5;
     text-align: center;
-  }
-
-  .keys {
-    display: none;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .keys {
-      display: block;
-    }
   }
 
   .peek {

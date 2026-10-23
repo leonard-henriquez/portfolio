@@ -1,7 +1,7 @@
 import { defineCollection, reference } from "astro:content";
 import { file, glob } from "astro/loaders";
 import { z } from "astro/zod";
-import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES, WEIGHTS } from "./lib/constants";
+import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES } from "./lib/constants";
 
 /**
  * Content for every theme. Themes never read these collections directly:
@@ -69,11 +69,10 @@ const projects = defineCollection({
 
 const sectionText = z.object({ intro: z.string().optional(), summary: z.string().optional() }).prefault({});
 
+const linkKind = z.enum(["github", "linkedin", "x", "website"]);
+
 /** "2020-08". */
 const yearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Use "YYYY-MM", e.g. "2020-08" (quoted in YAML).');
-
-/** How much a theme should make of an entry: `high` is what matters most, `low` can be compact. Never hides it. */
-const weight = z.enum(WEIGHTS).default("medium");
 
 const role = z
   .object({
@@ -105,7 +104,6 @@ const experience = z.object({
   summary: z.string().optional(),
   /** The project about this organization (a file name in src/content/projects/), e.g. `topo`. */
   project: reference("projects").optional(),
-  weight,
   /** One per title held, in any order. */
   roles: z.array(role).min(1),
 });
@@ -113,17 +111,12 @@ const experience = z.object({
 const education = z
   .object({
     school: z.string().min(1),
-    /** The qualification or programme: "MSc", "Fullstack Developer". */
-    degree: z.string().optional(),
-    /** "Data Analytics and Artificial Intelligence". */
-    field: z.string().optional(),
+    /** What was studied, as one line every theme shows in the same place: "MSc, Data Analytics and Artificial Intelligence". */
+    program: z.string().min(1),
     start: z.number().int(),
     /** Last year. Omit when it is the same as `start`. */
     end: z.number().int().optional(),
-    /** One short line: "W24 batch, with Topo." */
-    note: z.string().optional(),
     href: z.url().optional(),
-    weight,
   })
   .refine((e) => !e.end || e.end >= e.start, { message: "Education cannot end before it starts." });
 
@@ -158,12 +151,16 @@ const profile = defineCollection({
         .array(z.object({ key: z.string(), label: z.string(), items: z.array(z.string()).min(1) }))
         .default([]),
       quote: z.object({ text: z.string(), context: z.string().optional() }).optional(),
-      contact: z.object({
-        email: z.email(),
-        links: z.array(
-          z.object({ label: z.string(), href: z.url(), kind: z.enum(["github", "linkedin", "x", "website"]) }),
-        ),
-      }),
+      /** No email address, on purpose: `preferred` names the link (by `kind`) themes put forward to reach me. */
+      contact: z
+        .object({
+          intro: z.string().optional(),
+          preferred: linkKind,
+          links: z.array(z.object({ label: z.string(), href: z.url(), kind: linkKind })).min(1),
+        })
+        .refine((c) => c.links.some((l) => l.kind === c.preferred), {
+          message: "`preferred` must be the `kind` of one of the `links`.",
+        }),
       /**
        * Framing text for page sections, all optional: `intro` introduces the section, `summary` is a
        * one-line teaser (e.g. in navigation). `work` is about what was built in the current role.

@@ -46,8 +46,8 @@ function demoteHeadings(markdown: string, levels: number): string {
 
 function contactLines(profile: Profile, site: URL): string[] {
   return [
-    `Email: ${profile.contact.email}`,
-    ...profile.contact.links.map((l) => `${l.label}: ${l.href}`),
+    `Contact: ${profile.contact.preferred.label} (${profile.contact.preferred.href})`,
+    ...profile.contact.links.filter((l) => l !== profile.contact.preferred).map((l) => `${l.label}: ${l.href}`),
     `Website: ${url("/", site)}`,
   ];
 }
@@ -96,8 +96,7 @@ function experienceList(experience: Experience[], site: URL): string {
 function educationList(education: Education[]): string {
   return list(
     education.map((e) => {
-      const what = [e.program, e.note].filter(Boolean).join(". ");
-      return `**${e.years}: ${e.school}**${what ? `: ${sentence(what)}` : ""}`;
+      return `**${e.years}: ${e.school}**: ${sentence(e.program)}`;
     }),
   );
 }

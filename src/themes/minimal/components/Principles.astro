@@ -1,5 +1,7 @@
 ---
+/** Principles: No. · title, one line each; the explanation opens on demand. */
 import type { Profile } from "../../../lib/portfolio";
+import Disclosure from "./Disclosure.astro";
 
 interface Props {
   principles: Profile["principles"];
@@ -10,102 +12,21 @@ const { principles } = Astro.props;
 
 {
   principles.length > 0 && (
-    <section class="principles mn-wrap mn-grid" aria-labelledby="principles-title">
+    <section id="principles" class="mn-section mn-wrap" aria-labelledby="principles-title">
       <h2 id="principles-title" class="mn-label">Principles</h2>
-      <ol class="list" role="list">
+      <ol class="mn-table" role="list" data-mn-disclosures>
         {principles.map((p) => (
-          <li class="item mn-rule">
-            <span class="no mn-reveal">{p.no2}</span>
-            <h3 class="title mn-reveal">{p.title}</h3>
-            <p class="text mn-reveal" style="--range-end: 28%">
-              {p.body}
-            </p>
-          </li>
+          <Disclosure id={`principle-${p.no2}`}>
+            <Fragment slot="row">
+              <span class="mn-no">{p.no2}</span>
+              <span class="mn-name mn-name--wide">{p.title}</span>
+            </Fragment>
+            <div class="mn-p-text">
+              <p>{p.body}</p>
+            </div>
+          </Disclosure>
         ))}
       </ol>
     </section>
   )
 }
-
-<style>
-  .principles {
-    padding-top: clamp(96px, 11vw, 160px);
-    row-gap: 24px;
-  }
-
-  .mn-label {
-    grid-column: 1 / span 3;
-  }
-
-  .list {
-    grid-column: 4 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .item {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-    align-items: baseline;
-    padding: 20px 0 24px;
-  }
-
-  .no {
-    grid-column: 1;
-    font-size: 14px;
-    color: var(--mute);
-  }
-
-  .title {
-    grid-column: 2 / span 3;
-    margin: 0;
-    font-size: clamp(18px, 1.5vw, 22px);
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    text-wrap: balance;
-  }
-
-  .text {
-    grid-column: 5 / span 5;
-    margin: 0;
-    max-width: 38em;
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--ink-2);
-    text-wrap: pretty;
-  }
-
-  @media (max-width: 1099px) {
-    .mn-label,
-    .list {
-      grid-column: 1 / -1;
-    }
-
-    .title {
-      grid-column: 2 / span 4;
-    }
-
-    .text {
-      grid-column: 6 / span 7;
-    }
-  }
-
-  @media (max-width: 760px) {
-    .item {
-      grid-template-columns: 2.75rem minmax(0, 1fr);
-      column-gap: 0;
-      row-gap: 8px;
-    }
-
-    .title,
-    .text {
-      grid-column: 2;
-    }
-  }
-</style>

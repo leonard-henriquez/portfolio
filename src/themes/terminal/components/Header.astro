@@ -10,7 +10,7 @@ const { profile } = Astro.props;
 const user = `${token(profile.firstName)}@${token(profile.location.city)}`;
 const nav = [
   { href: "#work", label: "./work" },
-  { href: "#stack", label: "./stack" },
+  { href: "#about", label: "./about" },
   ...(profile.principles.length ? [{ href: "#principles", label: "./principles" }] : []),
   ...(profile.experience.length ? [{ href: "#experience", label: "./experience" }] : []),
   ...(profile.education.length ? [{ href: "#education", label: "./education" }] : []),
@@ -48,7 +48,7 @@ const nav = [
     align-items: center;
     gap: 12px 24px;
     padding-block: 22px;
-    font-size: 13px;
+    font-size: var(--fs-meta);
     animation: tm-header-in 1.2s 0.2s var(--ease-out) both;
   }
 

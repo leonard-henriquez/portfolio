@@ -1,15 +1,4 @@
-import type { ProjectStatus } from "../../lib/portfolio";
-
 /* Terminal-flavoured formatting helpers. Pure functions of content, no content of their own. */
-
-/** "4 directories — 1 shipped, 2 building, 1 study" (zero counts left out). */
-export function directorySummary(total: number, counts: Record<ProjectStatus, number>): string {
-  const parts = Object.entries(counts)
-    .filter(([, n]) => n > 0)
-    .map(([status, n]) => `${n} ${status}`);
-  const head = `${total} ${total === 1 ? "directory" : "directories"}`;
-  return parts.length ? `${head} — ${parts.join(", ")}` : head;
-}
 
 /** Deterministic 7-char hex "commit hash" for decorative git-log lines. */
 export function shortHash(input: string): string {

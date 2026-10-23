@@ -18,6 +18,3 @@ export const PROJECT_ANCHOR_PREFIX = "project-";
 
 /** Employment types of a role, as LinkedIn names them. */
 export const EMPLOYMENT_TYPES = ["permanent", "full-time", "part-time", "freelance", "contract", "internship"] as const;
-
-/** Importance of an experience or education entry, most important first. Themes size entries by it. */
-export const WEIGHTS = ["high", "medium", "low"] as const;

@@ -1,0 +1,36 @@
+---
+import type { Profile } from "../../../lib/portfolio";
+import Prompt from "./Prompt.astro";
+
+interface Props {
+  talks: Profile["talks"];
+}
+
+/* `cat talks.txt`: year, then the talk, jury or recognition. Undated entries keep the year column, blank. */
+const { talks } = Astro.props;
+---
+
+{
+  talks.length > 0 && (
+    <section id="talks" class="tm-section" aria-labelledby="talks-title">
+      <Prompt cmd="cat talks.txt" label="Talks and recognition" id="talks-title" />
+      <ul class="tm-list tm-narrow talks" data-print>
+        {talks.map((t, i) => (
+          <li class="tm-row tm-line ln" style={`--i:${i}`}>
+            <span class="c-meta t-meta">{t.year ?? <span class="t-dim" aria-hidden="true">····</span>}</span>
+            <span class="c-main">
+              <span class="c-name t-name">{t.text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  /* year · text. */
+  .talks {
+    --cols: 4ch minmax(0, 1fr) 2ch;
+  }
+</style>

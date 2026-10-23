@@ -1,0 +1,39 @@
+---
+/**
+ * One table row that opens a panel: the theme's one disclosure, for every list (see the table styles in Page.astro).
+ * The `row` slot holds the row's cells (`.mn-no`, `.mn-name`, `.mn-desc`, `.mn-meta`…, all phrasing content);
+ * the default slot the panel's content, laid out on the panel grid (`.mn-p-text`, `.mn-facts`…).
+ * Without JS the panel is shown (see Page.astro); with it, client.ts toggles and animates it, and opens it
+ * when the URL fragment names `id`.
+ */
+interface Props {
+  /** Element id of the item, also its deep link. */
+  id: string;
+  /** Position in its list, for the project preview. */
+  index?: number;
+  class?: string;
+}
+
+const { id, index, class: className } = Astro.props;
+---
+
+<li class:list={["mn-item", className]} id={id} data-mn-item data-index={index}>
+  <h3 class="mn-item-h">
+    <button
+      type="button"
+      class="mn-row mn-grid mn-reveal"
+      id={`${id}-button`}
+      aria-controls={`${id}-panel`}
+      data-mn-row
+      data-index={index}
+    >
+      <slot name="row" />
+      <span class="mn-plus" aria-hidden="true"></span>
+    </button>
+  </h3>
+  <div class="mn-panel" id={`${id}-panel`} role="region" aria-labelledby={`${id}-button`} hidden="until-found" data-mn-panel>
+    <div class="mn-panel-in mn-grid">
+      <slot />
+    </div>
+  </div>
+</li>

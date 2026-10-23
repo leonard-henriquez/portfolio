@@ -1,4 +1,5 @@
 ---
+import { MARKDOWN_PATHS } from "../../../lib/markdown";
 import type { Profile } from "../../../lib/portfolio";
 
 interface Props {
@@ -6,26 +7,23 @@ interface Props {
 }
 
 const { profile } = Astro.props;
-const { email, mailto, links } = profile.contact;
-const [local, domain = ""] = email.split("@");
-// Character counts let the address fill the measure on one line (desktop) or two (mobile, broken at "@").
-const chars = email.length + 2;
-const charsNarrow = Math.max(local.length, domain.length + 1) + 2;
+const { intro, preferred, links } = profile.contact;
 const year = new Date().getFullYear();
+// For AI agents: the Markdown version of the site (src/lib/markdown.ts).
+const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
 ---
 
-<footer id="contact" class="footer mn-rule" aria-labelledby="contact-title">
+<footer id="contact" class="footer" aria-labelledby="contact-title">
   <div class="mn-wrap">
+    <h2 id="contact-title" class="mn-label">Contact</h2>
     <div class="head mn-grid">
-      <h2 id="contact-title" class="mn-label">Contact</h2>
-      <p class="hint">Write to me</p>
+      <div class="body mn-display">
+        {intro && <p class="pitch mn-title mn-reveal">{intro}</p>}
+        <a class="cta mn-reveal" href={preferred.href} rel="me noopener" style="--range-end: 34%">
+          <span class="cta-text">Message me on {preferred.label}</span><span class="arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
     </div>
-
-    <a class="mail" href={mailto} style={`--chars: ${chars}; --chars-narrow: ${charsNarrow}`}>
-      <span class="mail-in mn-reveal">
-        <span class="addr">{local}<wbr />@{domain}</span><span class="arrow" aria-hidden="true">↗</span>
-      </span>
-    </a>
 
     <div class="base mn-grid" data-switcher-avoid>
       <ul class="links" role="list">
@@ -38,6 +36,9 @@ const year = new Date().getFullYear();
             </li>
           ))
         }
+        <li class="agents">
+          <a class="mn-link" href={llmsTxt} type="text/plain" title="This site as Markdown, for AI agents">llms.txt</a>
+        </li>
       </ul>
       <p class="copy">© {year} {profile.name}</p>
       <p class="place">{profile.location.label}</p>
@@ -48,54 +49,43 @@ const year = new Date().getFullYear();
 
 <style>
   .footer {
-    --rule-color: var(--ink);
-    margin-top: clamp(120px, 14vw, 200px);
+    margin-top: var(--section);
   }
 
+  /* On the tables' grid: an ink rule, then the text on the name column. */
   .head {
-    align-items: baseline;
-    padding-top: 16px;
+    padding: var(--row-pad) 0 clamp(64px, 8vw, 112px);
+    border-top: 1px solid var(--ink);
   }
 
-  .head .mn-label {
-    grid-column: 1 / span 3;
+  .body {
+    grid-column: 2 / -1;
   }
 
-  .hint {
-    grid-column: 4 / span 3;
-    margin: 0;
-    font-size: 13px;
+  .pitch {
+    max-width: 30em;
+    margin: 0 0 0.6em;
     color: var(--mute);
+    text-wrap: balance;
   }
 
-  .mail {
-    display: block;
-    margin: clamp(40px, 6vw, 88px) 0 clamp(56px, 7vw, 104px);
-    font-size: min(128px, calc((100vw - 2 * var(--gutter)) / (var(--chars) * 0.5)));
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.045em;
-    text-decoration: none;
-    white-space: nowrap;
-    clip-path: inset(-0.1em -0.1em -0.2em -0.1em);
-  }
-
-  .mail-in {
-    position: relative;
+  .cta {
     display: inline-block;
-    padding-bottom: 0.08em;
-    --rise: 0.7em;
-    --range-end: 30%;
+    text-decoration: none;
+  }
+
+  .cta-text {
+    position: relative;
   }
 
   /* Underline that draws in on hover. */
-  .mail-in::after {
+  .cta-text::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -0.02em;
-    height: max(2px, 0.035em);
+    bottom: -0.06em;
+    height: max(2px, 0.04em);
     background: currentColor;
     transform: scaleX(0);
     transform-origin: right;
@@ -104,26 +94,26 @@ const year = new Date().getFullYear();
 
   .arrow {
     display: inline-block;
-    margin-left: 0.12em;
+    margin-left: 0.2em;
     transition: transform 0.6s var(--ease-out);
   }
 
-  .mail:hover .mail-in::after,
-  .mail:focus-visible .mail-in::after {
+  .cta:hover .cta-text::after,
+  .cta:focus-visible .cta-text::after {
     transform: scaleX(1);
     transform-origin: left;
   }
 
-  .mail:hover .arrow,
-  .mail:focus-visible .arrow {
+  .cta:hover .arrow,
+  .cta:focus-visible .arrow {
     transform: translate(0.08em, -0.08em);
   }
 
   .base {
     align-items: baseline;
     padding-bottom: 40px;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: var(--t-small);
+    line-height: 1.45;
   }
 
   .links {
@@ -156,17 +146,17 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 760px) {
-    .hint {
-      grid-column: 3 / span 2;
-      text-align: right;
+    .head {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      column-gap: 0;
     }
 
-    .mail {
-      white-space: normal;
-      font-size: min(17vw, calc((100vw - 2 * var(--gutter)) / (var(--chars-narrow) * 0.5)));
-      line-height: 1.02;
+    .body {
+      grid-column: 2;
     }
+  }
 
+  @media (max-width: 760px) {
     .base {
       row-gap: 16px;
     }
@@ -190,8 +180,15 @@ const year = new Date().getFullYear();
     }
   }
 
+  /* Just above the phone layout, the links column is too narrow for a third link. It stays in the markup for agents. */
+  @media (min-width: 761px) and (max-width: 819px) {
+    .agents {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .mail-in::after,
+    .cta-text::after,
     .arrow {
       transition: none;
     }

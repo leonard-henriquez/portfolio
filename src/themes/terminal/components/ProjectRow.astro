@@ -6,51 +6,58 @@ interface Props {
   project: Project;
 }
 
+/*
+ * One `ls -la` line: permissions, status, period, folder, teaser. Opening it swaps the teaser (`focus`) for the
+ * full `summary` in place and prints the README below: dek, body, links, picture, facts, highlights.
+ */
 const { project: p } = Astro.props;
 const img = p.image.photo;
-const meta = [
+// Status and period are on the line itself.
+const facts = [
   { key: "role", value: p.role },
-  { key: "period", value: p.period },
-  { key: "status", value: p.statusLabel },
   ...(p.stack.length ? [{ key: "stack", value: p.stack.join(" · ") }] : []),
   ...(p.tags.length ? [{ key: "tags", value: p.tags.map((t) => `#${t}`).join(" ") }] : []),
 ];
-// Staggered "printing" of the README when the row opens.
-let i = 0;
-const next = () => `--i:${i++}`;
+const teaser = p.focus !== p.summary;
 ---
 
-<li class="row reveal" id={p.anchor} data-row={p.id}>
+<li class="tm-row ln" id={p.anchor} data-row={p.id}>
   <details>
-    <summary>
-      <span class="cols">
-        <span class="perm" aria-hidden="true">drwxr-xr-x</span>
-        <span class="status">
-          <span class="led" data-status={p.status} aria-hidden="true"></span>
-          <span>{p.status}</span>
-        </span>
-        <span class="main">
-          <span class="name">{p.folder}</span>
-          <span class="sum">{p.summary}</span>
-        </span>
-        <span class="year">{p.period}</span>
-        <span class="tog" aria-hidden="true"></span>
+    <summary class="tm-line">
+      <span class="c-meta t-meta t-dim perm" aria-hidden="true">drwxr-xr-x</span>
+      <span class="c-meta t-meta status">
+        <span class="led" data-status={p.status} aria-hidden="true"></span>{p.status}
       </span>
+      <span class="c-meta t-meta">{p.period}</span>
+      <span class="c-main">
+        <span class="c-name t-name">{p.folder}</span>
+        {
+          teaser ? (
+            <>
+              <span class="c-sec t-text c-clip c-closed">{p.focus}</span>
+              <span class="c-sec t-text c-open">{p.summary}</span>
+            </>
+          ) : (
+            <span class="c-sec t-text c-clip">{p.summary}</span>
+          )
+        }
+      </span>
+      <span class="tm-tog" aria-hidden="true"></span>
     </summary>
 
-    <div class="readme">
-      <p class="cmd" aria-hidden="true" style={next()}><span class="ps1">~ $</span> cat {p.folder}README.md</p>
+    <div class="tm-body readme">
+      <p class="t-text" aria-hidden="true"><span class="t-amber">~ $</span> cat {p.folder}README.md</p>
       <div class="grid">
         <div class="doc">
-          <h3 style={next()}><span class="hash" aria-hidden="true"># </span>{p.title}</h3>
-          {p.dek !== p.summary && <p class="dek" style={next()}>{p.dek}</p>}
-          {p.hasBody && <div class="body" style={next()} set:html={p.html} />}
+          <h3 class="t-name"><span class="t-amber" aria-hidden="true"># </span>{p.title}</h3>
+          {p.dek !== p.summary && <p class="t-lead">{p.dek}</p>}
+          {p.hasBody && <div class="prose t-text" set:html={p.html} />}
           {
             p.links.length > 0 && (
-              <ul class="links" style={next()}>
+              <ul class="links t-text">
                 {p.links.map((link) => (
                   <li>
-                    <a href={link.href} rel="noopener">
+                    <a class="tm-link" href={link.href} rel="noopener">
                       {link.label}
                       <span aria-hidden="true"> ↗</span>
                     </a>
@@ -61,7 +68,7 @@ const next = () => `--i:${i++}`;
           }
         </div>
         <div class="side">
-          <figure style={next()}>
+          <figure>
             <Image
               src={img.src}
               alt={img.alt}
@@ -73,14 +80,14 @@ const next = () => `--i:${i++}`;
               class:list={["shot", { pixelated: img.pixelated }]}
               style={`object-position:${img.position}`}
             />
-            <figcaption><span aria-hidden="true"># </span>{img.caption}</figcaption>
+            <figcaption class="t-meta t-dim"><span aria-hidden="true"># </span>{img.caption}</figcaption>
           </figure>
-          <dl class="meta" style={next()}>
+          <dl class="tm-dl t-meta">
             {
-              meta.map((m) => (
+              facts.map((f) => (
                 <div>
-                  <dt>{m.key}</dt>
-                  <dd>{m.value}</dd>
+                  <dt>{f.key}</dt>
+                  <dd>{f.value}</dd>
                 </div>
               ))
             }
@@ -89,22 +96,31 @@ const next = () => `--i:${i++}`;
       </div>
       {
         p.highlights.length > 0 && (
-          <div class="hl" style={next()}>
-            <h4>
-              <span aria-hidden="true">## </span>highlights
+          <div class="hl">
+            <h4 class="t-name">
+              <span class="t-amber" aria-hidden="true">## </span>highlights
             </h4>
-            <ol>
+            <ol class="tm-list tm-narrow hl-list">
               {p.highlights.map((h, n) => (
-                <li style={next()}>
-                  <p class="hl-title">
-                    <span class="hl-no" aria-hidden="true">
-                      {String(n + 1).padStart(2, "0")}
-                    </span>
-                    {h.title}
-                  </p>
-                  <p class="hl-body">{h.body}</p>
-                  {h.result && <p class="hl-result">{h.result}</p>}
-                  {h.stack.length > 0 && <p class="hl-stack">{h.stack.join(" · ")}</p>}
+                <li class="tm-row">
+                  <details>
+                    <summary class="tm-line">
+                      <span class="c-meta t-meta t-amber">{String(n + 1).padStart(2, "0")}</span>
+                      <span class="c-main">
+                        <span class="c-name t-name">{h.title}</span>
+                      </span>
+                      <span class="tm-tog" aria-hidden="true" />
+                    </summary>
+                    <div class="tm-body">
+                      <p class="t-text">{h.body}</p>
+                      {h.result && (
+                        <ul class="tm-diff t-text">
+                          <li>{h.result}</li>
+                        </ul>
+                      )}
+                      {h.stack.length > 0 && <p class="t-meta">{h.stack.join(" · ")}</p>}
+                    </div>
+                  </details>
                 </li>
               ))}
             </ol>
@@ -116,91 +132,22 @@ const next = () => `--i:${i++}`;
 </li>
 
 <style>
-  .row {
-    border-bottom: 1px solid var(--line);
-  }
-
-  summary {
-    position: relative;
-    display: block;
-    padding: 24px 12px;
-    cursor: pointer;
-    list-style: none;
-    isolation: isolate;
-  }
-
-  summary::-webkit-details-marker {
-    display: none;
-  }
-
-  summary:focus-visible {
-    outline-offset: -2px;
-  }
-
-  /* Selection-style highlight that sweeps in from the left. */
-  summary::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--bg-hover);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    transition: transform 0.5s var(--ease-out);
-  }
-
-  summary::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--amber);
-    transform: scaleY(0);
-    transition: transform 0.35s var(--ease);
-  }
-
-  summary:hover::before,
-  summary:focus-visible::before,
-  details[open] > summary::before {
-    transform: none;
-  }
-
-  summary:hover::after,
-  summary:focus-visible::after,
-  details[open] > summary::after {
-    transform: none;
-  }
-
-  .cols {
-    display: grid;
-    grid-template-columns: 10ch 11ch minmax(0, 1fr) 12ch 1.5ch;
-    gap: 8px 32px;
-    align-items: baseline;
-  }
-
-  .perm {
-    color: var(--dim);
-  }
-
   .status {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    color: var(--muted);
+    gap: 8px;
+    white-space: nowrap;
   }
 
   .led {
     --c: var(--blue);
     position: relative;
     flex: none;
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--c);
     box-shadow: 0 0 10px var(--c);
-    align-self: center;
   }
 
   .led::after {
@@ -233,137 +180,50 @@ const next = () => `--i:${i++}`;
     transform: scale(1.4);
   }
 
-  .main {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .name {
-    font-size: clamp(20px, 2vw, 26px);
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    overflow-wrap: anywhere;
-    transition:
-      color 0.25s,
-      transform 0.5s var(--ease-out);
-  }
-
-  summary:hover .name,
-  summary:focus-visible .name,
-  details[open] .name {
-    color: var(--amber);
-  }
-
-  .sum {
-    max-width: 70ch;
-    color: var(--muted);
-  }
-
-  .year {
-    color: var(--muted);
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  /* Plus that turns into a cross when open. */
-  .tog {
-    position: relative;
-    width: 12px;
-    height: 12px;
-    align-self: start;
-    justify-self: end;
-    margin-top: 0.45em;
-    color: var(--dim);
-    transition:
-      transform 0.45s var(--ease-out),
-      color 0.2s;
-  }
-
-  .tog::before,
-  .tog::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1.5px;
-    margin-top: -0.75px;
-    background: currentColor;
-  }
-
-  .tog::after {
-    transform: rotate(90deg);
-  }
-
-  summary:hover .tog {
-    color: var(--amber);
-  }
-
-  details[open] .tog {
-    color: var(--amber);
-    transform: rotate(135deg);
-  }
-
-  /* README panel, aligned with the name column. */
+  /* The README is wider than plain text bodies: it has a picture beside it. */
   .readme {
-    --indent: calc(21ch + 64px + 12px);
-    padding: 8px 12px 48px var(--indent);
+    gap: 20px;
   }
 
-  .cmd {
-    margin: 0 0 20px;
-    color: var(--muted);
-  }
-
-  .ps1 {
-    color: var(--amber);
+  .readme > .grid,
+  .readme > .hl {
+    max-width: none;
   }
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
-    gap: 32px 48px;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    gap: 24px 48px;
     align-items: start;
   }
 
-  h3 {
-    margin: 0 0 12px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--fg);
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 72ch;
   }
 
-  .hash,
-  h4 span {
-    color: var(--amber);
+  h3,
+  h4 {
+    margin: 0;
   }
 
-  .dek {
-    margin: 0 0 20px;
-    max-width: 30ch;
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: clamp(24px, 2.4vw, 32px);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
+  .doc .t-lead {
+    max-width: 34ch;
   }
 
-  .body {
-    max-width: 68ch;
-    color: #c9c6be;
-    font-size: 14px;
-    line-height: 1.75;
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .body :global(p) {
-    margin: 0 0 14px;
+  .prose :global(p) {
+    margin: 0;
   }
 
-  .body :global(a) {
+  .prose :global(a) {
     color: var(--amber);
   }
 
@@ -371,21 +231,14 @@ const next = () => `--i:${i++}`;
     display: flex;
     flex-wrap: wrap;
     gap: 8px 20px;
-    margin: 18px 0 0;
     padding: 0;
     list-style: none;
   }
 
-  .links a {
-    color: var(--amber);
-    text-decoration: underline;
-    text-decoration-color: rgb(240 179 90 / 0.4);
-    text-underline-offset: 4px;
-    transition: text-decoration-color 0.2s;
-  }
-
-  .links a:hover {
-    text-decoration-color: currentColor;
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   figure {
@@ -407,198 +260,45 @@ const next = () => `--i:${i++}`;
 
   figcaption {
     margin-top: 8px;
-    color: var(--dim);
-    font-size: 12px;
-  }
-
-  .meta {
-    margin: 20px 0 0;
-    font-size: 13px;
-  }
-
-  .meta div {
-    display: grid;
-    grid-template-columns: 8ch minmax(0, 1fr);
-    gap: 16px;
-    padding: 6px 0;
-    border-top: 1px dashed var(--line-2);
-  }
-
-  .meta dt {
-    color: var(--dim);
-  }
-
-  .meta dd {
-    margin: 0;
-    color: var(--fg);
-    overflow-wrap: anywhere;
   }
 
   .hl {
-    margin-top: 40px;
-  }
-
-  h4 {
-    margin: 0 0 16px;
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .hl ol {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    border: 1px solid var(--line);
-    background: var(--line);
-  }
-
-  .hl li {
     display: flex;
+    max-width: calc(72ch + 320px + 48px);
     flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    background: var(--bg);
+    gap: 12px;
+    margin-top: 8px;
   }
 
-  .hl p {
-    margin: 0;
+  /* Nested rows: number · title · toggle. */
+  .hl-list {
+    --cols: 2ch minmax(0, 1fr) 2ch;
+    --indent: 5ch;
   }
 
-  .hl-title {
-    font-weight: 600;
-  }
-
-  .hl-no {
-    margin-right: 10px;
-    color: var(--amber);
-    font-weight: 400;
-  }
-
-  .hl-body {
-    color: var(--muted);
-    font-size: 13.5px;
-    line-height: 1.65;
-  }
-
-  .hl-result {
-    color: var(--amber);
-    font-size: 13px;
-  }
-
-  .hl-stack {
-    margin-top: auto !important;
-    color: var(--dim);
-    font-size: 12px;
-  }
-
-  @keyframes tm-readme-in {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    details[open] .readme [style*="--i"] {
-      animation: tm-readme-in 0.55s calc(var(--i) * 45ms) var(--ease-out) both;
-    }
-  }
-
-  @media (max-width: 1100px) {
-    .cols {
-      grid-template-columns: 10ch 11ch minmax(0, 1fr) auto 1.5ch;
-      gap: 8px 24px;
-    }
-
-    .readme {
-      --indent: calc(21ch + 48px + 12px);
-    }
-
+  /* Below this, the README's text gets the full width; picture and facts sit side by side under it. */
+  @media (max-width: 1180px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);
     }
 
     .side {
       display: grid;
-      grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
       gap: 24px;
       align-items: start;
     }
-
-    .meta {
-      margin: 0;
-    }
   }
 
-  /* Mobile: perms + status + year on one line, then the name, then the summary. */
-  @media (max-width: 820px) {
-    summary {
-      padding: 20px 4px;
-    }
-
-    .cols {
-      grid-template-columns: auto auto minmax(0, 1fr) auto;
-      grid-template-areas:
-        "perm status year tog"
-        "main main main main";
-      gap: 10px 16px;
-      font-size: 13px;
-    }
-
+  @media (max-width: 1100px) {
     .perm {
-      grid-area: perm;
+      display: none;
     }
-
-    .status {
-      grid-area: status;
-    }
-
-    .year {
-      grid-area: year;
-    }
-
-    .tog {
-      grid-area: tog;
-    }
-
-    .main {
-      grid-area: main;
-      font-size: 14px;
-    }
-
-    .name {
-      font-size: 21px;
-    }
-
-    .readme {
-      padding: 4px 4px 40px;
-      font-size: 14px;
-    }
-
   }
 
   @media (max-width: 600px) {
     .side {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .meta {
-      margin-top: 4px;
-    }
-  }
-
-  @media (max-width: 380px) {
-    .perm {
-      display: none;
-    }
-
-    .cols {
-      grid-template-areas:
-        "status status year tog"
-        "main main main main";
     }
   }
 </style>

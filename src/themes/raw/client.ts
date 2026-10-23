@@ -1,4 +1,4 @@
-/* Raw theme behaviour, imported only while Raw is the active theme: the light/dark toggle, project deep links. */
+/* Raw theme behaviour, imported only while Raw is the active theme: the light/dark toggle, deep links that open a row. */
 
 import { projectFromHash } from "../active";
 
@@ -12,14 +12,20 @@ document.getElementById("raw-scheme-toggle")?.addEventListener("click", () => {
   } catch {}
 });
 
-// `#project-<id>` (or a bare `#<id>`, see projectFromHash) opens that project's README.
+// `#project-<id>` (or a bare `#<id>`, see projectFromHash) opens that project's details; so does any other row
+// linked to by its id (`#experience-<id>`).
 const projects = [...document.querySelectorAll<HTMLElement>("[data-raw-project]")];
 const openFromHash = () => {
   const target = projectFromHash(projects);
-  if (!target) return;
-  const details = target.row.querySelector("details");
-  if (details) details.open = true;
-  if (target.bare) target.row.scrollIntoView();
+  let row = target?.row;
+  if (!row) {
+    try {
+      row = document.getElementById(decodeURIComponent(location.hash.slice(1))) ?? undefined;
+    } catch {}
+  }
+  const details = row?.matches("li") ? row.querySelector(":scope > details") : null;
+  if (details instanceof HTMLDetailsElement) details.open = true;
+  if (target?.bare) target.row.scrollIntoView();
 };
 openFromHash();
 addEventListener("hashchange", openFromHash);

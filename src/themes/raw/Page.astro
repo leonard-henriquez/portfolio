@@ -2,19 +2,23 @@
 /**
  * Raw: the original site. Tiny5 pixel type over iA Writer Mono, Friedrich's Wanderer as a dithered
  * pixel image, thick rules, and its own light/dark toggle (html[data-raw-scheme], see meta.ts and client.ts).
- * Everything is readable without JavaScript: project details are native <details>.
+ * Every list is the same compact row (key · title · secondary line), with the rest of the item in a native
+ * <details> under it: scannable by default, details on demand, readable without JavaScript.
  */
 import { Image } from "astro:assets";
-import { pad, PROJECT_STATUSES, STATUS_LABELS } from "../../lib/portfolio";
+import { MARKDOWN_PATHS } from "../../lib/markdown";
+import { pad } from "../../lib/portfolio";
 import type { ThemePageProps } from "../types";
 import "./global.css";
 import { heroImage } from "./hero";
 
 type Props = ThemePageProps;
 
-const { profile, projects, span, statusCounts } = Astro.props.portfolio;
+const { profile, projects, span } = Astro.props.portfolio;
 const { current, contact, sections } = profile;
 const credit = profile.heroImage.credit;
+// For AI agents: the Markdown version of the site (src/lib/markdown.ts).
+const llmsTxt = new URL(MARKDOWN_PATHS.index, Astro.site);
 
 // "Work" is the current company's work streams: the profile's current project, or the first with highlights.
 const company = current.project ?? projects.find((p) => p.highlights.length > 0);
@@ -23,9 +27,6 @@ const hero = heroImage(Astro.props.portfolio);
 const work = company?.highlights ?? [];
 
 const projectCount = `${pad(projects.length, 2)} ${projects.length === 1 ? "project" : "projects"}, ${span.label}`;
-const statusLine = PROJECT_STATUSES.filter((s) => statusCounts[s] > 0)
-  .map((s) => `${statusCounts[s]} ${STATUS_LABELS[s].toLowerCase()}`)
-  .join(" · ");
 const hasAbout = profile.about.long.length > 0 || profile.stack.length > 0 || profile.focusAreas.length > 0;
 
 const nav = [
@@ -38,10 +39,7 @@ const nav = [
   ...(profile.talks.length ? [{ label: "Talks", href: "#talks", hint: sections.talks.summary }] : []),
 ];
 
-const links = [
-  ...contact.links.map(({ label, href }) => ({ label, href })),
-  { label: "Email", href: contact.mailto },
-];
+const links = contact.links.map(({ label, href }) => ({ label, href }));
 
 const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 ---
@@ -110,7 +108,7 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
           {profile.numbers.map((n) => (
             <div class="number">
               <dt class="pixel">{n.value}</dt>
-              <dd class="muted">{n.label}</dd>
+              <dd class="meta">{n.label}</dd>
             </div>
           ))}
         </dl>
@@ -125,98 +123,79 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
         <section id="projects" class="section">
           <div class="section-head">
             <h2 class="pixel">PROJECTS</h2>
-            <p>
-              {projectCount}.<br />
-              <span class="muted">{statusLine}</span>
-            </p>
+            <p>{projectCount}.</p>
           </div>
-          <ol class="cards">
+          <ol class="rows">
             {projects.map((p) => {
-              const img = p.image.pixel;
               const isWork = p.id === company?.id && work.length > 0;
-              const more = p.dek !== p.summary || p.hasBody || (p.highlights.length > 0 && !isWork);
+              const facts = [
+                { label: "Stack", value: p.stack.join(" · ") },
+                { label: "Tags", value: p.tags.map((t) => `#${t}`).join(" ") },
+              ].filter((f) => f.value);
               return (
-                <li class="card project" id={p.anchor} data-raw-project>
-                  <figure class="p-img">
-                    {img.pixelated ? (
-                      <img
-                        class="pixelated"
-                        src={img.src.src}
-                        width={img.src.width}
-                        height={img.src.height}
-                        alt={img.alt}
-                        loading="lazy"
-                        decoding="async"
-                        style={`object-position: ${img.position}`}
-                      />
-                    ) : (
-                      <Image
-                        src={img.src}
-                        widths={[240, 360, 480, 720].filter((w) => w <= img.src.width)}
-                        sizes="(min-width: 640px) 240px, calc(100vw - 72px)"
-                        alt={img.alt}
-                        loading="lazy"
-                        decoding="async"
-                        style={`object-position: ${img.position}`}
-                      />
-                    )}
-                    <figcaption class="muted">{img.caption}</figcaption>
-                  </figure>
-                  <div class="p-main">
-                    <p class="p-status">
-                      <span class="pixel" data-status={p.status}>{p.statusLabel.toUpperCase()}</span>
-                      <span class="muted">{p.period}</span>
-                    </p>
-                    <h3>{p.title}</h3>
-                    <p class="muted p-role">{p.role}</p>
-                    <p>{p.summary}</p>
-                    {p.stack.length > 0 && <p class="stack muted">{p.stack.join(" · ")}</p>}
-                    {p.tags.length > 0 && <p class="stack muted">{p.tags.map((t) => `#${t}`).join(" ")}</p>}
-                    {p.links.length > 0 && (
-                      <ul class="p-links">
-                        {p.links.map((link) => (
-                          <li>
-                            <a href={link.href}>
-                              {link.label}
-                              <span aria-hidden="true"> ↗</span>
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {more && (
-                    <details class="p-more">
-                      <summary>
-                        <span class="pixel" aria-hidden="true">
-                          README
+                <li class="row" id={p.anchor} data-raw-project>
+                  <details class="entry">
+                    <summary class="head">
+                      <span class="key">
+                        <span>{p.period}</span>
+                        <span class="chip pixel" data-status={p.status}>
+                          {p.statusLabel.toUpperCase()}
                         </span>
-                        <span class="sr-only">More about {p.title}</span>
-                      </summary>
-                      <div class="p-body">
-                        {p.dek !== p.summary && <p class="dek">{p.dek}</p>}
-                        {p.hasBody && <div class="prose" set:html={p.html} />}
-                        {isWork ? (
-                          <p class="muted">
-                            Work streams: <a href="#work">see Work</a>.
-                          </p>
-                        ) : (
-                          p.highlights.length > 0 && (
-                            <ol class="p-hl">
-                              {p.highlights.map((h) => (
-                                <li>
-                                  <h4>{h.title}</h4>
-                                  <p>{h.body}</p>
-                                  {h.result && <p class="result">{h.result}</p>}
-                                  {h.stack.length > 0 && <p class="stack muted">{h.stack.join(" · ")}</p>}
-                                </li>
-                              ))}
-                            </ol>
-                          )
-                        )}
-                      </div>
-                    </details>
-                  )}
+                      </span>
+                      <h3 class="title">{p.title}</h3>
+                      <span class="sub">{p.role}</span>
+                      <span class="line">{p.summary}</span>
+                      <span class="toggle pixel" aria-hidden="true" />
+                    </summary>
+                    <div class="more">
+                      {p.dek !== p.summary && <p>{p.dek}</p>}
+                      {p.hasBody && <div class="prose" set:html={p.html} />}
+                      {isWork ? (
+                        <p class="meta">
+                          Work streams: <a href="#work">see Work</a>.
+                        </p>
+                      ) : (
+                        p.highlights.length > 0 && (
+                          <ol class="sublist">
+                            {p.highlights.map((h) => (
+                              <li>
+                                <h4 class="title">{h.title}</h4>
+                                <p>{h.body}</p>
+                                {h.result && <p class="title result">{h.result}</p>}
+                                {h.stack.length > 0 && <p class="meta">{h.stack.join(" · ")}</p>}
+                              </li>
+                            ))}
+                          </ol>
+                        )
+                      )}
+                      {(facts.length > 0 || p.links.length > 0) && (
+                        <dl class="facts">
+                          {facts.map((f) => (
+                            <div>
+                              <dt class="meta">{f.label}</dt>
+                              <dd>{f.value}</dd>
+                            </div>
+                          ))}
+                          {p.links.length > 0 && (
+                            <div>
+                              <dt class="meta">Links</dt>
+                              <dd>
+                                {p.links.map((link, i) => (
+                                  <>
+                                    {i > 0 && " · "}
+                                    <a href={link.href}>
+                                      {link.label}
+                                      <span aria-hidden="true"> ↗</span>
+                                    </a>
+                                  </>
+                                ))}
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+                      )}
+                    </div>
+                  </details>
                 </li>
               );
             })}
@@ -235,16 +214,24 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
             <h2 class="pixel">WORK</h2>
             {sections.work.intro && <p>{sections.work.intro}</p>}
           </div>
-          <div class="cards">
-            {work.map((item) => (
-              <article class="card">
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-                {item.result && <p class="result">{item.result}</p>}
-                {item.stack.length > 0 && <p class="stack muted">{item.stack.join(" · ")}</p>}
-              </article>
+          <ol class="rows">
+            {work.map((item, i) => (
+              <li class="row">
+                <details class="entry">
+                  <summary class="head">
+                    <span class="key">{pad(i + 1, 2)}</span>
+                    <h3 class="title">{item.title}</h3>
+                    <span class="toggle pixel" aria-hidden="true" />
+                  </summary>
+                  <div class="more">
+                    <p>{item.body}</p>
+                    {item.result && <p class="title result">{item.result}</p>}
+                    {item.stack.length > 0 && <p class="meta">{item.stack.join(" · ")}</p>}
+                  </div>
+                </details>
+              </li>
             ))}
-          </div>
+          </ol>
         </section>
       </>
     )
@@ -262,35 +249,44 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
                 <blockquote class="pixel">
                   <p>{profile.quote.text}</p>
                 </blockquote>
-                {profile.quote.context && <figcaption class="muted">{profile.quote.context}</figcaption>}
+                {profile.quote.context && <figcaption class="meta">{profile.quote.context}</figcaption>}
               </figure>
             )}
           </div>
-          <div class="about-body">
+          <ul class="rows">
             {profile.about.long.length > 0 && (
-              <div class="about-text">
-                {profile.about.long.map((para) => (
-                  <p>{para}</p>
-                ))}
-              </div>
-            )}
-            {(profile.focusAreas.length > 0 || profile.stack.length > 0) && (
-              <dl class="rows">
-                {profile.focusAreas.length > 0 && (
-                  <div class="row">
-                    <dt class="muted">Focus</dt>
-                    <dd>{profile.focusAreas.join(" · ")}</dd>
+              <li class="row">
+                <details class="entry">
+                  <summary class="head">
+                    <span class="key">Bio</span>
+                    <span class="line">{profile.about.short}</span>
+                    <span class="toggle pixel" aria-hidden="true" />
+                  </summary>
+                  <div class="more">
+                    {profile.about.long.map((para) => (
+                      <p>{para}</p>
+                    ))}
                   </div>
-                )}
-                {profile.stack.map((g) => (
-                  <div class="row">
-                    <dt class="muted">{g.label}</dt>
-                    <dd>{g.items.join(" · ")}</dd>
-                  </div>
-                ))}
-              </dl>
+                </details>
+              </li>
             )}
-          </div>
+            {profile.focusAreas.length > 0 && (
+              <li class="row">
+                <div class="head">
+                  <span class="key">Focus</span>
+                  <span class="line">{profile.focusAreas.join(" · ")}</span>
+                </div>
+              </li>
+            )}
+            {profile.stack.map((g) => (
+              <li class="row">
+                <div class="head">
+                  <span class="key">{g.label}</span>
+                  <span class="line">{g.items.join(" · ")}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       </>
     )
@@ -305,14 +301,19 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
             <h2 class="pixel">PRINCIPLES</h2>
             {sections.principles.intro && <p>{sections.principles.intro}</p>}
           </div>
-          <ol class="cards">
+          <ol class="rows">
             {profile.principles.map((p) => (
-              <li class="card principle">
-                <span class="pixel index">{p.no2}</span>
-                <div>
-                  <h3>{p.title}</h3>
-                  <p>{p.body}</p>
-                </div>
+              <li class="row">
+                <details class="entry">
+                  <summary class="head">
+                    <span class="key">{p.no2}</span>
+                    <h3 class="title">{p.title}</h3>
+                    <span class="toggle pixel" aria-hidden="true" />
+                  </summary>
+                  <div class="more">
+                    <p>{p.body}</p>
+                  </div>
+                </details>
               </li>
             ))}
           </ol>
@@ -330,47 +331,45 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
             <h2 class="pixel">EXPERIENCE</h2>
             {sections.experience.intro && <p>{sections.experience.intro}</p>}
           </div>
-          <ol class="rows cv">
+          <ol class="rows">
             {profile.experience.map((org) => (
-              <li class:list={["row", `w-${org.weight}`]} id={org.anchor}>
-                <span class="muted">{org.current ? `${org.start.year}–now` : org.years}</span>
-                <div class="cv-main">
-                  <h3 class:list={["cv-name", { pixel: org.featured }]}>
-                    {org.href ? <a href={org.href}>{org.label}</a> : org.label}
-                  </h3>
-                  {(org.formerly || org.location || org.multiRole) && (
-                    <p class="muted">
-                      {[org.formerly && `Formerly ${org.formerly}`, org.location, org.multiRole && `${org.roles.length} roles, ${org.duration}`]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  )}
-                  {org.summary && <p>{org.summary}</p>}
-                  <ol class:list={["cv-roles", { nested: org.multiRole }]}>
-                    {org.roles.map((role) => (
-                      <li>
-                        <h4>
-                          {role.title} <span class="muted">· {role.typeLabel}</span>
-                        </h4>
-                        <p class="muted">
-                          <time datetime={role.start.iso}>{role.start.label}</time> –{" "}
-                          {role.end ? <time datetime={role.end.iso}>{role.end.label}</time> : "present"}
-                          {!role.current && <span class="nowrap"> · {role.duration}</span>}
-                        </p>
-                        {role.text && <p>{role.text}</p>}
-                        {role.highlights.map((h) => (
-                          <p class="result">{h}</p>
-                        ))}
-                        {role.skills.length > 0 && <p class="stack muted">{role.skills.join(" · ")}</p>}
-                      </li>
-                    ))}
-                  </ol>
-                  {org.project && (
-                    <p>
-                      <a href={`#${org.project.anchor}`}>See the {org.project.title} project ↑</a>
-                    </p>
-                  )}
-                </div>
+              <li class="row" id={org.anchor}>
+                <details class="entry">
+                  <summary class="head">
+                    <span class="key">{org.years}</span>
+                    <h3 class="title">{org.org}</h3>
+                    <span class="sub">{org.roles.map((r) => r.title).join(" · ")}</span>
+                    <span class="toggle pixel" aria-hidden="true" />
+                  </summary>
+                  <div class="more">
+                    {org.details.length > 0 && <p class="meta">{org.details.join(" · ")}</p>}
+                    {org.summary && <p>{org.summary}</p>}
+                    <ol class="sublist rail">
+                      {org.roles.map((role) => (
+                        <li>
+                          <h4 class="title">
+                            {role.title} <span class="meta">· {role.typeLabel}</span>
+                          </h4>
+                          <p class="meta">
+                            <time datetime={role.start.iso}>{role.start.label}</time> –{" "}
+                            {role.end ? <time datetime={role.end.iso}>{role.end.label}</time> : "present"}
+                            {!role.current && <span class="nowrap"> · {role.duration}</span>}
+                          </p>
+                          {role.text && <p>{role.text}</p>}
+                          {role.highlights.map((h) => (
+                            <p class="arrow">{h}</p>
+                          ))}
+                          {role.skills.length > 0 && <p class="meta">{role.skills.join(" · ")}</p>}
+                        </li>
+                      ))}
+                    </ol>
+                    {org.project && (
+                      <p class="meta">
+                        <a href={`#${org.project.anchor}`}>See the {org.project.title} project ↑</a>
+                      </p>
+                    )}
+                  </div>
+                </details>
               </li>
             ))}
           </ol>
@@ -388,14 +387,13 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
             <h2 class="pixel">EDUCATION</h2>
             {sections.education.intro && <p>{sections.education.intro}</p>}
           </div>
-          <ol class="rows cv">
+          <ol class="rows">
             {profile.education.map((e) => (
-              <li class:list={["row", `w-${e.weight}`]} id={e.anchor}>
-                <span class="muted">{e.years}</span>
-                <div class="cv-main">
-                  <h3 class:list={["cv-name", { pixel: e.featured }]}>{e.href ? <a href={e.href}>{e.school}</a> : e.school}</h3>
-                  {e.program && <p>{e.program}</p>}
-                  {e.note && <p class="muted">{e.note}</p>}
+              <li class="row" id={e.anchor}>
+                <div class="head">
+                  <span class="key">{e.years}</span>
+                  <h3 class="title">{e.school}</h3>
+                  <span class="sub">{e.program}</span>
                 </div>
               </li>
             ))}
@@ -417,8 +415,10 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
           <ul class="rows">
             {profile.talks.map((t) => (
               <li class="row">
-                <span class="muted">{t.year ?? ""}</span>
-                <span>{t.text}</span>
+                <div class="head">
+                  <span class="key">{t.year ?? ""}</span>
+                  <span class="title">{t.text}</span>
+                </div>
               </li>
             ))}
           </ul>
@@ -431,7 +431,7 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
     <div class="rule"></div>
     <div class="footer-inner" data-switcher-avoid>
       <p>
-        Write to me at <a href={contact.mailto}>{contact.email}</a>
+        {contact.intro && <>{contact.intro} </>}<a href={contact.preferred.href} rel="me noopener">Message me on {contact.preferred.label}</a>.
       </p>
       <p class="muted colophon">
         Set in Tiny5 and iA Writer Mono.{
@@ -440,7 +440,9 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
               {" "}Image after {credit.artist}, <i>{credit.title}</i> ({credit.year}).
             </>
           )
-        }
+        }<span class="agents">
+          {" "}Also in Markdown: <a href={llmsTxt} type="text/plain" title="This site as Markdown, for AI agents">llms.txt</a>.
+        </span>
       </p>
     </div>
   </footer>
@@ -585,16 +587,26 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
   }
 
   .number dd {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     margin-top: 8px;
     max-width: 24ch;
   }
 
+  /*
+   * Type: five styles, one per kind of text.
+   *   Display  Tiny5, sized per use: name, tagline, section titles, figures, quote, status chips, toggles.
+   *   Lead     iA Writer Mono 1rem/400: the introduction under the name.
+   *   Title    0.875rem/700: what an item is called (project, stream, principle, organization, role, school, talk).
+   *   Body     0.875rem/400: what it says (summaries, descriptions, prose, section intros).
+   *   Meta     0.875rem/400 muted: keys (periods, years, numbers, labels) and secondary facts (role, program,
+   *            organization details, stack, tags, captions, colophon).
+   * Rules: 4px under the header, 8px between sections, 2px around each list and on the rail, 1px between rows.
+   */
   .section {
     display: flex;
     flex-direction: column;
     gap: 32px;
-    padding: 32px 0 64px;
+    padding: 32px 0 56px;
   }
 
   .section-head {
@@ -614,329 +626,188 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
     max-width: 480px;
   }
 
-  .cards {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .card {
-    border: 2px solid var(--fg);
-    background: var(--card);
-    padding: 16px;
+  .title {
     font-size: 0.875rem;
-  }
-
-  .card h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .card .result {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--fg);
     font-weight: 700;
   }
 
-  .card .stack {
-    margin-top: 12px;
-    font-size: 0.8125rem;
-  }
-
-  .principle {
-    display: flex;
-    gap: 16px;
-  }
-
-  .index {
-    font-size: 1.5rem;
-    line-height: 1.1;
-  }
-
-  .rows {
+  .meta {
+    color: var(--muted);
     font-size: 0.875rem;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: 9ch 1fr;
-    gap: 16px;
-    padding: 12px 8px;
-    border-bottom: 1px solid var(--fg);
-  }
-
-  .row:first-child {
-    border-top: 2px solid var(--fg);
-  }
-
-  .row:last-child {
-    border-bottom-width: 2px;
-  }
-
-  footer {
-    padding-top: 32px;
-  }
-
-  /* Experience and education: a wider period column, an entry per organization, its roles nested. */
-  /* Phones: the period sits above the entry, so the entry gets the full width. */
-  .cv .row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-  }
-
-  @media (min-width: 640px) {
-    .cv .row {
-      grid-template-columns: 10ch minmax(0, 1fr);
-      gap: 16px;
-    }
+    font-weight: 400;
   }
 
   .nowrap {
     white-space: nowrap;
   }
 
-  .cv .row.w-high {
-    background: var(--card);
+  /*
+   * Lists: every item is one row on one grid, key · main · toggle. The main column stacks the title, a secondary
+   * line (meta) and a one-line text (body); an item shows the slots it has, always in that order. Whatever else the
+   * item holds is in a native <details> under the row, aligned on the main column.
+   */
+  .rows {
+    --key: 13ch;
+    --toggle: 2ch;
+    font-size: 0.875rem;
+    border-top: 2px solid var(--fg);
+    border-bottom: 2px solid var(--fg);
   }
 
-  .cv-main {
+  .row + .row {
+    border-top: 1px solid var(--fg);
+  }
+
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--toggle);
+    grid-template-areas:
+      "key toggle"
+      "title title"
+      "sub sub"
+      "line line";
+    column-gap: 16px;
+    padding: 12px 8px;
+  }
+
+  .key {
+    grid-area: key;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    align-self: start;
+    gap: 4px 12px;
+    color: var(--muted);
   }
 
-  .cv-name {
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.3;
+  .head .title {
+    grid-area: title;
   }
 
-  .cv-name.pixel {
-    font-size: 1.75rem;
-    font-weight: 400;
+  .sub {
+    grid-area: sub;
+    color: var(--muted);
+  }
+
+  .line {
+    grid-area: line;
+    overflow-wrap: anywhere;
+  }
+
+  .toggle {
+    grid-area: toggle;
+    justify-self: end;
+    align-self: start;
+    font-size: 1.25rem;
     line-height: 1.1;
   }
 
-  .w-low .cv-name {
-    font-size: 0.875rem;
+  .toggle::before {
+    content: "+" / "";
   }
 
-  .cv-roles {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 6px;
+  .entry[open] > summary .toggle::before {
+    content: "−" / "";
   }
 
-  /* Several roles at one organization: a thick rail, like the page's rules. */
-  .cv-roles.nested {
-    padding-left: 14px;
-    border-left: 2px solid var(--fg);
-  }
-
-  .cv-roles li {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .cv-roles h4 {
-    font-size: 0.875rem;
-    font-weight: 700;
-  }
-
-  .cv-roles h4 .muted {
-    font-weight: 400;
-  }
-
-  .cv .result {
-    font-weight: 700;
-  }
-
-  .cv .result::before {
-    content: "→ " / "";
-  }
-
-  .cv .stack {
-    font-size: 0.8125rem;
-  }
-
-  /* Projects */
-  .cards:has(.project) {
-    container-type: inline-size;
-  }
-
-  .project {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-  }
-
-  @container (min-width: 520px) {
-    .project {
-      grid-template-columns: 240px minmax(0, 1fr);
-      gap: 12px 20px;
-    }
-  }
-
-  .p-img img {
-    width: 100%;
-    max-width: 360px;
-    aspect-ratio: 120 / 74;
-    object-fit: cover;
-    border: 2px solid var(--fg);
-    background: var(--fog);
-  }
-
-  .pixelated {
-    image-rendering: pixelated;
-  }
-
-  .p-img figcaption {
-    margin-top: 6px;
-    font-size: 0.75rem;
-  }
-
-  .p-status {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 12px;
-    margin-bottom: 8px;
-    font-size: 0.8125rem;
-  }
-
-  .p-status .pixel {
-    padding: 0 6px;
-    border: 2px solid var(--fg);
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .p-status [data-status="shipped"] {
-    background: var(--fg);
-    color: var(--bg);
-  }
-
-  .card.project h3 {
-    margin-bottom: 0;
-    font-size: 1.125rem;
-    line-height: 1.35;
-  }
-
-  .p-role {
-    margin-bottom: 8px;
-    font-size: 0.8125rem;
-  }
-
-  .p-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 16px;
-    margin-top: 12px;
-  }
-
-  .p-more {
-    grid-column: 1 / -1;
-    border-top: 2px solid var(--fg);
-  }
-
-  .p-more summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
+  .entry > summary {
     cursor: pointer;
     list-style: none;
   }
 
-  .p-more summary::-webkit-details-marker {
+  .entry > summary::-webkit-details-marker {
     display: none;
   }
 
-  .p-more summary::after {
-    content: "+";
-    font-family: "Tiny5", ui-monospace, monospace;
-    font-size: 1.25rem;
-    line-height: 1;
+  .entry > summary:focus-visible {
+    outline-offset: -2px;
   }
 
-  .p-more[open] summary::after {
-    content: "−";
+  @media (hover: hover) {
+    .entry > summary:hover :is(.title, .line) {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
   }
 
-  .p-more summary:hover .pixel {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+  .row:has(> .entry[open]) {
+    background: var(--card);
   }
 
-  .p-body {
+  .more {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-top: 12px;
+    padding: 0 8px 20px;
   }
 
-  .dek {
-    font-weight: 700;
+  @media (min-width: 640px) {
+    .head {
+      grid-template-columns: var(--key) minmax(0, 1fr) var(--toggle);
+      grid-template-areas:
+        "key title toggle"
+        "key sub toggle"
+        "key line toggle";
+    }
+
+    /* A key alone (about's rows) still lines up with the titles. */
+    .key {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .more {
+      padding-left: calc(8px + var(--key) + 16px);
+      padding-right: calc(8px + var(--toggle) + 16px);
+    }
+  }
+
+  .chip {
+    padding: 0 6px;
+    border: 2px solid var(--fg);
+    color: var(--fg);
+    line-height: 1.4;
+  }
+
+  .chip[data-status="shipped"] {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .result::before,
+  .arrow::before {
+    content: "→ " / "";
   }
 
   .prose :global(p + p) {
     margin-top: 0.8em;
   }
 
-  .p-hl li {
-    padding: 12px 0;
-    border-top: 1px solid var(--fg);
+  /* Inside an item: its own parts (work streams, roles), each led by a title, behind a rail. */
+  .sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
-  .p-hl h4 {
-    margin-bottom: 4px;
-    font-size: 0.875rem;
+  .sublist li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .p-hl .result {
-    margin-top: 6px;
-    font-weight: 700;
+  .rail {
+    padding-left: 14px;
+    border-left: 2px solid var(--fg);
   }
 
-  .p-hl .stack {
-    margin-top: 6px;
-    font-size: 0.8125rem;
-  }
-
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .facts div {
+    display: grid;
+    grid-template-columns: 7ch minmax(0, 1fr);
+    gap: 16px;
   }
 
   /* About */
-  .about-body {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-  }
-
-  .about-text {
-    padding: 0 8px;
-    font-size: 0.875rem;
-  }
-
-  .about-text p + p {
-    margin-top: 1em;
-  }
-
-  .about-body .row dd {
-    overflow-wrap: anywhere;
-  }
-
   .quote {
     padding: 0 8px;
   }
@@ -950,7 +821,6 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
   .quote figcaption {
     margin-top: 12px;
-    font-size: 0.8125rem;
   }
 
   .footer-inner {
@@ -959,10 +829,6 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
     gap: 16px;
     padding: 24px 8px 0;
     font-size: 0.875rem;
-  }
-
-  .colophon {
-    font-size: 0.75rem;
   }
 
   @media (min-width: 640px) {
@@ -979,9 +845,7 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
     .intro-text,
     .section-head,
-    .cards,
-    .rows,
-    .about-body {
+    .rows {
       flex: 1;
       min-width: 0;
     }
@@ -1006,6 +870,11 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
       flex-direction: row;
       justify-content: space-between;
       align-items: baseline;
+    }
+
+    /* Side by side, a longer colophon would take width from the contact line. The link stays in the markup for agents. */
+    .agents {
+      display: none;
     }
   }
 </style>

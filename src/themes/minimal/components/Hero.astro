@@ -20,7 +20,7 @@ const { current } = profile;
 ---
 
 <section id="top" class="hero mn-wrap" aria-labelledby="hero-title">
-  <h1 id="hero-title" class="headline" data-mn-headline>
+  <h1 id="hero-title" class="headline mn-display" data-mn-headline>
     <span class="sr-only">{lead} {tail}</span>
     <span aria-hidden="true">
       <span class="lead">{words(lead).map((w) => <><span class="w"><span>{w}</span></span>{" "}</>)}</span>
@@ -49,16 +49,12 @@ const { current } = profile;
 
 <style>
   .hero {
-    padding-block: clamp(80px, 12vw, 176px) clamp(56px, 8vw, 112px);
+    padding-block: clamp(72px, 10vw, 144px) clamp(48px, 6vw, 88px);
   }
 
   .headline {
     margin: 0;
     max-width: 19ch;
-    font-size: clamp(40px, 5.6vw, 84px);
-    font-weight: 500;
-    line-height: 1.02;
-    letter-spacing: -0.035em;
     text-wrap: pretty;
   }
 
@@ -105,8 +101,8 @@ const { current } = profile;
 
   .caption {
     margin-top: 12px;
-    font-size: 13px;
-    line-height: 1.4;
+    font-size: var(--t-small);
+    line-height: 1.45;
     color: var(--mute);
   }
 

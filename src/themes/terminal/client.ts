@@ -3,7 +3,8 @@
  * Everything here is progressive: without it the page is complete and static.
  * - hero terminal typed character by character, prompts typed when they scroll into view
  * - IntersectionObserver reveals where CSS scroll-driven animations are missing (Firefox)
- * - number scramble, cursor-following project preview, j/k row navigation, copy email
+ * - number scramble, cursor-following project preview
+ * - expandable lists: open the row a link points at, j/k between rows, Escape to close
  */
 
 import { projectFromHash } from "../active";
@@ -183,46 +184,56 @@ function initScrollFallback(): void {
   update();
 }
 
-/* Project rows: open from the URL hash, j/k to move between rows, Escape to close. */
-function initRows(): void {
-  const rows = [...document.querySelectorAll<HTMLElement>("[data-row]")];
-  if (!rows.length) return;
-  const summaries = rows.map((row) => row.querySelector("summary")).filter((s): s is HTMLElement => !!s);
-
-  // `#project-<id>` (or a bare `#<id>`, see projectFromHash) opens that project.
-  const openFromHash = () => {
-    const target = projectFromHash(rows);
-    const details = target?.row.querySelector("details");
-    if (!target || !details) return;
-    details.open = true;
-    if (target.bare) target.row.scrollIntoView();
-  };
-  openFromHash();
-  addEventListener("hashchange", openFromHash);
-
-  // Only while a project row has focus (WCAG 2.1.4: no page-wide single-key shortcuts). Tab into the list first.
-  const list = rows[0].parentElement;
-  list?.addEventListener("keydown", (event) => {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    const current = summaries.indexOf(event.target as HTMLElement);
-    if (current < 0) return;
-    if (event.key === "Escape") {
-      const details = summaries[current].parentElement as HTMLDetailsElement;
-      details.open = false;
-      return;
+/* The row a link points at: a project (`#project-<id>`, or a bare `#<id>`, see projectFromHash) or any other
+ * row with an id (`#experience-<org>`). Opens it. */
+function initHash(): void {
+  const projects = [...document.querySelectorAll<HTMLElement>("[data-row]")];
+  const open = () => {
+    const project = projectFromHash(projects);
+    let row: HTMLElement | null | undefined = project?.row;
+    if (!row) {
+      try {
+        row = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      } catch {
+        return;
+      }
     }
-    if (event.key !== "j" && event.key !== "k") return;
-    const step = event.key === "j" ? 1 : -1;
-    const summary = summaries[Math.max(0, Math.min(summaries.length - 1, current + step))];
-    event.preventDefault();
-    summary.focus({ preventScroll: true });
-    summary.scrollIntoView({ block: "nearest", behavior: motionQuery.matches ? "auto" : "smooth" });
-  });
+    const details = row?.querySelector(":scope > details");
+    if (!(details instanceof HTMLDetailsElement)) return;
+    details.open = true;
+    if (project?.bare) row?.scrollIntoView();
+  };
+  open();
+  addEventListener("hashchange", open);
+}
+
+/* Every expandable list: j/k move between its rows, Escape closes the focused one. Only while one of the list's
+ * own rows has focus (WCAG 2.1.4: no page-wide single-key shortcuts), so Tab into the list first. */
+function initLists(): void {
+  for (const list of document.querySelectorAll<HTMLElement>("[data-list]")) {
+    const summaries = [...list.querySelectorAll<HTMLElement>(":scope > li > details > summary")];
+    if (!summaries.length) continue;
+    list.addEventListener("keydown", (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const current = summaries.indexOf(event.target as HTMLElement);
+      if (current < 0) return;
+      if (event.key === "Escape") {
+        (summaries[current].parentElement as HTMLDetailsElement).open = false;
+        return;
+      }
+      if (event.key !== "j" && event.key !== "k") return;
+      const step = event.key === "j" ? 1 : -1;
+      const summary = summaries[Math.max(0, Math.min(summaries.length - 1, current + step))];
+      event.preventDefault();
+      summary.focus({ preventScroll: true });
+      summary.scrollIntoView({ block: "nearest", behavior: motionQuery.matches ? "auto" : "smooth" });
+    });
+  }
 }
 
 /* A small photo that trails the cursor over the project list. */
 function initPeek(): void {
-  const list = document.querySelector<HTMLElement>("[data-list]");
+  const list = document.querySelector<HTMLElement>('[data-list="projects"]');
   const peek = document.querySelector<HTMLElement>("[data-peek]");
   const inner = document.querySelector<HTMLElement>("[data-peek-inner]");
   if (!list || !peek || !inner || !finePointer.matches || motionQuery.matches) return;
@@ -263,7 +274,8 @@ function initPeek(): void {
     { once: true },
   );
   list.addEventListener("pointermove", (event) => {
-    const summary = (event.target as HTMLElement).closest("summary");
+    // The project lines only, not the highlights inside an open README.
+    const summary = (event.target as HTMLElement).closest<HTMLElement>("[data-row] > details > summary");
     const row = summary?.closest<HTMLElement>("[data-row]");
     const open = summary?.parentElement instanceof HTMLDetailsElement && summary.parentElement.open;
     show(summary && !open ? row?.dataset.row : undefined);
@@ -278,39 +290,14 @@ function initPeek(): void {
   addEventListener("scroll", () => show(undefined), { passive: true });
 }
 
-function initCopy(): void {
-  const button = document.querySelector<HTMLButtonElement>("[data-copy]");
-  const label = button?.querySelector<HTMLElement>("[data-copy-label]");
-  const status = document.querySelector<HTMLElement>("[data-copy-status]");
-  if (!button || !label || !navigator.clipboard) return;
-  button.hidden = false;
-  let timer = 0;
-  button.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(button.dataset.copy ?? "");
-      label.textContent = "copied";
-      button.classList.add("is-done");
-      if (status) status.textContent = "Email address copied to the clipboard.";
-      clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        label.textContent = "copy";
-        button.classList.remove("is-done");
-        if (status) status.textContent = "";
-      }, 2000);
-    } catch {
-      location.href = `mailto:${button.dataset.copy}`;
-    }
-  });
-}
-
 function init(): void {
   root.classList.add("tm-ready");
   initTerminal();
   initViewport();
   initScrollFallback();
-  initRows();
+  initHash();
+  initLists();
   initPeek();
-  initCopy();
 }
 
 init();

@@ -1,0 +1,63 @@
+---
+import type { Education } from "../../../lib/portfolio";
+import Prompt from "./Prompt.astro";
+
+interface Props {
+  education: Education[];
+}
+
+/*
+ * `tree ~/education`, one line per school: branch, years, school, program. Every school has exactly one program
+ * line, always in the same column; nothing else to open.
+ */
+const { education } = Astro.props;
+// Like `tree` and `ls`, a name with spaces is quoted.
+const folder = (school: string) => (/\s/.test(school) ? `'${school}'/` : `${school}/`);
+const nameWidth = Math.max(...education.map((e) => folder(e.school).length));
+---
+
+{
+  education.length > 0 && (
+    <section id="education" class="tm-section" aria-labelledby="education-title">
+      <Prompt cmd="tree ~/education" label="Education" id="education-title" />
+      <ol class="tm-list edu" data-print style={`--name:${nameWidth}ch`}>
+        {education.map((e, i) => (
+          <li class="tm-row tm-line ln" style={`--i:${i}`} id={e.anchor}>
+            <span class="c-meta t-meta t-dim" aria-hidden="true">
+              {i === education.length - 1 ? "└──" : "├──"}
+            </span>
+            <span class="c-meta t-meta">{e.years}</span>
+            <span class="c-main">
+              <span class="c-name t-name">
+                {e.href ? (
+                  <a href={e.href} rel="noopener">
+                    {folder(e.school)}
+                  </a>
+                ) : (
+                  folder(e.school)
+                )}
+              </span>
+              <span class="c-sec t-text">{e.program}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  /* branch · years · school · program · (no toggle: nothing more to show). */
+  .edu {
+    --cols: 3ch 12ch var(--name) minmax(0, 1fr) 2ch;
+  }
+
+  a {
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: var(--amber);
+  }
+</style>

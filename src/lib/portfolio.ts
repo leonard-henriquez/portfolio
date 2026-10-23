@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES, WEIGHTS } from "./constants";
+import { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_ANCHOR_PREFIX, PROJECT_STATUSES } from "./constants";
 
 /*
  * The one contract between content and themes.
@@ -14,10 +14,8 @@ export type ImageStyle = (typeof IMAGE_STYLES)[number];
 export type ContentComponent = Awaited<ReturnType<typeof render>>["Content"];
 
 export type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
-/** Importance of an experience or education entry: "high", "medium" or "low". */
-export type Weight = (typeof WEIGHTS)[number];
 
-export { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES, WEIGHTS };
+export { EMPLOYMENT_TYPES, IMAGE_STYLES, PROJECT_STATUSES };
 
 export const STATUS_LABELS: Record<ProjectStatus, string> = {
   shipped: "Shipped",
@@ -181,13 +179,15 @@ export interface Experience {
   href?: string;
   /** "Paris, France". */
   location?: string;
+  /**
+   * Secondary facts about the organization, for one secondary line: `detail`, "Formerly <name>", `location`,
+   * in that order (e.g. ["YC W24"], ["Formerly Flatlooker"], ["Paris, France"]). Often empty.
+   */
+  details: string[];
   /** What the organization is, one line. Empty when the content has none. */
   summary: string;
   /** The project about this organization, with its own page and highlights, when the content names one. */
   project?: Project;
-  weight: Weight;
-  /** `weight === "high"`: what a theme should make most of. */
-  featured: boolean;
   /** Newest first. Never empty. */
   roles: ExperienceRole[];
   /** More than one title held: themes nest the roles under the organization. */
@@ -218,23 +218,14 @@ export interface Education {
   /** 0-based position, newest first. */
   index: number;
   school: string;
-  /** "MSc". */
-  degree?: string;
-  /** "Data Analytics and Artificial Intelligence". */
-  field?: string;
-  /** Degree and field: "MSc, Data Analytics and Artificial Intelligence". Empty when neither is given. */
+  /** One line: "MSc, Data Analytics and Artificial Intelligence". */
   program: string;
   start: number;
   /** Last year; equal to `start` for single-year entries. */
   end: number;
   /** "2015–2019", or "2018" within one year. */
   years: string;
-  /** One short line. Empty when the content has none. */
-  note: string;
   href?: string;
-  weight: Weight;
-  /** `weight === "high"`. */
-  featured: boolean;
 }
 
 export type ProfileSection = "work" | "principles" | "talks" | "experience" | "education";
@@ -313,10 +304,11 @@ export interface Profile {
   stackItems: string[];
   quote?: { text: string; context?: string };
   contact: {
-    email: string;
-    /** "mailto:…". */
-    mailto: string;
-    /** Social links (no email). */
+    /** A sentence inviting people to get in touch. */
+    intro?: string;
+    /** The one channel to put forward (LinkedIn); also listed in `links`. The site shows no email address. */
+    preferred: ProfileLink;
+    /** Social links. */
     links: ProfileLink[];
   };
   /**
@@ -479,10 +471,9 @@ function resolveExperience(
       fullLabel: e.formerly ? `${e.org} (${e.detail ? `${e.detail}, ` : ""}formerly ${e.formerly})` : label,
       href: e.href,
       location: e.location,
+      details: [e.detail, e.formerly && `Formerly ${e.formerly}`, e.location].filter((d): d is string => Boolean(d)),
       summary: e.summary ?? "",
       project,
-      weight: e.weight,
-      featured: e.weight === "high",
       roles,
       multiRole: roles.length > 1,
       current,
@@ -509,16 +500,11 @@ function resolveEducation(entries: CollectionEntry<"profile">["data"]["education
         anchor: `education-${id}`,
         index: 0,
         school: e.school,
-        degree: e.degree,
-        field: e.field,
-        program: [e.degree, e.field].filter(Boolean).join(", "),
+        program: e.program,
         start: e.start,
         end,
         years: period(e.start, end),
-        note: e.note ?? "",
         href: e.href,
-        weight: e.weight,
-        featured: e.weight === "high",
       } satisfies Education;
     })
     .sort((a, b) => b.end - a.end || b.start - a.start)
@@ -629,7 +615,12 @@ function resolveProfile(entry: CollectionEntry<"profile">, projects: Project[]):
     stack: d.stack,
     stackItems: d.stack.flatMap((g) => g.items),
     quote: d.quote,
-    contact: { ...d.contact, mailto: `mailto:${d.contact.email}` },
+    contact: {
+      intro: d.contact.intro,
+      // The schema guarantees a link of this kind.
+      preferred: d.contact.links.find((l) => l.kind === d.contact.preferred)!,
+      links: d.contact.links,
+    },
     sections: Object.fromEntries(
       Object.entries(d.sections).map(([key, text]) => [key, { ...text, summary: text.summary ?? text.intro }]),
     ) as Record<ProfileSection, SectionText>,
