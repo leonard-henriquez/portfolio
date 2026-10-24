@@ -63,3 +63,14 @@ One-time setup:
    - `A` `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
    - `CNAME` `www` → `leonard-henriquez.github.io`
 3. Back in Settings → Pages, set the custom domain to `hqz.me` (`public/CNAME` already contains it), wait for the DNS check, then tick **Enforce HTTPS**.
+
+## Previews
+
+Every pull request is built and deployed to [Cloudflare Pages](https://pages.cloudflare.com) by `.github/workflows/preview.yml`, on a URL that follows its branch (`<branch>.hqz-me.pages.dev`, updated on every push). A comment on the PR links to it, in each theme. Cloudflare marks these deployments `noindex`. Production is unaffected: it stays on GitHub Pages.
+
+One-time setup:
+
+1. In Cloudflare, create an API token (My Profile → API Tokens → Create Token → Custom token) with the permission **Account → Cloudflare Pages → Edit**.
+2. In the GitHub repo, go to Settings → Secrets and variables → Actions and add two repository secrets: `CLOUDFLARE_API_TOKEN` (the token) and `CLOUDFLARE_ACCOUNT_ID` (shown in the Cloudflare dashboard, in the URL or under Account details).
+
+The first run creates the Pages project (`hqz-me`). Without the secrets, and on pull requests from forks, the workflow deploys nothing and says why.
