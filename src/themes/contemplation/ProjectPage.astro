@@ -2,7 +2,7 @@
 /**
  * Contemplation, one project: its landscape under the header, then quiet sections on the paper, as on the home page.
  * Kicker, title and dek; the landscape (the project's panorama, or its illustration); the results as figures (the
- * Intro's cards); the long description beside the facts; the highlights; the projects before and after it.
+ * Intro's cards); the article beside the facts; the highlights; the projects before and after it.
  * Everything is open: there is nothing to disclose on a page about one project.
  */
 import "@fontsource-variable/space-grotesk/wght.css";
@@ -238,7 +238,7 @@ const neighbours = [
     letter-spacing: -0.025em;
   }
 
-  /* The long description, large, beside the facts. */
+  /* The article, large, beside the facts. */
   .body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
@@ -255,12 +255,129 @@ const neighbours = [
     text-wrap: pretty;
   }
 
-  .prose :global(p) {
+  .prose :global(:is(p, ul, ol, blockquote, pre, table)) {
     margin: 0;
   }
 
-  .prose :global(p + p) {
+  .prose :global(* + :is(p, ul, ol, blockquote, pre, table)) {
     margin-top: 0.8em;
+  }
+
+  /* The article's headings: the Work list's names, then the highlights' titles. */
+  .prose :global(:is(h2, h3)) {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2em;
+    font-size: clamp(24px, 2.2vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.5em;
+    font-size: 21px;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(:is(h2, h3) + *) {
+    margin-top: 0.5em;
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(strong) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    padding-left: 1.2em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prose :global(li)::marker {
+    color: var(--accent);
+  }
+
+  .prose :global(ol > li)::marker {
+    font-family: var(--mono);
+    font-size: 0.75em;
+  }
+
+  .prose :global(code) {
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    font-family: var(--mono);
+    font-size: 0.8em;
+  }
+
+  .prose :global(pre) {
+    overflow-x: auto;
+    padding: 18px 20px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--light);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
+
+  /* A line set apart: the figures' style (the results above). */
+  .prose :global(blockquote) {
+    padding-left: 20px;
+    border-left: 3px solid var(--accent);
+    color: var(--ink);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .prose :global(:is(th, td)) {
+    padding: 10px 20px 10px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  /* Column heads in the labels' style (.ct-mono). */
+  .prose :global(th) {
+    border-bottom-color: var(--ink);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .facts {

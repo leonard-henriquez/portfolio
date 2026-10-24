@@ -93,7 +93,8 @@ function renderProject(project: Project, level: number, byline?: string): string
     byline,
     `> ${project.dek}`,
     facts,
-    project.hasBody ? demoteHeadings(project.markdown, level) : project.summary,
+    // The article's top headings are `##`: one level under the project's.
+    project.hasBody ? demoteHeadings(project.markdown, level - 1) : project.summary,
     ...highlights,
   );
 }

@@ -17,6 +17,8 @@ pnpm build     # outputs dist/
 
 Add a project by dropping a Markdown file in `src/content/projects/`; it shows up in every theme, gets its own page at `/projects/<file name>/`, and `/#project-<file name>` links to its row on the home page (opened) whatever the theme. Run `pnpm check` before pushing.
 
+A project's Markdown body is its article, shown on its own page and in the Markdown versions. The home page shows its `excerpt` instead (a paragraph, optional), so the article can be as long as it needs.
+
 Projects with `status: released` or `building` are Selected work in Contemplation; `exploring` and `study` are Explorations. A project's `results` (measured outcomes) are its proof line; without them, its `stack` is.
 
 The current role is `current` in `profile.yaml`. The full career (every role, every school) is on LinkedIn only, never in this repo, so the two can't contradict each other: what matters of it is told in `about`.

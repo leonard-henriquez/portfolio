@@ -4,15 +4,16 @@ import type { Project } from "../../../lib/portfolio";
 
 interface Props {
   project: Project;
-  /** On the project's page: the picture loads eagerly and the highlights are open. */
+  /** On the project's page: the full article, the picture loads eagerly and the highlights are open. */
   page?: boolean;
   /** Heading level of "## highlights", so each page keeps its outline. */
   level?: 2 | 4;
 }
 
 /*
- * A project's README: dek, body, links, picture, facts, highlights. Printed under its `ls -la` line when the line is
- * opened (components/ProjectRow.astro), and on the project's own page (ProjectPage.astro).
+ * A project's README: dek, text, links, picture, facts, highlights. Printed under its `ls -la` line when the line is
+ * opened (components/ProjectRow.astro), with the excerpt, and on the project's own page (ProjectPage.astro), with the
+ * full article.
  */
 const { project: p, page = false, level = 4 } = Astro.props;
 const Heading = `h${level}` as "h2" | "h4";
@@ -29,7 +30,7 @@ const facts = [
   <div class="grid">
     <div class="doc">
       {p.dek !== p.summary && <p class="t-lead">{p.dek}</p>}
-      {p.hasBody && <div class="prose t-text" set:html={p.html} />}
+      {page ? p.hasBody && <div class="prose t-text" set:html={p.html} /> : p.excerpt && <p class="t-text">{p.excerpt}</p>}
       {
         p.links.length > 0 && (
           <ul class="links t-text">
@@ -153,6 +154,118 @@ const facts = [
 
   .prose :global(a) {
     color: var(--amber);
+  }
+
+  /* The article, in the theme's text styles: headings as Markdown, lists as terminal output. */
+  .prose :global(:is(h2, h3)) {
+    margin: 12px 0 0;
+    color: var(--fg);
+    font-size: var(--fs-text);
+    font-weight: 500;
+    line-height: var(--lh);
+  }
+
+  .prose :global(h2)::before {
+    content: "## ";
+    color: var(--amber);
+  }
+
+  .prose :global(h3)::before {
+    content: "### ";
+    color: var(--dim);
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(strong) {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .prose :global(:is(ul, ol, blockquote, pre)) {
+    margin: 0;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
+    counter-reset: item;
+  }
+
+  .prose :global(li) {
+    position: relative;
+    padding-left: 4ch;
+  }
+
+  .prose :global(ul > li)::before {
+    content: "-";
+    position: absolute;
+    left: 1ch;
+    color: var(--dim);
+  }
+
+  .prose :global(ol > li) {
+    counter-increment: item;
+  }
+
+  .prose :global(ol > li)::before {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    color: var(--amber);
+  }
+
+  .prose :global(code) {
+    color: var(--string);
+  }
+
+  .prose :global(pre) {
+    overflow-x: auto;
+    padding: 14px 16px;
+    border: 1px solid var(--line-2);
+    background: var(--bg-2);
+    font-size: var(--fs-meta);
+    line-height: var(--lh);
+  }
+
+  .prose :global(pre code) {
+    color: var(--fg);
+  }
+
+  /* The lead style (see global.css). */
+  .prose :global(blockquote) {
+    color: var(--fg);
+    font-family: var(--serif);
+    font-size: var(--fs-lead);
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--fs-meta);
+    line-height: var(--lh);
+  }
+
+  .prose :global(:is(th, td)) {
+    padding: 6px 2ch 6px 0;
+    border-top: 1px dashed var(--line-2);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    color: var(--dim);
+    font-weight: 400;
   }
 
   .links {

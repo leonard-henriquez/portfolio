@@ -1,5 +1,5 @@
 ---
-/** Explorations: research and studies, after a line on what they are. A row shows the name, the summary and the status; it opens on the long description and a link to the project's own page. */
+/** Explorations: research and studies, after a line on what they are. A row shows the name, the summary and the status; it opens on the excerpt and a link to the project's own page. */
 import type { Project } from "../../../lib/portfolio";
 import Disclosure from "./Disclosure.astro";
 
@@ -37,7 +37,7 @@ const { projects, intro } = Astro.props;
             <div class="ct-under ct-body">
               {p.title !== p.shortTitle && <p class="ct-mono ct-aside">{p.title}</p>}
               <p>{p.summary}</p>
-              {p.hasBody && <Fragment set:html={p.html} />}
+              {p.excerpt && <p>{p.excerpt}</p>}
               <p>
                 <a class="ct-page ct-mono" href={p.href}>
                   The project's page<span aria-hidden="true"> →</span>

@@ -96,11 +96,13 @@ export interface Project {
   focus: string;
   /** Editorial standfirst. Falls back to `summary`. */
   dek: string;
-  /** Long description (Markdown body) as a component: `<project.Content />`. */
+  /** A paragraph for the home page's panels. Optional: the full article (below) is for the project's own page. */
+  excerpt?: string;
+  /** The full article (Markdown body) as a component: `<project.Content />`. For the project's own page. */
   Content: ContentComponent;
-  /** Same long description as an HTML string, for `set:html`. Empty when there is no body. */
+  /** Same article as an HTML string, for `set:html`. Empty when there is no body. */
   html: string;
-  /** Same long description as its Markdown source, for text outputs (see src/lib/markdown.ts). Empty when there is no body. */
+  /** Same article as its Markdown source, for text outputs (see src/lib/markdown.ts). Empty when there is no body. */
   markdown: string;
   hasBody: boolean;
 
@@ -306,6 +308,7 @@ async function resolveProject(entry: CollectionEntry<"projects">, index: number)
     summary: d.summary,
     focus: d.focus ?? d.summary,
     dek: d.dek ?? d.summary,
+    excerpt: d.excerpt,
     Content,
     html,
     markdown: entry.body?.trim() ?? "",

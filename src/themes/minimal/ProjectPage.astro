@@ -261,21 +261,120 @@ const photo = p.image.photo;
 
   .text {
     grid-column: 2 / span 6;
-    color: var(--ink);
   }
 
-  .prose :global(p) {
-    margin: 0 0 0.9em;
+  /* The article: body text in ink-2, names (headings, bold leads) in ink, as everywhere in the theme. */
+  .prose :global(:is(p, ul, ol, blockquote, pre, table)) {
+    margin: 0;
+  }
+
+  .prose :global(:is(p, li)) {
     text-wrap: pretty;
   }
 
-  .prose :global(p:last-child) {
-    margin-bottom: 0;
+  .prose :global(* + :is(p, ul, ol, blockquote, pre, table)) {
+    margin-top: 0.9em;
   }
 
   .prose :global(a) {
+    color: var(--ink);
     text-underline-offset: 0.18em;
     text-decoration-thickness: 1px;
+  }
+
+  .prose :global(:is(h2, h3)) {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
+  /* The title style, then the body style. */
+  .prose :global(h2) {
+    margin-top: 2.4em;
+    font-size: var(--t-title);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.8em;
+    font-size: var(--t-body);
+    line-height: 1.55;
+  }
+
+  .prose :global(:is(h2, h3) + *) {
+    margin-top: 0.5em;
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(strong) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    padding-left: 1.4em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prose :global(li)::marker {
+    color: var(--mute);
+  }
+
+  .prose :global(code) {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+
+  .prose :global(pre) {
+    overflow-x: auto;
+    padding: 16px 18px;
+    background: #f6f6f6;
+    font-size: var(--t-small);
+    line-height: 1.6;
+  }
+
+  .prose :global(blockquote) {
+    padding-left: 20px;
+    border-left: 1px solid var(--ink);
+    color: var(--ink);
+    font-size: var(--t-title);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  /* Tables: the theme's table, small. An ink rule under the heads, hairlines between rows. */
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--t-small);
+    line-height: 1.45;
+  }
+
+  .prose :global(:is(th, td)) {
+    padding: 9px 16px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    border-bottom-color: var(--ink);
+    color: var(--mute);
+    font-weight: 400;
   }
 
   .facts {
