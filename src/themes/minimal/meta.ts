@@ -1,6 +1,6 @@
 import interLatin from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
 import type { ThemeMeta } from "../types";
-import { heroImage } from "./hero";
+import { heroImage, projectHeroImage } from "./hero";
 
 export default {
   name: "Minimal",
@@ -9,6 +9,7 @@ export default {
   colorScheme: "light",
   preload: [{ href: interLatin, as: "font", type: "font/woff2" }],
   heroImage,
+  projectHeroImage,
   ogImage: (portfolio) => heroImage(portfolio).src,
   // Hidden-until-revealed states (and collapsed table panels) only apply under `mn-js`, so the page reads fine without JS.
   boot: (root) => {

@@ -39,6 +39,11 @@ const projects = defineCollection({
       focus: z.string().optional(),
       /** Editorial standfirst, one sentence. Falls back to `summary`. */
       dek: z.string().optional(),
+      /**
+       * A paragraph for the home page, where a project's row opens. The Markdown body is the full article, for the
+       * project's own page (and the Markdown versions); without an excerpt, the home page shows none of it.
+       */
+      excerpt: z.string().optional(),
       images: z
         .object({
           photo: art.optional(),

@@ -87,3 +87,21 @@ export function panoramaImage(src: ImageMetadata): ThemeHeroImage {
 export function heroImage(_portfolio: Portfolio): ThemeHeroImage {
   return panoramaImage(VISTAS[0].src);
 }
+
+/**
+ * The landscape at the top of a project's page, as `ProjectPage.astro` renders it and `meta.ts` preloads it: the
+ * project's panorama, or its illustration. None for a pixel grid (the fallback when a project has no hi-res image).
+ */
+export function projectBanner(project: Project): (ThemeHeroImage & { alt: string; position: string; sky?: string }) | undefined {
+  const vista = vistaOf(project);
+  if (vista) {
+    return { ...panoramaImage(vista.src), alt: vista.alt, position: `${vista.x} 66%`, sky: vista.sky };
+  }
+  const { src, alt, position, pixelated } = project.image.illustration;
+  if (pixelated) return undefined;
+  return { src, widths: [960, 1280, src.width].filter((w) => w <= src.width), sizes: "100vw", alt, position };
+}
+
+export function projectHeroImage(_portfolio: Portfolio, project: Project): ThemeHeroImage | undefined {
+  return projectBanner(project);
+}

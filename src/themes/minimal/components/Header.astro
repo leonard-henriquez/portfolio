@@ -4,20 +4,23 @@ import { asPhrase } from "../format";
 
 interface Props {
   profile: Profile;
+  /** Where the home page's sections are: "" on the home page, "/" elsewhere. */
+  base?: string;
 }
 
-const { profile } = Astro.props;
+const { profile, base = "" } = Astro.props;
 
 const nav = [
-  { label: "Projects", href: "#projects" },
-  { label: "About", href: "#about" },
+  { label: "Projects", href: `${base}#projects` },
+  { label: "About", href: `${base}#about` },
+  // The contact footer is on every page.
   { label: "Contact", href: "#contact" },
 ];
 ---
 
 <header class="header">
   <div class="inner mn-wrap mn-grid">
-    <a class="name" href="#top">{profile.name}</a>
+    <a class="name" href={`${base}#top`}>{profile.name}</a>
     <span class="roles">{asPhrase(profile.roles).join(", ")}</span>
     <nav class="nav" aria-label="Sections">
       {nav.map((item) => <a class="mn-link" href={item.href}>{item.label}</a>)}

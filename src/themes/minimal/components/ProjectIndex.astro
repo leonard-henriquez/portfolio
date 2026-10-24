@@ -1,7 +1,7 @@
 ---
 /**
  * The project index: No. · Project · Focus · Status · Year, one line per project. A row opens the project
- * (dek, description, facts, image, highlights); on fine pointers a preview of its image follows the cursor.
+ * (dek, excerpt, a link to its own page, facts, image, highlights); on fine pointers a preview of its image follows the cursor.
  */
 import type { Portfolio } from "../../../lib/portfolio";
 import { pad } from "../../../lib/portfolio";
@@ -47,11 +47,12 @@ const { projects } = Astro.props.portfolio;
           <div class="mn-p-text">
             {p.title !== p.shortTitle && <p class="p-title mn-small">{p.title}</p>}
             <p class="mn-lead">{p.dek}</p>
-            {p.hasBody && (
-              <div class="prose">
-                <p.Content />
-              </div>
-            )}
+            {p.excerpt && <p>{p.excerpt}</p>}
+            <p>
+              <a class="mn-link p-page" href={p.href}>
+                The project's page<span aria-hidden="true"> →</span>
+              </a>
+            </p>
           </div>
 
           <dl class="mn-facts">
@@ -150,23 +151,13 @@ const { projects } = Astro.props.portfolio;
 </section>
 
 <style>
-  /* Only what is particular to projects; the table, the row and the panel grid are in Page.astro. */
+  /* Only what is particular to projects; the table, the row and the panel grid are in global.css. */
   .p-title {
     color: var(--mute);
   }
 
-  .prose :global(p) {
-    margin: 0 0 0.9em;
-    text-wrap: pretty;
-  }
-
-  .prose :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  .prose :global(a) {
-    text-underline-offset: 0.18em;
-    text-decoration-thickness: 1px;
+  .p-page {
+    color: var(--ink);
   }
 
   .p-fig {
@@ -412,7 +403,7 @@ const { projects } = Astro.props.portfolio;
       order: -1;
     }
 
-    /* Beats the panel's one-column rule (Page.astro): highlights keep their number column. */
+    /* Beats the panel's one-column rule (global.css): highlights keep their number column. */
     :global(.mn-panel-in) > .p-hl {
       --indent: 2.75rem;
       grid-column: 1 / -1;

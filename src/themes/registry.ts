@@ -9,12 +9,18 @@ export const DEFAULT_THEME = "contemplation";
 const pages = import.meta.glob<{ default: AstroComponentFactory }>(["./*/Page.astro", "!./_*/Page.astro"], {
   eager: true,
 });
+const projectPages = import.meta.glob<{ default: AstroComponentFactory }>(
+  ["./*/ProjectPage.astro", "!./_*/ProjectPage.astro"],
+  { eager: true },
+);
 const metas = import.meta.glob<{ default: Partial<ThemeMeta> }>(["./*/meta.ts", "!./_*/meta.ts"], { eager: true });
 
 export interface Theme {
   slug: string;
   meta: ThemeMeta;
   Page: AstroComponentFactory;
+  /** The page of one project (`/projects/<id>/`). */
+  ProjectPage: AstroComponentFactory;
   /** Link that opens the site in this theme (and remembers it). */
   href: string;
 }
@@ -27,8 +33,18 @@ export const themes: Theme[] = Object.entries(pages)
     if (!/^[a-z0-9-]+$/.test(slug)) {
       throw new Error(`Theme folder "${slug}" must be lowercase letters, digits and dashes (it is used in URLs and CSS).`);
     }
+    const projectPage = projectPages[`./${slug}/ProjectPage.astro`];
+    if (!projectPage) {
+      throw new Error(`Theme "${slug}" has no src/themes/${slug}/ProjectPage.astro (the page of one project).`);
+    }
     const meta = metas[`./${slug}/meta.ts`]?.default ?? {};
-    return { slug, meta: { ...meta, name: meta.name ?? slug }, Page: module.default, href: `/?theme=${slug}` };
+    return {
+      slug,
+      meta: { ...meta, name: meta.name ?? slug },
+      Page: module.default,
+      ProjectPage: projectPage.default,
+      href: `/?theme=${slug}`,
+    };
   })
   .sort(
     (a, b) =>

@@ -3,11 +3,12 @@
  * The hero: one frame, one landscape per project. Every image fills the whole frame at the same size, stacked;
  * each panel is a moving mask (clip-path) over its own image, with the project's name in the band below.
  * On hover or focus a panel widens to 40% and the others share the rest; on phones the panels stack.
- * The header (name and navigation) sits above it, on the paper: no text over the images.
+ * The header (name and navigation, components/Header.astro) sits above it, on the paper: no text over the images.
  */
 import { Image } from "astro:assets";
 import type { Portfolio } from "../../../lib/portfolio";
 import { panoramaImage, panoramaProjects } from "../vista";
+import Header from "./Header.astro";
 
 interface Props {
   portfolio: Portfolio;
@@ -15,27 +16,9 @@ interface Props {
 
 const { profile, projects } = Astro.props.portfolio;
 const panels = panoramaProjects(projects);
-
-const nav = [
-  { label: "Work", href: "#work" },
-  { label: "Explorations", href: "#explorations" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
-];
 ---
 
-<header id="top" class="header ct-wrap">
-  <a class="ct-mono home" href="#top">{profile.name}</a>
-  <nav aria-label="Sections">
-    {
-      nav.map((item) => (
-        <a class="ct-mono" href={item.href}>
-          {item.label}
-        </a>
-      ))
-    }
-  </nav>
-</header>
+<Header profile={profile} />
 
 <section class="panorama" aria-label="Projects">
   <div class="frame" style={`--n: ${panels.length}`}>
@@ -144,26 +127,6 @@ const nav = [
     transition:
       opacity 0.4s 0.15s,
       transform 0.4s 0.15s;
-  }
-
-  .header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding-block: 20px;
-    color: var(--ink);
-  }
-
-  .header a {
-    text-decoration: none;
-  }
-
-  .header nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 22px;
   }
 
   @media (min-width: 761px) {

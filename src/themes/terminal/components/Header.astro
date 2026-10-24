@@ -3,19 +3,22 @@ import type { Profile } from "../../../lib/portfolio";
 
 interface Props {
   profile: Profile;
+  /** Where the home page's sections are: "" on the home page, "/" elsewhere. */
+  base?: string;
 }
 
-const { profile } = Astro.props;
+const { profile, base = "" } = Astro.props;
 const nav = [
-  { href: "#work", label: "/work" },
-  { href: "#about", label: "/about" },
-  ...(profile.principles.length ? [{ href: "#principles", label: "/principles" }] : []),
+  { href: `${base}#work`, label: "/work" },
+  { href: `${base}#about`, label: "/about" },
+  ...(profile.principles.length ? [{ href: `${base}#principles`, label: "/principles" }] : []),
+  // The contact footer is on every page.
   { href: "#contact", label: "/contact" },
 ];
 ---
 
 <header class="header tm-container">
-  <a href="#top" class="host">
+  <a href={`${base}#top`} class="host">
     <span class="dot" aria-hidden="true"></span>
     <span>{profile.name}</span>
   </a>
@@ -34,7 +37,7 @@ const nav = [
 
 <style>
   .header {
-    /* Centred in the shared .tm-container (see Page.astro). */
+    /* Centred in the shared .tm-container (see global.css). */
     position: absolute;
     inset: 0 0 auto;
     z-index: 20;

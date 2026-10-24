@@ -3,7 +3,7 @@
  * One list row that opens a panel: the theme's one disclosure, for every list that has more to say.
  * The `row` slot holds the row's cells (phrasing content only: it sits in a <button>), laid out by the caller's
  * `rowClass`; the default slot holds the panel's content, laid out by `panelClass`.
- * Without JS the panel is shown (see Page.astro); with it, client.ts toggles and animates it, and opens it when the
+ * Without JS the panel is shown (see global.css); with it, client.ts toggles and animates it, and opens it when the
  * URL fragment names `id`. `hidden="until-found"` lets find-in-page open it too.
  */
 interface Props {

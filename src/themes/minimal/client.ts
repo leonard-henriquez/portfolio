@@ -153,7 +153,7 @@ function disclosures(list: HTMLElement, onToggle: () => void) {
   const items = [...list.querySelectorAll<HTMLElement>("[data-mn-item]")];
   for (const item of items) {
     const row = item.querySelector("[data-mn-row]");
-    // Not in the markup: without JS every panel is shown (see Page.astro).
+    // Not in the markup: without JS every panel is shown (see global.css).
     row?.setAttribute("aria-expanded", "false");
     row?.addEventListener("click", () => {
       setOpen(item, !item.classList.contains("is-open"));

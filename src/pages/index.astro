@@ -1,29 +1,12 @@
 ---
-/**
- * The whole site: every theme in `src/themes/` on one page (see src/themes/types.ts for the contract).
- * The default theme is rendered as-is, first, for crawlers and visitors without JavaScript; the others wait,
- * inert, in <template>s until Site.astro's scripts mount the one the visitor picked.
- */
+/** The home page: every theme in `src/themes/` on one page (see src/themes/types.ts for the contract). */
+import ThemeRoots from "../components/ThemeRoots.astro";
 import Site from "../layouts/Site.astro";
 import { getPortfolio } from "../lib/portfolio";
-import { defaultTheme, themes } from "../themes/registry";
 
 const portfolio = await getPortfolio();
-const { Page: DefaultPage } = defaultTheme;
-const others = themes.filter((theme) => theme !== defaultTheme);
 ---
 
 <Site>
-  <div data-theme-root={defaultTheme.slug}>
-    <DefaultPage portfolio={portfolio} />
-  </div>
-  {
-    others.map(({ slug, Page }) => (
-      <template data-theme-root={slug}>
-        <div data-theme-root={slug}>
-          <Page portfolio={portfolio} />
-        </div>
-      </template>
-    ))
-  }
+  <ThemeRoots page="Page" props={{ portfolio }} />
 </Site>

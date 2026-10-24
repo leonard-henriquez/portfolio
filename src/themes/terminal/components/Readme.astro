@@ -1,0 +1,339 @@
+---
+import { Image } from "astro:assets";
+import type { Project } from "../../../lib/portfolio";
+
+interface Props {
+  project: Project;
+  /** On the project's page: the full article, the picture loads eagerly and the highlights are open. */
+  page?: boolean;
+  /** Heading level of "## highlights", so each page keeps its outline. */
+  level?: 2 | 4;
+}
+
+/*
+ * A project's README: dek, text, links, picture, facts, highlights. Printed under its `ls -la` line when the line is
+ * opened (components/ProjectRow.astro), with the excerpt, and on the project's own page (ProjectPage.astro), with the
+ * full article.
+ */
+const { project: p, page = false, level = 4 } = Astro.props;
+const Heading = `h${level}` as "h2" | "h4";
+const img = p.image.photo;
+// Status and period are on the line (or the page's header) already.
+const facts = [
+  { key: "role", value: p.role },
+  ...(p.stack.length ? [{ key: "stack", value: p.stack.join(" · ") }] : []),
+  ...(p.tags.length ? [{ key: "tags", value: p.tags.map((t) => `#${t}`).join(" ") }] : []),
+];
+---
+
+<div class="readme">
+  <div class="grid">
+    <div class="doc">
+      {p.dek !== p.summary && <p class="t-lead">{p.dek}</p>}
+      {page ? p.hasBody && <div class="prose t-text" set:html={p.html} /> : p.excerpt && <p class="t-text">{p.excerpt}</p>}
+      {
+        p.links.length > 0 && (
+          <ul class="links t-text">
+            {p.links.map((link) => (
+              <li>
+                <a class="tm-link" href={link.href} rel="noopener">
+                  {link.label}
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+    <div class="side">
+      <figure>
+        <Image
+          src={img.src}
+          alt={img.alt}
+          widths={[360, 720]}
+          sizes="(min-width: 600px) 340px, calc(100vw - 40px)"
+          format={img.pixelated ? "png" : undefined}
+          loading={page ? "eager" : "lazy"}
+          decoding="async"
+          class:list={["shot", { pixelated: img.pixelated }]}
+          style={`object-position:${img.position}`}
+        />
+        <figcaption class="t-meta t-dim"><span aria-hidden="true"># </span>{img.caption}</figcaption>
+      </figure>
+      <dl class="tm-dl t-meta">
+        {
+          facts.map((f) => (
+            <div>
+              <dt>{f.key}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+  {
+    p.highlights.length > 0 && (
+      <div class="hl">
+        <Heading class="t-name">
+          <span class="t-amber" aria-hidden="true">## </span>highlights
+        </Heading>
+        <ol class="tm-list tm-narrow hl-list">
+          {p.highlights.map((h, n) => (
+            <li class="tm-row">
+              <details open={page}>
+                <summary class="tm-line">
+                  <span class="c-meta t-meta t-amber">{String(n + 1).padStart(2, "0")}</span>
+                  <span class="c-main">
+                    <span class="c-name t-name">{h.title}</span>
+                  </span>
+                  <span class="tm-tog" aria-hidden="true" />
+                </summary>
+                <div class="tm-body">
+                  <p class="t-text">{h.body}</p>
+                  {h.result && (
+                    <ul class="tm-diff t-text">
+                      <li>{h.result}</li>
+                    </ul>
+                  )}
+                  {h.stack.length > 0 && <p class="t-meta">{h.stack.join(" · ")}</p>}
+                </div>
+              </details>
+            </li>
+          ))}
+        </ol>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .readme {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .readme > .grid,
+  .readme > .hl {
+    max-width: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    gap: 24px 48px;
+    align-items: start;
+  }
+
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 72ch;
+  }
+
+  .hl > .t-name {
+    margin: 0;
+  }
+
+  .doc .t-lead {
+    max-width: 34ch;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .prose :global(p) {
+    margin: 0;
+  }
+
+  .prose :global(a) {
+    color: var(--amber);
+  }
+
+  /* The article, in the theme's text styles: headings as Markdown, lists as terminal output. */
+  .prose :global(:is(h2, h3)) {
+    margin: 12px 0 0;
+    color: var(--fg);
+    font-size: var(--fs-text);
+    font-weight: 500;
+    line-height: var(--lh);
+  }
+
+  .prose :global(h2)::before {
+    content: "## ";
+    color: var(--amber);
+  }
+
+  .prose :global(h3)::before {
+    content: "### ";
+    color: var(--dim);
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(strong) {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .prose :global(:is(ul, ol, blockquote, pre)) {
+    margin: 0;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
+    counter-reset: item;
+  }
+
+  .prose :global(li) {
+    position: relative;
+    padding-left: 4ch;
+  }
+
+  .prose :global(ul > li)::before {
+    content: "-";
+    position: absolute;
+    left: 1ch;
+    color: var(--dim);
+  }
+
+  .prose :global(ol > li) {
+    counter-increment: item;
+  }
+
+  .prose :global(ol > li)::before {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    color: var(--amber);
+  }
+
+  .prose :global(code) {
+    color: var(--string);
+  }
+
+  .prose :global(pre) {
+    overflow-x: auto;
+    padding: 14px 16px;
+    border: 1px solid var(--line-2);
+    background: var(--bg-2);
+    font-size: var(--fs-meta);
+    line-height: var(--lh);
+  }
+
+  .prose :global(pre code) {
+    color: var(--fg);
+  }
+
+  /* The lead style (see global.css). */
+  .prose :global(blockquote) {
+    color: var(--fg);
+    font-family: var(--serif);
+    font-size: var(--fs-lead);
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--fs-meta);
+    line-height: var(--lh);
+  }
+
+  .prose :global(:is(th, td)) {
+    padding: 6px 2ch 6px 0;
+    border-top: 1px dashed var(--line-2);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    color: var(--dim);
+    font-weight: 400;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  .shot {
+    width: 100%;
+    aspect-ratio: 18 / 11;
+    height: auto;
+    object-fit: cover;
+    border: 1px solid var(--line-2);
+    background: var(--bg-2);
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+  }
+
+  figcaption {
+    margin-top: 8px;
+  }
+
+  .hl {
+    display: flex;
+    max-width: calc(72ch + 320px + 48px);
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  /* Nested rows: number · title · toggle. */
+  .hl-list {
+    --cols: 2ch minmax(0, 1fr) 2ch;
+    --indent: 5ch;
+  }
+
+  /* Below this, the README's text gets the full width; picture and facts sit side by side under it. */
+  @media (max-width: 1180px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .side {
+      display: grid;
+      grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .side {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

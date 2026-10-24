@@ -1,0 +1,604 @@
+/*
+ * Minimal's global CSS, imported by Page.astro and ProjectPage.astro.
+ * Every theme's CSS ships on every page: everything global is scoped to html[data-theme="minimal"].
+ */
+html[data-theme="minimal"] {
+  --ink: #111111;
+  --ink-2: #4a4a4a; /* 8.9:1 on white */
+  --mute: #6b6b6b; /* 5.3:1, labels and small text */
+  --mute-lg: #8a8a8a; /* 3.4:1, large text only (≥ 24px) */
+  --rule: #e3e3e3;
+  --paper: #ffffff;
+  --gutter: clamp(16px, 3vw, 40px);
+  --gap: 24px;
+  --max: 1360px;
+  --header-h: 57px;
+  --section: clamp(80px, 9vw, 136px);
+  --row-pad: 20px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.77, 0, 0.18, 1);
+  --ease-slide: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* The type scale (see the comment at the top). */
+  --t-display: clamp(34px, 4.6vw, 66px);
+  --t-title: clamp(19px, 1.55vw, 22px);
+  --t-body: 15px;
+  --t-small: 13px;
+
+  --switcher-font: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;
+  --switcher-fg: var(--ink);
+  --switcher-muted: var(--mute);
+  --switcher-bg: var(--paper);
+  --switcher-border: 1px solid var(--rule);
+  --switcher-radius: 0;
+  --switcher-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.35);
+  --switcher-accent: var(--ink);
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;
+  font-size: var(--t-body);
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+}
+
+@media (max-width: 1099px) {
+  html[data-theme="minimal"] {
+    --gap: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="minimal"] {
+    --header-h: 52px;
+    --row-pad: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="minimal"] {
+    scroll-behavior: smooth;
+  }
+}
+
+[data-theme="minimal"] body {
+  margin: 0;
+  background: var(--paper);
+  overflow-x: clip;
+}
+
+[data-theme="minimal"] *,
+[data-theme="minimal"] *::before,
+[data-theme="minimal"] *::after {
+  box-sizing: border-box;
+}
+
+[data-theme="minimal"] a {
+  color: inherit;
+}
+
+[data-theme="minimal"] ::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+[data-theme="minimal"] :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+[data-theme="minimal"] .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+[data-theme="minimal"] .skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 50;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-small);
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+
+[data-theme="minimal"] .skip:focus-visible {
+  transform: none;
+}
+
+/* The four text styles. Colour is set per field kind. */
+
+:where([data-theme="minimal"]) .mn-display {
+  font-size: var(--t-display);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+:where([data-theme="minimal"]) .mn-title {
+  font-size: var(--t-title);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+:where([data-theme="minimal"]) .mn-body {
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+:where([data-theme="minimal"]) .mn-small {
+  font-size: var(--t-small);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+/* Layout */
+
+:where([data-theme="minimal"]) .mn-wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+:where([data-theme="minimal"]) .mn-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+}
+
+@media (max-width: 760px) {
+  :where([data-theme="minimal"]) .mn-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+:where([data-theme="minimal"]) .mn-section {
+  padding-top: var(--section);
+}
+
+/* Section head: the label, then the table's ink rule. */
+:where([data-theme="minimal"]) .mn-label {
+  margin: 0 0 16px;
+  font-size: var(--t-small);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* Links: an underline that draws in from the left. */
+:where([data-theme="minimal"]) .mn-link {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) no-repeat 100% 100% / 0 1px;
+  transition: background-size 0.5s var(--ease-io);
+}
+
+:where([data-theme="minimal"]) .mn-link:hover,
+:where([data-theme="minimal"]) .mn-link:focus-visible {
+  background-position: 0 100%;
+  background-size: 100% 1px;
+}
+
+/* A static, full-length hairline at the top of the element. */
+:where([data-theme="minimal"]) .mn-rule {
+  border-top: 1px solid var(--rule-color, var(--rule));
+}
+
+/*
+ * Tables. Every list on the page (projects, principles, experience, education, talks) is one of these:
+ * an ink rule on top, full-length hairlines between rows and below the last one, and the same columns:
+ *   No. (1) · Name (2–5) · Descriptor (6–9) · Category (10) · Period (11–12, right, room for the +)
+ * A list without a descriptor lets its names run on (`.mn-name--wide`), still starting at column 2.
+ */
+:where([data-theme="minimal"]) .mn-table {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+
+:where([data-theme="minimal"]) .mn-item + .mn-item {
+  border-top: 1px solid var(--rule);
+}
+
+:where([data-theme="minimal"]) .mn-item-h {
+  margin: 0;
+  font: inherit;
+}
+
+:where([data-theme="minimal"]) .mn-row {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: var(--row-pad) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  align-items: baseline;
+}
+
+:where([data-theme="minimal"]) .mn-row > * {
+  margin: 0;
+  min-width: 0;
+}
+
+:where([data-theme="minimal"]) .mn-no {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: var(--t-small);
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+:where([data-theme="minimal"]) .mn-name {
+  grid-column: 2 / span 4;
+  grid-row: 1;
+  font-size: var(--t-title);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+:where([data-theme="minimal"]) .mn-name--wide {
+  grid-column: 2 / span 8;
+}
+
+:where([data-theme="minimal"]) .mn-desc {
+  grid-column: 6 / span 4;
+  grid-row: 1;
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* Category and period: inline on phones, as one meta line (see below). */
+:where([data-theme="minimal"]) .mn-meta {
+  display: contents;
+}
+
+:where([data-theme="minimal"]) .mn-cat {
+  grid-column: 10;
+  grid-row: 1;
+  font-size: var(--t-small);
+  line-height: 1.45;
+  color: var(--mute);
+  white-space: nowrap;
+}
+
+:where([data-theme="minimal"]) .mn-when {
+  grid-column: 11 / span 2;
+  grid-row: 1;
+  padding-right: 32px;
+  font-size: var(--t-small);
+  line-height: 1.45;
+  color: var(--mute);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Disclosure rows (buttons): the + mark, an ink rule under the hovered or open row, a nudge of the name. */
+:where([data-theme="minimal"]) button.mn-row {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where([data-theme="minimal"]) button.mn-row:focus-visible {
+  outline-offset: 6px;
+}
+
+:where([data-theme="minimal"]) button.mn-row .mn-name {
+  transition:
+    transform 0.55s var(--ease-slide),
+    color 0.35s ease;
+}
+
+:where([data-theme="minimal"]) button.mn-row:focus-visible .mn-name {
+  transform: translateX(10px);
+}
+
+/* Full length always: it fades, it never draws in. */
+:where([data-theme="minimal"]) button.mn-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--ink);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 1;
+}
+
+:where([data-theme="minimal"]) .mn-item.is-open > .mn-item-h > .mn-row::after {
+  opacity: 1;
+}
+
+:where([data-theme="minimal"]) .mn-plus {
+  position: absolute;
+  right: 2px;
+  top: calc(var(--row-pad) + var(--t-title) * 0.625 - 6px);
+  width: 12px;
+  height: 12px;
+}
+
+:where([data-theme="minimal"]) .mn-plus::before,
+:where([data-theme="minimal"]) .mn-plus::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  transition: transform 0.5s var(--ease-io);
+}
+
+:where([data-theme="minimal"]) .mn-plus::before {
+  left: 0;
+  right: 0;
+  top: 5.5px;
+  height: 1px;
+}
+
+:where([data-theme="minimal"]) .mn-plus::after {
+  top: 0;
+  bottom: 0;
+  left: 5.5px;
+  width: 1px;
+}
+
+:where([data-theme="minimal"]) .mn-item.is-open .mn-plus::after {
+  transform: scaleY(0);
+}
+
+:where([data-theme="minimal"]) .mn-item.is-open .mn-plus::before {
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Hover only: an open row's name stays on the grid, aligned with its panel. */
+  :where([data-theme="minimal"]) .mn-item:not(.is-open) button.mn-row:hover .mn-name {
+    transform: translateX(10px);
+  }
+
+  :where([data-theme="minimal"]) button.mn-row:hover::after {
+    opacity: 1;
+  }
+
+  :where([data-theme="minimal"])
+    .mn-table:has(.mn-item:not(.is-open) button.mn-row:hover)
+    .mn-item:not(.is-open)
+    button.mn-row:not(:hover)
+    .mn-name {
+    color: var(--mute-lg);
+  }
+}
+
+/*
+ * Panels. Without JavaScript (no `mn-js` on <html>, see meta.ts: also crawlers, and the fallback when client.ts
+ * fails) rows can't toggle: every panel is shown and the +/- marks go. With it, panels start collapsed
+ * (`hidden="until-found"`, so find-in-page still opens them) and client.ts animates them.
+ * Inside, the same layout for every item: text under the name (2–5), facts under the descriptor (6–9),
+ * an image (10–12) where there is one.
+ */
+:where(html[data-theme="minimal"]:not(.mn-js)) .mn-panel[hidden] {
+  display: block;
+  content-visibility: visible;
+}
+
+:where(html[data-theme="minimal"]:not(.mn-js)) .mn-plus {
+  display: none;
+}
+
+:where(html[data-theme="minimal"]:not(.mn-js)) button.mn-row {
+  cursor: auto;
+}
+
+:where([data-theme="minimal"]) .mn-panel-in {
+  padding: 4px 0 clamp(36px, 4vw, 56px);
+  row-gap: 32px;
+  align-items: start;
+}
+
+:where([data-theme="minimal"]) .mn-p-text {
+  grid-column: 2 / span 4;
+  font-size: var(--t-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+:where([data-theme="minimal"]) .mn-p-text > * {
+  margin: 0;
+  max-width: 36em;
+  text-wrap: pretty;
+}
+
+:where([data-theme="minimal"]) .mn-p-text > * + * {
+  margin-top: 0.9em;
+}
+
+/* A lead: the first sentence of a panel, in ink. */
+:where([data-theme="minimal"]) .mn-lead {
+  color: var(--ink);
+}
+
+:where([data-theme="minimal"]) .mn-facts {
+  grid-column: 6 / span 4;
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: 1.45;
+}
+
+:where([data-theme="minimal"]) .mn-facts > div {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--rule);
+}
+
+:where([data-theme="minimal"]) .mn-facts > div:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+
+:where([data-theme="minimal"]) .mn-facts dt {
+  color: var(--mute);
+}
+
+:where([data-theme="minimal"]) .mn-facts dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+:where([data-theme="minimal"]) .mn-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+}
+
+/* Tablet: the descriptor moves under the name. */
+@media (max-width: 1099px) {
+  :where([data-theme="minimal"]) .mn-name {
+    grid-column: 2 / span 6;
+  }
+
+  :where([data-theme="minimal"]) .mn-name--wide {
+    grid-column: 2 / span 8;
+  }
+
+  :where([data-theme="minimal"]) .mn-desc {
+    grid-column: 2 / span 6;
+    grid-row: 2;
+    margin-top: 4px;
+  }
+
+  :where([data-theme="minimal"]) .mn-cat {
+    grid-column: 9 / span 2;
+  }
+
+  :where([data-theme="minimal"]) .mn-when {
+    grid-column: 11 / span 2;
+  }
+
+  :where([data-theme="minimal"]) .mn-p-text {
+    grid-column: 2 / span 7;
+  }
+
+  :where([data-theme="minimal"]) .mn-facts {
+    grid-column: 2 / span 7;
+  }
+}
+
+/* Phones: number, then one stacked cell: name, descriptor, and a meta line (category · period). */
+@media (max-width: 760px) {
+  :where([data-theme="minimal"]) .mn-row,
+  :where([data-theme="minimal"]) .mn-panel-in {
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    column-gap: 0;
+  }
+
+  :where([data-theme="minimal"]) .mn-name,
+  :where([data-theme="minimal"]) .mn-name--wide,
+  :where([data-theme="minimal"]) .mn-desc {
+    grid-column: 2;
+    padding-right: 28px;
+  }
+
+  :where([data-theme="minimal"]) .mn-meta {
+    display: flex;
+    grid-column: 2;
+    grid-row: 3;
+    gap: 0.3em;
+    margin-top: 4px;
+  }
+
+  :where([data-theme="minimal"]) .mn-cat,
+  :where([data-theme="minimal"]) .mn-when {
+    padding-right: 0;
+    text-align: left;
+  }
+
+  :where([data-theme="minimal"]) .mn-cat + .mn-when::before {
+    content: "·";
+    margin-right: 0.3em;
+  }
+
+  :where([data-theme="minimal"]) .mn-panel-in {
+    row-gap: 24px;
+  }
+
+  :where([data-theme="minimal"]) .mn-panel-in > * {
+    grid-column: 2;
+    grid-row: auto;
+  }
+}
+
+/* Reveals: rows rise in once, scroll-driven where supported, IntersectionObserver (`.mn-io`) elsewhere. */
+@keyframes mn-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise, 0.8rem));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :where([data-theme="minimal"]) .mn-reveal {
+      animation: mn-rise both var(--ease-out);
+      animation-timeline: view();
+      animation-range: entry 0% cover var(--range-end, 18%);
+    }
+  }
+
+  /* Set by the disclosure FLIP on elements in motion. */
+  :where([data-theme="minimal"]) .mn-hold .mn-reveal,
+  :where([data-theme="minimal"]) .mn-hold.mn-reveal {
+    animation: none;
+  }
+
+  :where([data-theme="minimal"].mn-io) .mn-reveal {
+    transition:
+      opacity 0.9s ease var(--d, 0ms),
+      transform 1.1s var(--ease-out) var(--d, 0ms);
+  }
+
+  :where([data-theme="minimal"].mn-io) .mn-reveal:not(.is-in) {
+    opacity: 0;
+    transform: translateY(var(--rise, 0.8rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where([data-theme="minimal"]) .mn-link,
+  :where([data-theme="minimal"]) button.mn-row .mn-name,
+  :where([data-theme="minimal"]) button.mn-row::after,
+  :where([data-theme="minimal"]) .mn-plus::before,
+  :where([data-theme="minimal"]) .mn-plus::after {
+    transition: none;
+  }
+}

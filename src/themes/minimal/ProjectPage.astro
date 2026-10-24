@@ -1,0 +1,502 @@
+---
+/**
+ * Minimal, one project: what its row opens on the home page, given the whole page, on the same 12-column grid.
+ * Number and title, the dek, the photo across the grid (its Fig. caption), the text under the name column and the
+ * facts beside it, the highlights as a table (the home page's), then the projects before and after it.
+ */
+import "@fontsource-variable/inter-tight/wght.css";
+import { Image } from "astro:assets";
+import { pad } from "../../lib/portfolio";
+import type { ThemeProjectPageProps } from "../types";
+import "./global.css";
+import Footer from "./components/Footer.astro";
+import Header from "./components/Header.astro";
+import ProjectImage from "./components/ProjectImage.astro";
+import { projectHeroImage } from "./hero";
+
+type Props = ThemeProjectPageProps;
+
+const { portfolio, project: p, previous, next } = Astro.props;
+const { profile } = portfolio;
+const hero = projectHeroImage(portfolio, p);
+const photo = p.image.photo;
+---
+
+<a class="skip" href="#project">Skip to the project</a>
+<Header profile={profile} base="/" />
+<main>
+  <article id="project" class="mn-wrap" aria-labelledby="project-title">
+    <header id="top" class="head mn-grid">
+      <a class="back mn-small mn-link" href={`/#${p.anchor}`}><span aria-hidden="true">← </span>Projects</a>
+      <span class="no mn-small"><span class="sr-only">No. </span>{p.no2}</span>
+      <h1 id="project-title" class="title mn-display">{p.title}</h1>
+      <p class="meta mn-small">
+        <span>{p.statusLabel}</span>
+        <span aria-hidden="true">·</span>
+        <span>{p.period}</span>
+      </p>
+      <p class="dek mn-title">{p.dek}</p>
+    </header>
+
+    <figure class="fig">
+      <div class="frame">
+        {
+          hero ? (
+            <Image {...hero} alt={photo.alt} loading="eager" fetchpriority="high" style={`object-position: ${photo.position}`} />
+          ) : (
+            <ProjectImage image={photo} widths={[]} sizes="100vw" loading="eager" />
+          )
+        }
+      </div>
+      <figcaption class="mn-small">
+        <span>Fig. {p.no2}</span>
+        <span>{photo.caption}</span>
+      </figcaption>
+    </figure>
+
+    <div class="body mn-grid">
+      {
+        (p.hasBody || p.summary !== p.dek) && (
+          <div class="mn-p-text text">
+            {p.hasBody ? (
+              <div class="prose">
+                <p.Content />
+              </div>
+            ) : (
+              <p>{p.summary}</p>
+            )}
+          </div>
+        )
+      }
+
+      <dl class="mn-facts facts">
+        <div>
+          <dt>Role</dt>
+          <dd>{p.role}</dd>
+        </div>
+        {
+          p.results.length > 0 && (
+            <div>
+              <dt>Results</dt>
+              <dd>
+                <ul class="results" role="list">
+                  {p.results.map((result) => (
+                    <li>{result}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )
+        }
+        {
+          p.stack.length > 0 && (
+            <div>
+              <dt>Stack</dt>
+              <dd>{p.stack.join(", ")}</dd>
+            </div>
+          )
+        }
+        {
+          p.tags.length > 0 && (
+            <div>
+              <dt>Tags</dt>
+              <dd>{p.tags.join(", ")}</dd>
+            </div>
+          )
+        }
+        {
+          p.links.length > 0 && (
+            <div>
+              <dt>Links</dt>
+              <dd class="mn-links">
+                {p.links.map((link) => (
+                  <a class="mn-link" href={link.href}>
+                    {link.label}
+                    <span aria-hidden="true"> ↗</span>
+                  </a>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+
+    {
+      p.highlights.length > 0 && (
+        <section class="mn-section" aria-labelledby="highlights-title">
+          <h2 id="highlights-title" class="mn-label">Highlights</h2>
+          <ol class="mn-table" role="list">
+            {p.highlights.map((h, i) => (
+              <li class="mn-item">
+                <div class="mn-row mn-grid mn-reveal">
+                  <span class="mn-no">{pad(i + 1, 2)}</span>
+                  <h3 class="mn-name">{h.title}</h3>
+                  <div class="mn-desc hl-body">
+                    <p>{h.body}</p>
+                    {h.result && <p class="hl-result">{h.result}</p>}
+                    {h.stack.length > 0 && <p class="hl-stack mn-small">{h.stack.join(", ")}</p>}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+  </article>
+
+  <nav class="pager mn-section mn-wrap" aria-label="More projects">
+    <ul class="mn-table" role="list">
+      {
+        previous && (
+          <li class="mn-item">
+            <a class="mn-row mn-grid step" href={previous.href} rel="prev">
+              <span class="mn-no">
+                <span class="sr-only">Previous project, No. </span>
+                {previous.no2}
+              </span>
+              <span class="mn-name">{previous.shortTitle}</span>
+              <span class="mn-desc">{previous.focus}</span>
+              <span class="mn-when" aria-hidden="true">← Previous</span>
+            </a>
+          </li>
+        )
+      }
+      {
+        next && (
+          <li class="mn-item">
+            <a class="mn-row mn-grid step" href={next.href} rel="next">
+              <span class="mn-no">
+                <span class="sr-only">Next project, No. </span>
+                {next.no2}
+              </span>
+              <span class="mn-name">{next.shortTitle}</span>
+              <span class="mn-desc">{next.focus}</span>
+              <span class="mn-when" aria-hidden="true">Next →</span>
+            </a>
+          </li>
+        )
+      }
+    </ul>
+  </nav>
+</main>
+<Footer profile={profile} />
+
+<style>
+  /* Number · title (2–10) · status and period (11–12); the dek under the title. */
+  .head {
+    align-items: baseline;
+    row-gap: 20px;
+    padding-top: clamp(40px, 6vw, 88px);
+  }
+
+  .head > * {
+    margin: 0;
+  }
+
+  .back {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-bottom: clamp(24px, 4vw, 56px);
+    color: var(--ink);
+  }
+
+  .no {
+    grid-column: 1;
+    color: var(--mute);
+  }
+
+  .title {
+    grid-column: 2 / span 9;
+    text-wrap: balance;
+  }
+
+  .meta {
+    grid-column: 11 / span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.3em;
+    color: var(--mute);
+    white-space: nowrap;
+  }
+
+  .dek {
+    grid-column: 2 / span 7;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .fig {
+    margin: clamp(40px, 5vw, 72px) 0 0;
+  }
+
+  .frame {
+    aspect-ratio: 16 / 7;
+    overflow: clip;
+    background: #eceeef;
+  }
+
+  .frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .fig figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    color: var(--mute);
+  }
+
+  /* Text under the name column, wider than in a panel; facts on the last four columns. */
+  .body {
+    align-items: start;
+    row-gap: 32px;
+    padding-top: clamp(40px, 5vw, 72px);
+  }
+
+  .text {
+    grid-column: 2 / span 6;
+  }
+
+  /* The article: body text in ink-2, names (headings, bold leads) in ink, as everywhere in the theme. */
+  .prose :global(:is(p, ul, ol, blockquote, pre, table)) {
+    margin: 0;
+  }
+
+  .prose :global(:is(p, li)) {
+    text-wrap: pretty;
+  }
+
+  .prose :global(* + :is(p, ul, ol, blockquote, pre, table)) {
+    margin-top: 0.9em;
+  }
+
+  .prose :global(a) {
+    color: var(--ink);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+  }
+
+  .prose :global(:is(h2, h3)) {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
+  /* The title style, then the body style. */
+  .prose :global(h2) {
+    margin-top: 2.4em;
+    font-size: var(--t-title);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.8em;
+    font-size: var(--t-body);
+    line-height: 1.55;
+  }
+
+  .prose :global(:is(h2, h3) + *) {
+    margin-top: 0.5em;
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(strong) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    padding-left: 1.4em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prose :global(li)::marker {
+    color: var(--mute);
+  }
+
+  .prose :global(code) {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+
+  .prose :global(pre) {
+    overflow-x: auto;
+    padding: 16px 18px;
+    background: #f6f6f6;
+    font-size: var(--t-small);
+    line-height: 1.6;
+  }
+
+  .prose :global(blockquote) {
+    padding-left: 20px;
+    border-left: 1px solid var(--ink);
+    color: var(--ink);
+    font-size: var(--t-title);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  /* Tables: the theme's table, small. An ink rule under the heads, hairlines between rows. */
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--t-small);
+    line-height: 1.45;
+  }
+
+  .prose :global(:is(th, td)) {
+    padding: 9px 16px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    border-bottom-color: var(--ink);
+    color: var(--mute);
+    font-weight: 400;
+  }
+
+  .facts {
+    grid-column: 9 / span 4;
+  }
+
+  .results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Highlights: the home page's table, the body under the descriptor. */
+  .hl-body > p {
+    margin: 0;
+  }
+
+  .hl-result {
+    margin-top: 6px !important;
+    color: var(--ink);
+  }
+
+  .hl-stack {
+    margin-top: 6px !important;
+    color: var(--mute);
+  }
+
+  /* Previous and next: table rows that are links. The name nudges right and an ink rule fades in on hover. */
+  .step {
+    text-decoration: none;
+  }
+
+  .step .mn-name {
+    transition: transform 0.55s var(--ease-slide);
+  }
+
+  .step::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+  }
+
+  .step:hover .mn-name,
+  .step:focus-visible .mn-name {
+    transform: translateX(10px);
+  }
+
+  .step:hover::after,
+  .step:focus-visible::after {
+    opacity: 1;
+  }
+
+  .step:focus-visible {
+    outline-offset: 6px;
+  }
+
+  .step .mn-when {
+    padding-right: 0;
+    color: var(--ink);
+  }
+
+  @media (max-width: 1099px) {
+    .title {
+      grid-column: 2 / span 8;
+    }
+
+    .meta {
+      grid-column: 10 / span 3;
+    }
+
+    .text {
+      grid-column: 2 / span 7;
+    }
+
+    .facts {
+      grid-column: 2 / span 7;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .head,
+    .body {
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      column-gap: 0;
+    }
+
+    .title,
+    .meta,
+    .dek,
+    .text,
+    .facts {
+      grid-column: 2;
+    }
+
+    .meta {
+      justify-content: flex-start;
+    }
+
+    .frame {
+      aspect-ratio: 4 / 3;
+    }
+
+    /* The direction goes on the meta line, after the descriptor. */
+    .step .mn-when {
+      grid-column: 2;
+      grid-row: 3;
+      margin-top: 4px;
+      text-align: left;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step .mn-name,
+    .step::after {
+      transition: none;
+    }
+  }
+</style>
