@@ -7,7 +7,8 @@ order: 5
 summary: "A control plane for background coding agents: any harness, any sandbox, self-hosted by small teams. Launching a task is decoupled from where it runs. It grows out of the background-agent platform I built at Topo."
 focus: Open-source orchestration for background coding agents
 stack: [TypeScript, Postgres]
-tags: [open source]
+tags: [open source, coding agents]
+excerpt: "Tools that run coding agents in the background each bundle one harness, one sandbox and one hosted backend. The control plane decouples launching a task from where it runs: it schedules, tracks and supervises sessions, while harnesses, sandboxes and clients plug in through interfaces, with teams, policies and plugins in the core."
 images:
   photo:
     src: ../../assets/photo/valley.jpg

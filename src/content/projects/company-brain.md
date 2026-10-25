@@ -6,7 +6,9 @@ role: Built at Topo, now a product spec
 order: 3
 summary: "A shared Markdown memory that the team and its agents both read and write. At Topo: a Go daemon syncing to S3, compare-and-swap writes, LLM-resolved merges and an MCP server. As a product: provenance, review and permissions for every fact."
 focus: Shared memory for a team and its agents
-stack: [Go, S3/R2, MCP, Temporal]
+stack: [Go, S3/R2, SQLite, MCP, Temporal]
+tags: [agent memory]
+excerpt: "Git as the sync layer broke down under continuous writes from people and agents, so a small daemon syncs the folder with object storage instead. Each upload is a conditional PUT on the ETag; a concurrent edit gets a real three-way merge from the versioned ancestor, the model resolves what is left, and anything still unsure is set aside as a conflict file, never lost."
 images:
   photo:
     src: ../../assets/photo/night.jpg

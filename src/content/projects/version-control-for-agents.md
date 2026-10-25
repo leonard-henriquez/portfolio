@@ -6,6 +6,9 @@ role: Research & design
 order: 6
 summary: One trunk where every change lands signed by the agent that made it, conflicts resolve as they happen, and any agent’s work can be rolled back. A layer over plain Git, not a replacement.
 focus: Git, made for many agents writing at once
+stack: [Git, SQLite]
+tags: [version control, coding agents]
+excerpt: "Git strains when several agents share a codebase: branches diverge in minutes and interleaved work can't be undone cleanly. The design started as a new system, an operation log with a CRDT as state, and moved to a layer over Git: an operation log beside the commits, a CRDT-style merge driver and dependency-aware rollback."
 images:
   photo:
     src: ../../assets/photo/valley.jpg

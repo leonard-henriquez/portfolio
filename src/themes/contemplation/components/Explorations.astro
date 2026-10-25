@@ -1,7 +1,11 @@
 ---
-/** Explorations: research and studies, after a line on what they are. A row shows the name, the summary and the status; it opens on the excerpt and a link to the project's own page. */
+/**
+ * Explorations: research and studies, after a line on what they are. A row shows the name, the summary and the status;
+ * it opens on the excerpt, the figures and facts (as in Selected work) and a link to the project's own page.
+ */
 import type { Project } from "../../../lib/portfolio";
 import Disclosure from "./Disclosure.astro";
+import ProjectFacts from "./ProjectFacts.astro";
 
 interface Props {
   projects: Project[];
@@ -38,6 +42,7 @@ const { projects, intro } = Astro.props;
               {p.title !== p.shortTitle && <p class="ct-mono ct-aside">{p.title}</p>}
               <p>{p.summary}</p>
               {p.excerpt && <p>{p.excerpt}</p>}
+              <ProjectFacts project={p} />
               <p>
                 <a class="ct-page ct-mono" href={p.href}>
                   The project's page<span aria-hidden="true"> →</span>
@@ -57,11 +62,13 @@ const { projects, intro } = Astro.props;
     margin: 20px 0 0;
   }
 
-  .ct-under :global(p) {
-    margin: 0;
+  .ct-under {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
 
-  .ct-under :global(p + p) {
-    margin-top: 0.6em;
+  .ct-under :global(p) {
+    margin: 0;
   }
 </style>

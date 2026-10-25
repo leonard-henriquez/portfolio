@@ -6,7 +6,11 @@ role: Feasibility study
 order: 10
 summary: How low can the cost per million tokens go on a mature 12 nm node, with LPDDR and an SRAM cache instead of HBM?
 focus: Inference ASIC study, lowest cost per token
-tags: [ASIC, inference]
+results:
+  - "~12 nm node"
+  - "No HBM, no CoWoS"
+stack: [LPDDR, SRAM, INT4/FP4, vLLM, SGLang]
+tags: [ASIC, inference, feasibility study]
 images:
   photo:
     src: ../../assets/photo/ridges.jpg

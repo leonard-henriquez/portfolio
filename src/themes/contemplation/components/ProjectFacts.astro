@@ -1,0 +1,70 @@
+---
+/**
+ * In a project's panel, under the text: the results as small figures (ProjectPage.astro's, at panel size), then the
+ * stack, tags and links on one label line. Two kinds of line, two styles: figures in ink under an accent rule,
+ * facts in the accent's mono.
+ */
+import type { Project } from "../../../lib/portfolio";
+
+interface Props {
+  project: Project;
+}
+
+const { project: p } = Astro.props;
+const facts = [...p.stack, ...p.tags];
+---
+
+{
+  p.results.length > 0 && (
+    <ul class="results" role="list" aria-label="Results">
+      {p.results.map((result) => (
+        <li>{result}</li>
+      ))}
+    </ul>
+  )
+}
+{
+  (facts.length > 0 || p.links.length > 0) && (
+    <p class="facts ct-mono">
+      <span class="sr-only">Stack and links: </span>
+      {facts.join(" · ")}
+      {p.links.map((link, i) => (
+        <>
+          {(facts.length > 0 || i > 0) && " · "}
+          <a href={link.href} rel="noopener">
+            {link.label}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        </>
+      ))}
+    </p>
+  )
+}
+
+<style>
+  .results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .results > li {
+    padding-top: 8px;
+    border-top: 2px solid var(--accent);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .facts {
+    margin: 0;
+    color: var(--accent);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+</style>
