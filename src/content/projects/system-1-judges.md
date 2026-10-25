@@ -6,7 +6,12 @@ role: Method
 order: 9
 summary: "Fast, calibrated scoring: a judgment split into dozens of yes/no questions, answered as probabilities by a decision model in one call and aggregated in code. First use case: outbound emails."
 focus: Fast, calibrated LLM scoring
-tags: [evals]
+results:
+  - "~65 atomic rules"
+  - "2,755 reference templates"
+  - "One model call per email"
+tags: [evals, calibration]
+excerpt: "A slow model writes the rubric once, as narrow yes/no questions with prewritten fixes. A fast decision model answers all of them in one call, as calibrated probabilities, and code aggregates: gates cap the score, and each failed rule points at its sentence and returns its fix."
 images:
   photo:
     src: ../../assets/photo/dunes.jpg

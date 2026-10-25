@@ -179,10 +179,24 @@ const neighbours = [
     margin: 0;
   }
 
+  /* A small outlined button in ink, so it reads apart from the kicker's metadata under it. */
   .back {
     align-self: flex-start;
-    margin-bottom: clamp(24px, 4vw, 56px);
+    margin-bottom: clamp(28px, 4vw, 56px);
+    padding: 7px 12px 6px;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    color: var(--ink);
     text-decoration: none;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .back:hover,
+  .back:focus-visible {
+    background: var(--ink);
+    color: var(--light);
   }
 
   /* The Intro's display style, for one project. */
@@ -196,8 +210,8 @@ const neighbours = [
     text-wrap: balance;
   }
 
+  /* Across the whole column, under the title. */
   .dek {
-    max-width: 40ch;
     font-size: clamp(19px, 1.6vw, 23px);
     line-height: 1.4;
     color: var(--ink-2);
@@ -505,6 +519,7 @@ const neighbours = [
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .back,
     .step .ct-title,
     .step::after {
       transition: none;

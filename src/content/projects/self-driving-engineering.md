@@ -8,10 +8,12 @@ order: 2
 summary: "Rebuilt how a five-person team releases software around coding agents: a harness that lets agents install, run, test and observe the whole product, strict CI gates, and a path from customer feedback to a preview, a demo video and a one-click release."
 focus: Releasing software around coding agents
 results:
-  - Merged PRs a month 80 → 318
-  - Bugs per PR −63%
-  - CI failures 15.7% → 2.4%
-stack: [Claude Code, Codex, Cursor]
+  - "Merged PRs a month 80 → 318"
+  - "Bugs per PR −63%"
+  - "CI failures 15.7% → 2.4%"
+  - "Feedback to production < 10 h at p80"
+stack: [Claude Code, Codex, Cursor, OpenCode, Temporal, GitHub Actions]
+excerpt: "Coding agents could write code faster than we could read it, so I invested in what surrounds them: reproducible environments, instructions in the repo, observability agents can query, checks moved left and auto-fix loops. Each proposed change came with a preview URL and a recorded demo, so review moved from reading diffs to checking behavior."
 images:
   photo:
     src: ../../assets/photo/sea.jpg

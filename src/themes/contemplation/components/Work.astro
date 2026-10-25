@@ -8,6 +8,7 @@ import { Image } from "astro:assets";
 import type { Project } from "../../../lib/portfolio";
 import { vistaOf } from "../vista";
 import Disclosure from "./Disclosure.astro";
+import ProjectFacts from "./ProjectFacts.astro";
 
 interface Props {
   projects: Project[];
@@ -28,7 +29,6 @@ const { projects, span } = Astro.props;
         {projects.map((p) => {
           const vista = vistaOf(p);
           const img = vista ?? p.image.illustration;
-          const facts = [...p.stack, ...p.tags];
           return (
             <Disclosure id={p.anchor} rowClass="work-row" panelClass="work-row">
               <Fragment slot="row">
@@ -59,21 +59,7 @@ const { projects, span } = Astro.props;
 
               <div class="more">
                 {p.excerpt && <p class="ct-body">{p.excerpt}</p>}
-                {p.results.length > 0 && <p class="results ct-mono">{p.results.join(" · ")}</p>}
-                {(facts.length > 0 || p.links.length > 0) && (
-                  <p class="facts ct-mono">
-                    {facts.join(" · ")}
-                    {p.links.map((link, i) => (
-                      <>
-                        {(facts.length > 0 || i > 0) && " · "}
-                        <a href={link.href} rel="noopener">
-                          {link.label}
-                          <span aria-hidden="true"> ↗</span>
-                        </a>
-                      </>
-                    ))}
-                  </p>
-                )}
+                <ProjectFacts project={p} />
                 <a class="ct-page ct-mono" href={p.href}>
                   The project's page<span aria-hidden="true"> →</span>
                 </a>
@@ -164,13 +150,6 @@ const { projects, span } = Astro.props;
     flex-direction: column;
     gap: 14px;
     max-width: 64ch;
-  }
-
-  .results,
-  .facts {
-    margin: 0;
-    font-size: 11px;
-    line-height: 1.6;
   }
 
   .highlights {

@@ -6,7 +6,12 @@ role: Research & design
 order: 7
 summary: "What Temporal would look like if S3 were the database: durability on the server, thin clients in any language, primitives for agents that run for hours."
 focus: Object-storage-native alternative to Temporal
-tags: [S3, R2]
+results:
+  - "≈100 ms durability overhead per step"
+  - "No database cluster to run"
+stack: [S3, R2, GCS, MinIO]
+tags: [durable execution]
+excerpt: "Event sourcing on object storage: each workflow's history is an append-only series of log segments in the bucket, written with conditional writes, so S3 is the coordination layer and self-hosting is one binary and one bucket. Durability moves to the server, clients become thin, and the primitives are shaped around agents that run for hours."
 images:
   photo:
     src: ../../assets/photo/dunes.jpg

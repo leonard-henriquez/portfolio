@@ -6,7 +6,11 @@ role: Research & design
 order: 8
 summary: "An S3-native engine shaped around how agents query: many precise, iterative queries that mix full text, vectors and filters."
 focus: S3-native search shaped around agent queries
-tags: [S3, search]
+results:
+  - "400M+ documents indexed at Topo"
+stack: [S3, BM25, vectors, MCP]
+tags: [search, market study]
+excerpt: "The opening is the interface: a file system with ls, glob, grep and read, plus semantic queries, at S3 scale, with an ephemeral, forkable index per agent session. I started with a market study rather than code, and set what would make it a yes: design partners, a benchmark on a real agent workload, and an engine builder on the team."
 images:
   photo:
     src: ../../assets/photo/night.jpg

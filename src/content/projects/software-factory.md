@@ -6,7 +6,11 @@ role: Founder
 order: 4
 summary: Turns websites and apps without APIs into read-and-write MCP tools for agents. A pipeline captures how a site behaves, distills it, generates the connector, runs it, and heals it when the site changes.
 focus: Websites without APIs, turned into MCP tools for agents
-stack: [TypeScript, MCP]
+results:
+  - "Goal: 2nd connector in < 2 days, 3rd in < 1"
+stack: [TypeScript, Zod, MCP, Temporal]
+tags: [connectors]
+excerpt: "Three products with different lifecycles: the factory, run by coding agents, that captures, distills, generates and repairs connectors; the catalog of reviewed, readable connector packages; and the runtime that executes them with no model inference on the critical path. A model writes each capability's spec, templates write the code, and replay evals gate every commit."
 images:
   photo:
     src: ../../assets/photo/sea.jpg
