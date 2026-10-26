@@ -60,9 +60,9 @@ export const VISTAS: Vista[] = [
   },
   {
     src: alpineLake,
-    alt: "Pixel art: a hiker on a rock above an alpine lake, below jagged peaks at dawn",
+    alt: "Pixel art: a hiker sitting on a rock above a glacial lake, below jagged granite peaks",
     x: "58%",
-    sky: "#7c9add",
+    sky: "#699cdb",
   },
   {
     src: larches,
