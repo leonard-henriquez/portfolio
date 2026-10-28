@@ -23,6 +23,8 @@ Projects with `status: released` or `building` are Selected work in Contemplatio
 
 The current role is `current` in `profile.yaml`. The full career (every role, every school) is on LinkedIn only, never in this repo, so the two can't contradict each other: what matters of it is told in `about`.
 
+The one exception is `public/cv.pdf`, served at [`/cv.pdf`](https://hqz.me/cv.pdf): the one-page CV as a PDF, to hand out (a QR code points to it). Replace the file to update it. Like the site, it carries no email address or phone number: it sends people to LinkedIn.
+
 ## For LLMs
 
 The same content is also published as Markdown, rendered from `getPortfolio()` by `src/lib/markdown.ts` (nothing is duplicated):
