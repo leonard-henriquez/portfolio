@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from "astro";
+import Site from "../../../layouts/Site.astro";
+import ThemeRoots from "../../../components/ThemeRoots.astro";
+import { getArticles, type Article } from "../../../lib/articles";
+import { getPortfolio } from "../../../lib/portfolio";
+
+export const getStaticPaths = (async () => (await getArticles()).map((article) => ({
+  params: { slug: article.id }, props: { article },
+}))) satisfies GetStaticPaths;
+
+interface Props { article: Article }
+const { article } = Astro.props;
+const portfolio = await getPortfolio();
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org", "@type": "Article",
+  headline: article.title, description: article.description,
+  datePublished: article.date.toISOString(),
+  author: { "@type": "Person", name: portfolio.profile.name, url: Astro.site!.href },
+  mainEntityOfPage: new URL(article.href, Astro.site).href,
+}).replace(/</g, "\\u003c");
+---
+
+<Site title={`${article.title} · ${portfolio.profile.name}`} description={article.description}
+  ogType="article" jsonLd={jsonLd} markdownPath={article.markdownPath} heroImages={{}}>
+  <ThemeRoots page="ArticlePage" props={{ portfolio, article }} />
+</Site>

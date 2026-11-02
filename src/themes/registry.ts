@@ -1,5 +1,6 @@
 import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 import type { ThemeMeta } from "./types";
+import ArticlePage from "../components/ArticlePage.astro";
 
 /** The theme shown to first-time visitors, crawlers and visitors without JavaScript. */
 export const DEFAULT_THEME = "contemplation";
@@ -21,6 +22,7 @@ export interface Theme {
   Page: AstroComponentFactory;
   /** The page of one project (`/projects/<id>/`). */
   ProjectPage: AstroComponentFactory;
+  ArticlePage: AstroComponentFactory;
   /** Link that opens the site in this theme (and remembers it). */
   href: string;
 }
@@ -43,6 +45,7 @@ export const themes: Theme[] = Object.entries(pages)
       meta: { ...meta, name: meta.name ?? slug },
       Page: module.default,
       ProjectPage: projectPage.default,
+      ArticlePage,
       href: `/?theme=${slug}`,
     };
   })

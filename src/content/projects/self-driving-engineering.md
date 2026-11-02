@@ -73,3 +73,5 @@ With the same team, merged pull requests went from about 80 to 318 a month. Bugs
 - **Route models, don't trim steps.** When I analysed a month of background-agent sessions, cost grew linearly with the number of steps for any given model, but the cost per step varied about 25 times between models. Long sessions only looked like they compounded because they were mostly run on the most expensive model. Choosing the model per task is the lever.
 
 This work is the starting point of two later projects: the [Agent Control Plane](/projects/agent-control-plane/), which generalizes the background-agent platform, and the [Company Brain](/projects/company-brain/), which gives agents the business context the code does not hold.
+
+For a closer look at the workflow, the measurements and their limits, read [Rethinking Code Integration and Review in the Age of AI](/articles/ai-code-integration-review/).
