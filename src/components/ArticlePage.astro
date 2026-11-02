@@ -1,0 +1,104 @@
+---
+import type { ThemeArticlePageProps } from "../themes/types";
+type Props = ThemeArticlePageProps;
+const { portfolio, article } = Astro.props;
+const { Content } = article;
+const date = article.date.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+---
+
+<div class="essay">
+  <a class="skip" href="#article">Skip to article</a>
+  <div class="masthead wrap">
+    <a href="/">{portfolio.profile.name}</a>
+    <a href="/projects/self-driving-engineering/">Topo / Self-driving engineering <span aria-hidden="true">↗</span></a>
+  </div>
+  <main class="wrap">
+    <header class="head">
+      <a class="back meta" href="/">← Portfolio</a>
+      <p class="eyebrow meta">Engineering / Field notes</p>
+      <h1>{article.title}</h1>
+      <p class="dek">{article.description}</p>
+      <div class="details meta"><time datetime={article.date.toISOString()}>{date}</time><span>{article.minutes} min read</span><a href={article.markdownPath}>Markdown</a></div>
+    </header>
+    <div class="reading">
+      <nav class="toc" aria-label="In this essay">
+        <details open>
+          <summary class="meta">In this essay</summary>
+          {article.headings.map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
+        </details>
+      </nav>
+      <article id="article" class="prose"><Content /></article>
+    </div>
+  </main>
+  <footer class="wrap meta" data-switcher-avoid><a href="/">← {portfolio.profile.name}</a><a href="#article">Back to the essay ↑</a></footer>
+</div>
+
+<style>
+  .essay {
+    --essay-ink: var(--ink, var(--fg));
+    --essay-muted: var(--ink-2, var(--muted));
+    --essay-rule: var(--rule, var(--line));
+    --essay-accent: var(--accent, var(--blue, var(--ink)));
+    --essay-code: var(--light, var(--bg-2, #f6f3ec));
+    color: var(--essay-ink);
+    font-size: 19px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 1360px; margin-inline: auto; padding-inline: clamp(20px, 4vw, 56px); }
+  a { color: inherit; text-underline-offset: .25em; text-decoration-thickness: 1px; }
+  a:hover { color: var(--essay-accent); }
+  .meta { font-family: var(--mono, ui-monospace, monospace); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+  .masthead { display: flex; justify-content: space-between; gap: 20px; padding-block: 26px; border-bottom: 1px solid var(--essay-rule); font-size: 13px; }
+  .masthead a { text-decoration: none; }
+  .head { padding-block: clamp(48px, 6vw, 88px); }
+  .back { display: inline-block; margin-bottom: 40px; }
+  .eyebrow { color: var(--essay-accent); margin: 0 0 22px; }
+  h1 { max-width: 22ch; margin: 0; font-size: clamp(42px, 5.5vw, 80px); font-weight: 500; line-height: 1.04; letter-spacing: -.045em; text-wrap: balance; }
+  .dek { max-width: 62ch; margin: 30px 0; font-size: clamp(20px, 1.7vw, 24px); line-height: 1.45; color: var(--essay-muted); }
+  .details { display: flex; flex-wrap: wrap; gap: 12px 28px; color: var(--essay-muted); }
+  .reading { display: grid; grid-template-columns: 230px minmax(0, 1fr); align-items: start; gap: clamp(32px, 5vw, 72px); }
+  .toc { position: sticky; top: 32px; max-height: calc(100vh - 64px); overflow: auto; padding-right: 12px; font-size: 12px; line-height: 1.5; color: var(--essay-muted); }
+  summary { cursor: pointer; margin-bottom: 16px; color: var(--essay-accent); }
+  .toc a { display: block; margin: 0 0 14px; text-decoration: none; }
+  .prose { min-width: 0; }
+  .prose :global(:is(p, ul, ol, blockquote)) { max-width: 70ch; }
+  .prose :global(p) { margin: 0 0 1.3em; }
+  .prose > :global(p:first-child) { font-size: 22px; line-height: 1.6; }
+  .prose :global(h2) { margin: 72px 0 24px; padding-top: 24px; border-top: 1px solid var(--essay-rule); font-size: clamp(27px, 2.4vw, 35px); font-weight: 500; line-height: 1.18; letter-spacing: -.025em; scroll-margin-top: 32px; }
+  .prose :global(h3) { margin-top: 36px; font-size: 23px; font-weight: 500; line-height: 1.3; }
+  .prose :global(strong) { font-weight: 600; }
+  .prose :global(li + li) { margin-top: .5em; }
+  .prose :global(figure) { margin: 40px 0; }
+  .prose :global(figure img) { display: block; width: 100%; height: auto; border: 1px solid var(--essay-rule); }
+  .prose :global(figcaption) { margin-top: 14px; font-size: 13px; line-height: 1.6; color: var(--essay-muted); }
+  .prose :global(table) { display: block; overflow-x: auto; max-width: 100%; margin: 28px 0; border-collapse: collapse; font-size: 14px; line-height: 1.5; }
+  .prose :global(th), .prose :global(td) { min-width: 140px; padding: 12px 16px; border-bottom: 1px solid var(--essay-rule); vertical-align: top; text-align: left; }
+  .prose :global(th) { font-family: var(--mono, ui-monospace, monospace); font-size: 11px; color: var(--essay-accent); font-weight: 400; }
+  .prose :global(code) { font-family: var(--mono, ui-monospace, monospace); font-size: .8em; overflow-wrap: anywhere; }
+  .prose :global(pre) { overflow-x: auto; padding: 20px; background: var(--essay-code); border: 1px solid var(--essay-rule); line-height: 1.6; font-size: 15px; }
+  .prose :global(pre code) { overflow-wrap: normal; }
+  .prose :global(.footnotes) { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+  .prose :global(.footnotes h2) { font-size: 27px; }
+  .prose :global(sup) { font-size: 11px; }
+  footer { margin-top: 96px; padding-block: 32px 72px; border-top: 1px solid var(--essay-rule); display: flex; justify-content: space-between; gap: 24px; }
+  .skip { position: absolute; top: -100px; left: 20px; }
+  .skip:focus { top: 12px; background: var(--paper, var(--bg)); padding: 12px; z-index: 10; }
+  @media (max-width: 960px) {
+    .reading { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .toc { position: static; max-height: 260px; border-block: 1px solid var(--essay-rule); padding-block: 18px; }
+  }
+  @media (max-width: 600px) {
+    .essay { font-size: 17px; }
+    .masthead { align-items: start; font-size: 11px; }
+    .masthead a:last-child { max-width: 150px; text-align: right; }
+    .prose > :global(p:first-child) { font-size: 20px; }
+    .prose :global(h2) { margin-top: 56px; }
+    footer { flex-direction: column; padding-bottom: 96px; }
+  }
+  @media print {
+    .toc, .masthead, .back, footer { display: none; }
+    .reading { display: block; }
+    .essay { font-size: 11pt; }
+    .prose :global(figure), .prose :global(pre) { break-inside: avoid; }
+  }
+</style>

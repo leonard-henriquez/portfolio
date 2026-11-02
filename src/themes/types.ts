@@ -1,5 +1,6 @@
 import type { ImageMetadata, ImageOutputFormat } from "astro";
 import type { Portfolio, Project } from "../lib/portfolio";
+import type { Article } from "../lib/articles";
 
 /**
  * Every theme renders on every page (`/`, and each project's `/projects/<id>/`); the visitor picks which one is shown.
@@ -31,6 +32,12 @@ import type { Portfolio, Project } from "../lib/portfolio";
  */
 export interface ThemePageProps {
   portfolio: Portfolio;
+}
+
+/** Long-form essays share a reading layout and inherit the active theme's typography. */
+export interface ThemeArticlePageProps {
+  portfolio: Portfolio;
+  article: Article;
 }
 
 export interface ThemeProjectPageProps {

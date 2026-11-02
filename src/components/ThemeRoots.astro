@@ -4,12 +4,13 @@
  * and visitors without JavaScript; the others inert in <template>s until Site.astro's scripts mount the one the
  * visitor picked. `page` names the component each theme renders here (`Page` on `/`, `ProjectPage` on a project).
  */
-import type { ThemePageProps, ThemeProjectPageProps } from "../themes/types";
+import type { ThemePageProps, ThemeProjectPageProps, ThemeArticlePageProps } from "../themes/types";
 import { defaultTheme, themes } from "../themes/registry";
 
 type Props =
   | { page: "Page"; props: ThemePageProps }
-  | { page: "ProjectPage"; props: ThemeProjectPageProps };
+  | { page: "ProjectPage"; props: ThemeProjectPageProps }
+  | { page: "ArticlePage"; props: ThemeArticlePageProps };
 
 const { page, props } = Astro.props;
 const Default = defaultTheme[page];

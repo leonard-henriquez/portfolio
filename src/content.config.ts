@@ -168,4 +168,13 @@ const art = defineCollection({
   },
 });
 
-export const collections = { projects, profile, art };
+const articles = defineCollection({
+  loader: glob({ base: "./src/content/articles", pattern: "**/[^_]*.md" }),
+  schema: z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    date: z.coerce.date(),
+  }),
+});
+
+export const collections = { projects, profile, art, articles };
