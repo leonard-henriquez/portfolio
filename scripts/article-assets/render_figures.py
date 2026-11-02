@@ -79,7 +79,7 @@ for ax,(key,label,color) in zip(axes,series):
     ax.text(.01,.91,f'3-month averages: {first:.1f} → {last:.1f}',transform=ax.transAxes,fontsize=12,fontweight='bold')
     ax.annotate(f'{vals[-1]:.0f}' if key=='merged_prs' else f'{vals[-1]:.2f}',(x[-1],vals[-1]),xytext=(-8,10),textcoords='offset points',ha='right',color=color)
 months(axes[-1],prs,3)
-save(fig,'01-throughput-and-delay','Source: monthly_prs.csv. Delay panel = monthly medians; annotations = means of those medians.\nAugust through 27th. Active author accounts increased from 4 to 7–8; this is not fixed-team productivity.')
+save(fig,'01-throughput-and-delay','Topo · monthly_prs.csv · Monthly counts and median opening-to-merge delay. August ends on the 27th.')
 
 q=read('shift_left_quarterly.csv')
 keys=['pre_tool_use','post_tool_use','pre_commit','pre_push','ci']
@@ -93,7 +93,7 @@ ax.set_xticks(range(len(q)),[r['quarter'].replace('-','\n') for r in q],fontsize
 ax.set_yticks(range(5),labels)
 for (i,j),v in np.ndenumerate(mat): ax.text(j,i,str(v) if v else '·',ha='center',va='center',color='white' if v>=13 else INK,fontsize=12)
 ax.tick_params(length=0,pad=10);ax.spines[:].set_visible(False)
-save(fig,'02-check-placement','Source: shift_left_quarterly.csv. Q3 2026: 26 configured placements before CI, plus 21 in CI.\nA rule may appear at several stages. Counts measure placement, not coverage, usage or effectiveness.')
+save(fig,'02-check-placement','Topo · shift_left_quarterly.csv · 26 placements before CI in Q3 2026. A rule can appear at several stages.')
 
 rows=read('ci_breakdown_monthly.csv'); dates=sorted({r['month'] for r in rows})
 fig,ax=plt.subplots(figsize=(12,7));fig.subplots_adjust(left=.10,right=.77,top=.76,bottom=.22)
@@ -106,7 +106,7 @@ for cat,label,color,style in [('ai_review','AI review',RUST,'-'),('other','Other
     ax.annotate(f'{label}  {vals[-1]:.1f}%',(len(rs)-1,vals[-1]),xytext=(14,offset),textcoords='offset points',va='center',color=color,fontweight='bold')
 frame(ax,'Failed runs / retained runs (%)');ax.set_ylim(0,65);months(ax,[{'month':m} for m in dates],2)
 ax.annotate('675 / 1,202 review runs\nfailed in April (56.2%)',(6,56.16),xytext=(4,61),arrowprops={'arrowstyle':'-','color':RUST},fontsize=10,color=RUST)
-save(fig,'03-ci-decomposition','Source: ci_breakdown_monthly.csv. Each category has its own denominator; reruns count separately.\nAI-review failures include findings and incomplete/no-verdict runs. Not precision or distinct defective PRs.\nOctober from 8th; August through 27th. Preview-only category omitted; cancellation/skip exclusions follow source.')
+save(fig,'03-ci-decomposition','Topo · ci_breakdown_monthly.csv · Failed workflow runs; AI review includes incomplete reviews.')
 
 loop=[r for r in read('monthly_loop_quality.csv') if r['month']>='2025-11']
 fig,axes=plt.subplots(2,1,figsize=(12,8),sharex=True,gridspec_kw={'height_ratios':[3,1]})
@@ -120,7 +120,7 @@ for i in [0,8,9]:axes[0].annotate(f'{vals[i]:.2f}%',(i,vals[i]),xytext=(-7,-20 i
 axes[1].bar(range(len(n)),n,color='#b0c5d0',width=.55);frame(axes[1],'PRs in sample');axes[1].set_ylim(0,470)
 for i,v in enumerate(n):axes[1].text(i,v+8,str(v),ha='center',fontsize=9)
 months(axes[1],loop,2)
-save(fig,'04-human-commit-proxy','Source: monthly_loop_quality.csv. Conditional on merged, attributable AI PRs. August is partial.\nEarlier edits, coaching, review, internal agent retries and abandoned sessions are not measured here.\nThe CSV calls this “first_pass_merge_rate”; it is not first-attempt success or absence of human involvement.')
+save(fig,'04-human-commit-proxy','Topo · monthly_loop_quality.csv · Coaching, review and earlier human edits remain outside this measure.')
 
 bugs=[r for r in read('linear_bugs_monthly.csv') if r['month']>='2025-11']
 # Validate source fields rather than relying on column positions.
@@ -134,7 +134,7 @@ for ax,key,label,color in [(axes[0],'bugs_created','Tickets / month',BLUE),(axes
     frame(ax,label);ax.set_ylim(0,max(vals)*1.25)
     for i in [0,len(bugs)-1]:ax.annotate(f'{vals[i]:.0f}' if key=='bugs_created' else f'{vals[i]:.1f}',(i,vals[i]),xytext=(0,12),textcoords='offset points',ha='center',color=color,fontweight='bold')
 months(axes[1],bugs,2)
-save(fig,'05-tickets-and-denominator','Source: linear_bugs_monthly.csv. Union of Ticketing-team and Bug-labeled issues; imperfect labels.\nTickets are not linked to introducing deployments; counts include duplicates/cancellations and reporting lag.\nAugust through 27th. Neither series is a measured deployment change failure rate.')
+save(fig,'05-tickets-and-denominator','Topo · linear_bugs_monthly.csv · Recorded tickets; collection changed over time. August is partial.')
 
 # Conceptual illustration, intentionally separated from the empirical charts.
 fig,ax=plt.subplots(figsize=(12,7.2));ax.set_xlim(0,12);ax.set_ylim(0,6);ax.axis('off')
@@ -153,7 +153,7 @@ box(6.7,2.35,2.2,1.4,'Repair + verify','merge revision\ncheck the new candidate'
 box(9.55,2.35,2.15,1.4,'Acceptance','evidence refers to\nthis exact version')
 arrow((2.4,4.1),(3.3,3.35));arrow((2.4,1.85),(3.3,2.75));arrow((5.85,3.05),(6.65,3.05));arrow((8.95,3.05),(9.5,3.05))
 ax.text(6, .3,'New patch, new base or relevant environment change → recheck affected evidence',ha='center',fontsize=12,color=RUST)
-save(fig,'06-candidate-evidence','Conceptual diagram, not an incident trace. Based on the Topo migration-graph invariant.\nOne revision head does not prove safe locking, backfill behavior or compatibility with a running older application.')
+save(fig,'06-candidate-evidence','Conceptual migration example. A single head leaves locking, backfill cost and rollout compatibility unresolved.')
 
 (DATA.parent/'calculations.json').write_text(json.dumps(comparisons,indent=2)+'\n')
 print(f'Wrote SVG + PNG figures to {OUT}')

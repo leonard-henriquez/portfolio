@@ -183,8 +183,7 @@ z
    <text style="font-size: 11px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="80.276" transform="rotate(-0 69.12 80.276)">Validate the combination, repair its graph, then refresh the evidence</text>
   </g>
   <g id="text_15">
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 480.868172)">Conceptual diagram, not an incident trace. Based on the Topo migration-graph invariant.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 493.272)">One revision head does not prove safe locking, backfill behavior or compatibility with a running older application.</text>
+   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="493.272" transform="rotate(-0 69.12 493.272)">Conceptual migration example. A single head leaves locking, backfill cost and rollout compatibility unresolved.</text>
   </g>
  </g>
  <defs>

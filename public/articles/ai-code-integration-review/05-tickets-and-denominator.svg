@@ -334,9 +334,7 @@ L 812.16 449.28
    <text style="font-size: 11px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="88.494687" transform="rotate(-0 69.12 88.494687)">Recorded bug-ticket population · November 2025–August 2026</text>
   </g>
   <g id="text_26">
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 523.681172)">Source: linear_bugs_monthly.csv. Union of Ticketing-team and Bug-labeled issues; imperfect labels.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 535.876172)">Tickets are not linked to introducing deployments; counts include duplicates/cancellations and reporting lag.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 548.28)">August through 27th. Neither series is a measured deployment change failure rate.</text>
+   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="548.28" transform="rotate(-0 69.12 548.28)">Topo · linear_bugs_monthly.csv · Recorded tickets; collection changed over time. August is partial.</text>
   </g>
  </g>
  <defs>

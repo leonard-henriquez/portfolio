@@ -328,8 +328,7 @@ iVBORw0KGgoAAAANSUhEUgAAA4QAAAFUCAYAAAB87/I9AAAILElEQVR4nO3ZsWrbYBiG0biO7//KupQO
    <text style="font-size: 11px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="76.398687" transform="rotate(-0 69.12 76.398687)">Configured placements per stage · quarterly snapshots, 2024 Q1–2026 Q3</text>
   </g>
   <g id="text_75">
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 453.364172)">Source: shift_left_quarterly.csv. Q3 2026: 26 configured placements before CI, plus 21 in CI.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 465.768)">A rule may appear at several stages. Counts measure placement, not coverage, usage or effectiveness.</text>
+   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="465.768" transform="rotate(-0 69.12 465.768)">Topo · shift_left_quarterly.csv · 26 placements before CI in Q3 2026. A rule can appear at several stages.</text>
   </g>
  </g>
  <defs>

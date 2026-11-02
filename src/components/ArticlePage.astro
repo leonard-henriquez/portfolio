@@ -79,6 +79,9 @@ const date = article.date.toLocaleDateString("en-GB", { month: "long", year: "nu
   .prose :global(pre code) { overflow-wrap: normal; }
   .prose :global(.footnotes) { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
   .prose :global(.footnotes h2) { font-size: 27px; }
+  .prose :global(.article-notes) { margin-top: 56px; padding: 20px 0; border-block: 1px solid var(--essay-rule); font-size: 14px; line-height: 1.6; color: var(--essay-muted); }
+  .prose :global(.article-notes summary) { cursor: pointer; font-family: var(--mono, ui-monospace, monospace); font-size: 12px; color: var(--essay-accent); }
+  .prose :global(.article-notes[open] summary) { margin-bottom: 20px; }
   .prose :global(sup) { font-size: 11px; }
   footer { margin-top: 96px; padding-block: 32px 72px; border-top: 1px solid var(--essay-rule); display: flex; justify-content: space-between; gap: 24px; }
   .skip { position: absolute; top: -100px; left: 20px; }

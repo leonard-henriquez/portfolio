@@ -311,9 +311,7 @@ Q 397.020304 150.01673 409.148727 156.977652
    <text style="font-size: 11px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="78.414688" transform="rotate(-0 69.12 78.414688)">Failure rates per workflow run · October 2025–August 2026</text>
   </g>
   <g id="text_22">
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 454.921172)">Source: ci_breakdown_monthly.csv. Each category has its own denominator; reruns count separately.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 467.116172)">AI-review failures include findings and incomplete/no-verdict runs. Not precision or distinct defective PRs.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 479.52)">October from 8th; August through 27th. Preview-only category omitted; cancellation/skip exclusions follow source.</text>
+   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="479.52" transform="rotate(-0 69.12 479.52)">Topo · ci_breakdown_monthly.csv · Failed workflow runs; AI review includes incomplete reviews.</text>
   </g>
  </g>
  <defs>

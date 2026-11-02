@@ -1,6 +1,6 @@
 # Article figures
 
-Regenerates the six SVG figures used by `/articles/ai-code-integration-review/` from frozen, aggregate Topo CSVs, restricted to the columns used by the figures and their denominators. No live credentials or per-person records are involved. The article's appendix documents the populations, dates and interpretation limits; August 2026 is partial through the 27th.
+Regenerates the five SVG figures shown at `/articles/ai-code-integration-review/` and the supplementary bug-ticket chart from frozen, aggregate Topo CSVs, restricted to the columns used by the figures and their denominators. No live credentials or per-person records are involved. The article's folded data notes document the populations, dates and interpretation limits; August 2026 is partial through the 27th.
 
 ```sh
 pnpm install --frozen-lockfile

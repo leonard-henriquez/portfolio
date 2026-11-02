@@ -389,8 +389,7 @@ L 812.16 478.224
    <text style="font-size: 11px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="90.510688" transform="rotate(-0 69.12 90.510688)">May 2025–August 2026 · two different measures, shown separately</text>
   </g>
   <g id="text_27">
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 549.628172)">Source: monthly_prs.csv. Delay panel = monthly medians; annotations = means of those medians.</text>
-   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #344556" transform="translate(69.12 562.032)">August through 27th. Active author accounts increased from 4 to 7–8; this is not fixed-team productivity.</text>
+   <text style="font-size: 9px; font-family: 'Space Grotesk', 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #344556" x="69.12" y="562.032" transform="rotate(-0 69.12 562.032)">Topo · monthly_prs.csv · Monthly counts and median opening-to-merge delay. August ends on the 27th.</text>
   </g>
  </g>
  <defs>
